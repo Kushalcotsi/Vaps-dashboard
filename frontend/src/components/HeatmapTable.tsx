@@ -4,6 +4,11 @@ import React, { useMemo, useState } from 'react';
 import { VapsAttachRate } from "@/types";
 import { Info, Search, Download } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { Card, CardHeader } from "./ui/Card";
+import { Input } from "./ui/Input";
+import { Button } from "./ui/Button";
+import { Table, TableHeader, TableRow, TableHead } from "./ui/TablePrims";
+import { typography } from "@/design-system/typography";
 
 interface HeatmapTableProps {
   title: string;
@@ -45,10 +50,10 @@ export default function HeatmapTable({ title, data, segmentName, cutoff }: Heatm
 
   const getHeatStyle = (signal: string | undefined) => {
     switch (signal) {
-      case "Strong Industry Opportunity": return { bg: "bg-[#55b9a5]", text: "text-white" };
-      case "Good General Fit": return { bg: "bg-[#a9d9cf]", text: "text-slate-900" };
-      case "Niche Industry Signal": return { bg: "bg-[#d8edf7]", text: "text-slate-900" };
-      case "Monitor": return { bg: "bg-[#f7e4b3]", text: "text-slate-900" };
+      case "Strong Industry Opportunity": return { bg: "bg-primary text-white" };
+      case "Good General Fit": return { bg: "bg-blue-100 text-slate-900" };
+      case "Niche Industry Signal": return { bg: "bg-blue-50 text-slate-700" };
+      case "Monitor": return { bg: "bg-amber-100 text-slate-900" };
       default: return { bg: "bg-white", text: "text-slate-300" };
     }
   };
@@ -56,81 +61,77 @@ export default function HeatmapTable({ title, data, segmentName, cutoff }: Heatm
   const fmtPct = (val?: number) => val !== undefined ? `${(val * 100).toFixed(1)}%` : "";
 
   return (
-    <div className="bg-white border border-slate-200 rounded-xl overflow-hidden shadow-sm">
-      <div className="p-4 bg-slate-50/50 border-b border-slate-200 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+    <Card>
+      <CardHeader className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div className="flex items-center gap-2">
-          <h2 className="text-sm font-bold text-slate-900 uppercase tracking-tight">{title}</h2>
+          <h2 className={typography.cardTitle}>{title}</h2>
           <Info size={14} className="text-slate-400 cursor-help" />
         </div>
         <div className="flex items-center gap-4 w-full md:w-auto">
-          <div className="relative flex-1 md:flex-initial">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={14} />
-            <input 
-              value={filter}
-              onChange={e => setFilter(e.target.value)}
-              placeholder="FILTER VAPS ID"
-              className="bg-white border border-slate-200 rounded-md pl-9 pr-4 py-1.5 text-[11px] font-bold uppercase tracking-widest focus:outline-none focus:ring-2 focus:ring-blue-500/20 w-full md:w-48"
-            />
-          </div>
-          <button className="px-3 py-1.5 bg-white border border-slate-200 rounded-md text-[11px] font-bold text-slate-600 hover:bg-slate-50 transition-colors uppercase tracking-widest flex items-center gap-2">
+          <Input 
+            value={filter}
+            onChange={e => setFilter(e.target.value)}
+            placeholder="FILTER VAPS ID"
+            icon={<Search size={14} />}
+            className="md:w-48"
+          />
+          <Button variant="outline" size="sm" className="flex items-center gap-2">
             <Download size={12} />
-            Download CSV
-          </button>
+            CSV
+          </Button>
         </div>
-      </div>
+      </CardHeader>
 
-      <div className="overflow-auto max-h-[600px] relative">
-        <table className="w-full border-separate border-spacing-0 table-fixed min-w-[1200px]">
-          <thead className="sticky top-0 z-20">
-            <tr>
-              <th className="sticky left-0 z-30 bg-slate-50 border-b border-r border-slate-200 px-4 py-3 text-left text-[10px] font-bold text-slate-500 uppercase tracking-widest w-[280px]">
-                VAPS ID & Description
-              </th>
-              {pivoted.columns.map(col => (
-                <th key={col} className="px-2 py-3 text-center text-[10px] font-bold text-slate-500 uppercase tracking-widest min-w-[140px] border-b border-r border-slate-200 last:border-r-0 bg-slate-50 leading-tight">
-                  {col}
-                </th>
-              ))}
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-slate-100">
-            {filteredRows.map(([vaps, row]) => (
-              <tr key={vaps} className="hover:bg-slate-50/50 transition-colors group">
-                <td className="sticky left-0 z-10 bg-white group-hover:bg-slate-50/80 border-r border-slate-200 px-4 py-3 transition-colors shadow-[2px_0_5px_-2px_rgba(0,0,0,0.05)]">
-                  <div className="flex flex-col">
-                    <span className="text-[11px] font-bold text-slate-800 leading-tight uppercase tabular-nums">{vaps}</span>
-                    <span className="text-[10px] font-medium text-slate-500 mt-1 line-clamp-1">{row.desc}</span>
-                  </div>
-                </td>
-                {pivoted.columns.map(col => {
-                  const cell = row.cells.get(col);
-                  const style = getHeatStyle(cell?.industrySignal);
-                  return (
-                    <td 
-                      key={col} 
-                      className={cn(
-                        "p-0 border-r border-slate-100 last:border-r-0 transition-all duration-200",
-                        style.bg
-                      )}
-                    >
-                      {cell && (
-                        <div className="w-full h-[54px] flex flex-col items-center justify-center gap-0.5 group/cell">
-                          <span className={cn("text-[11px] font-bold tabular-nums", style.text)}>
-                            {fmtPct(cell.attachRate)}
-                          </span>
-                          <span className={cn("text-[8px] font-bold uppercase tracking-wider text-center px-2", style.text)}>
-                            {cell.industrySignal === "No Signal" ? "" : cell.industrySignal}
-                          </span>
-                        </div>
-                      )}
-                    </td>
-                  );
-                })}
-              </tr>
+      <Table className="table-fixed min-w-[1200px]">
+        <TableHeader>
+          <TableRow>
+            <TableHead className="sticky left-0 z-30 w-[280px] border-r">
+              VAPS ID & Description
+            </TableHead>
+            {pivoted.columns.map(col => (
+              <TableHead key={col} className="text-center min-w-[140px] border-r last:border-r-0">
+                {col}
+              </TableHead>
             ))}
-          </tbody>
-        </table>
-      </div>
-    </div>
+          </TableRow>
+        </TableHeader>
+        <tbody className="divide-y divide-slate-100">
+          {filteredRows.map(([vaps, row]) => (
+            <TableRow key={vaps}>
+              <td className="sticky left-0 z-10 bg-white group-hover:bg-slate-50/80 border-r border-slate-200 px-4 py-3 transition-colors shadow-[2px_0_5px_-2px_rgba(0,0,0,0.05)]">
+                <div className="flex flex-col">
+                  <span className={cn(typography.mono, "text-slate-800 leading-tight uppercase tabular-nums")}>{vaps}</span>
+                  <span className="text-[10px] font-medium text-slate-500 mt-1 line-clamp-1">{row.desc}</span>
+                </div>
+              </td>
+              {pivoted.columns.map(col => {
+                const cell = row.cells.get(col);
+                const style = getHeatStyle(cell?.industrySignal);
+                return (
+                  <td 
+                    key={col} 
+                    className={cn(
+                      "p-0 border-r border-slate-100 last:border-r-0 transition-all duration-200",
+                      style.bg
+                    )}
+                  >
+                    {cell && (
+                      <div className="w-full h-[54px] flex flex-col items-center justify-center gap-0.5 group/cell">
+                        <span className={cn("text-[11px] font-bold tabular-nums", style.text)}>
+                          {fmtPct(cell.attachRate)}
+                        </span>
+                        <span className={cn("text-[8px] font-bold uppercase tracking-wider text-center px-2", style.text)}>
+                          {cell.industrySignal === "No Signal" ? "" : cell.industrySignal}
+                        </span>
+                      </div>
+                    )}
+                  </td>
+                );
+              })}
+            </TableRow>
+          ))}
+        </tbody>
+      </Table>
+    </Card>
   );
 }

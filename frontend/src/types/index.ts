@@ -34,7 +34,6 @@ export interface VapsAttachRate {
   recommendationValue?: string;
   recommendationKind?: string;
   coveredText?: string;
-  elbowCutoff?: number;
   cutoffStatus?: string;
 }
 

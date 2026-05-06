@@ -13,6 +13,11 @@ import UnitSummaryCard from "@/components/UnitSummaryCard"
 import IndustryAnalysisTable from "@/components/IndustryAnalysisTable"
 import VapsDetailTable from "@/components/VapsDetailTable"
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs"
+import { DashboardLayout } from "@/components/layout/DashboardLayout"
+import { PageContainer } from "@/components/layout/PageContainer"
+import { typography } from "@/design-system/typography"
+import { spacing } from "@/design-system/spacing"
+import { cn } from "@/lib/utils"
 
 export default function DashboardPage() {
   const { selectedUnit, selectedSource, selectedGroup, searchQuery } = useDashboardStore()
@@ -87,12 +92,12 @@ export default function DashboardPage() {
   const [segmentTab, setSegmentTab] = useState("Market");
   const [rawTab, setRawTab] = useState("Unit");
 
-  if (isLoading) return <div className="p-10 text-slate-400 font-bold uppercase tracking-widest text-xs flex items-center justify-center min-h-screen">Loading Analytical Intelligence...</div>;
-  if (error) return <div className="p-10 text-rose-500 font-bold flex items-center justify-center min-h-screen">Connection Error</div>;
+  if (isLoading) return <div className={cn("flex items-center justify-center min-h-screen", typography.label)}>Loading Analytical Intelligence...</div>;
+  if (error) return <div className={cn("flex items-center justify-center min-h-screen text-rose-500", typography.label)}>Connection Error</div>;
 
   return (
-    <div className="min-h-screen bg-[#f8fafc] text-slate-900 font-sans selection:bg-teal-100">
-      <div className="max-w-[1600px] mx-auto p-4 md:p-10 space-y-8">
+    <DashboardLayout>
+      <PageContainer className={spacing.section}>
         
         {/* Persistent Control Plane */}
         <DashboardHeader />
@@ -203,7 +208,7 @@ export default function DashboardPage() {
             
           </Tabs>
         </div>
-      </div>
-    </div>
+      </PageContainer>
+    </DashboardLayout>
   )
 }
