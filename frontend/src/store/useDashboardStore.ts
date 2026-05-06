@@ -12,7 +12,7 @@ interface DashboardState {
 }
 
 export const useDashboardStore = create<DashboardState>((set) => ({
-  selectedUnit: '10W', // Default from reference
+  selectedUnit: 'all', 
   selectedSource: '',
   selectedGroup: '',
   setSelectedUnit: (unit) => set({ selectedUnit: unit }),

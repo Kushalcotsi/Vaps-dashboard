@@ -9,28 +9,27 @@ import { Button } from "./ui/Button";
 import { Table, TableHeader, TableRow, TableHead, TableCell } from "./ui/TablePrims";
 import { typography } from "@/design-system/typography";
 import { Badge } from "./ui/Badge";
+import { cn } from "@/lib/utils";
 
 interface IndustryAnalysisProps {
   marketRows: VapsAttachRate[];
 }
 
 export default function IndustryAnalysisTable({ marketRows }: IndustryAnalysisProps) {
-  const [selectedMarket, setSelectedMarket] = useState<string>('');
+  const [selectedMarket, setSelectedMarket] = useState<string>(''); // Default to empty (All)
   const [search, setSearch] = useState('');
+  const [selectedVaps, setSelectedVaps] = useState<string | null>(null);
+  const [selectedColIdx, setSelectedColIdx] = useState<number | null>(null);
 
   const markets = useMemo(() => {
     return Array.from(new Set(marketRows.map(r => r.market).filter(Boolean))).sort();
   }, [marketRows]);
 
-  React.useEffect(() => {
-    if (!selectedMarket && markets.length > 0) {
-      setSelectedMarket(markets[0] || "");
-    }
-  }, [markets, selectedMarket]);
+  // Removed useEffect that was defaulting to markets[0]
 
   const filteredRows = useMemo(() => {
     return marketRows.filter(r => 
-      r.market === selectedMarket &&
+      (selectedMarket === '' || r.market === selectedMarket) &&
       (search === '' || 
        r.vaps.toLowerCase().includes(search.toLowerCase()) || 
        r.vapsDesc.toLowerCase().includes(search.toLowerCase()))
@@ -39,6 +38,23 @@ export default function IndustryAnalysisTable({ marketRows }: IndustryAnalysisPr
 
   const fmtPct = (val?: number) => val !== undefined ? `${(val * 100).toFixed(1)}%` : "0.0%";
   const fmtNum = (val?: number) => val !== undefined ? val.toLocaleString() : "0";
+
+  const columns = [
+    { label: "Market segment", minW: "150px" },
+    { label: "VAPS", minW: "100px" },
+    { label: "VAPS description", minW: "250px" },
+    { label: "Recommendation logic", minW: "150px" },
+    { label: "Recommendation value", minW: "120px" },
+    { label: "Covered", minW: "80px" },
+    { label: "Activations", isNum: true, minW: "100px" },
+    { label: "Associated", isNum: true, minW: "100px" },
+    { label: "Industry attach rate", isNum: true, minW: "120px" },
+    { label: "Unit attach rate", isNum: true, minW: "120px" },
+    { label: "Leverage", isNum: true, minW: "100px" },
+    { label: "Opportunity score", isNum: true, minW: "120px" },
+    { label: "Industry signal", minW: "180px" },
+    { label: "Interpretation", minW: "300px" }
+  ];
 
   return (
     <Card>
@@ -50,6 +66,7 @@ export default function IndustryAnalysisTable({ marketRows }: IndustryAnalysisPr
             onChange={(e) => setSelectedMarket(e.target.value)}
             className="w-auto min-w-[180px]"
           >
+            <option value="">All Markets</option>
             {markets.map(m => <option key={m} value={m}>{m}</option>)}
           </Select>
           <Input 
@@ -69,43 +86,40 @@ export default function IndustryAnalysisTable({ marketRows }: IndustryAnalysisPr
       <Table>
         <TableHeader>
           <TableRow>
-            <TableHead>Market segment</TableHead>
-            <TableHead>VAPS</TableHead>
-            <TableHead>VAPS description</TableHead>
-            <TableHead>Recommendation logic</TableHead>
-            <TableHead>Recommendation value</TableHead>
-            <TableHead>Covered</TableHead>
-            <TableHead isNum>Activations</TableHead>
-            <TableHead isNum>Associated</TableHead>
-            <TableHead isNum>Industry attach rate</TableHead>
-            <TableHead isNum>Unit attach rate</TableHead>
-            <TableHead isNum>Leverage</TableHead>
-            <TableHead isNum>Opportunity score</TableHead>
-            <TableHead>Industry signal</TableHead>
-            <TableHead>Interpretation</TableHead>
+            {columns.map((col, idx) => (
+              <TableHead 
+                key={col.label} 
+                isHighlighted={selectedColIdx === idx}
+                isNum={col.isNum}
+                style={{ minWidth: col.minW }}
+                className="whitespace-nowrap"
+              >
+                {col.label}
+              </TableHead>
+            ))}
           </TableRow>
         </TableHeader>
         <tbody className="divide-y divide-slate-100">
           {filteredRows.map((row, idx) => (
-            <TableRow key={idx}>
-              <TableCell className="text-slate-500">{row.market}</TableCell>
-              <TableCell isBold className={typography.mono}>{row.vaps}</TableCell>
-              <TableCell className="text-slate-700 min-w-[200px]">{row.vapsDesc}</TableCell>
-              <TableCell className={typography.label}>{row.recommendationKind || "Fixed quantity"}</TableCell>
-              <TableCell className="text-xs font-medium text-slate-500 italic">{row.recommendationValue || "0"}</TableCell>
-              <TableCell>{row.coveredText || "No"}</TableCell>
-              <TableCell isNum>{fmtNum(row.activations)}</TableCell>
-              <TableCell isNum>{fmtNum(row.associated)}</TableCell>
-              <TableCell isNum isBold className="text-blue-600">{fmtPct(row.attachRate)}</TableCell>
-              <TableCell isNum isBold>{fmtPct(row.unitAttachRate)}</TableCell>
-              <TableCell isNum isBold className="text-emerald-600">{row.leverage ? row.leverage.toFixed(2) + "x" : "---"}</TableCell>
-              <TableCell isNum isBold>{row.opportunityScore?.toFixed(1)}</TableCell>
-              <TableCell>
+            <TableRow key={row.vaps + idx} isHighlighted={selectedVaps === row.vaps}>
+              <TableCell isHighlighted={selectedColIdx === 0} onClick={() => { setSelectedVaps(row.vaps === selectedVaps ? null : row.vaps); setSelectedColIdx(0); }} className="text-slate-500">{row.market}</TableCell>
+              <TableCell isHighlighted={selectedColIdx === 1} onClick={() => { setSelectedVaps(row.vaps === selectedVaps ? null : row.vaps); setSelectedColIdx(1); }} isBold className={typography.mono}>{row.vaps}</TableCell>
+              <TableCell isHighlighted={selectedColIdx === 2} onClick={() => { setSelectedVaps(row.vaps === selectedVaps ? null : row.vaps); setSelectedColIdx(2); }} className="text-slate-700 font-semibold leading-normal">{row.vapsDesc}</TableCell>
+              <TableCell isHighlighted={selectedColIdx === 3} onClick={() => { setSelectedVaps(row.vaps === selectedVaps ? null : row.vaps); setSelectedColIdx(3); }} className={typography.label}>{row.recommendationKind || "Fixed quantity"}</TableCell>
+              <TableCell isHighlighted={selectedColIdx === 4} onClick={() => { setSelectedVaps(row.vaps === selectedVaps ? null : row.vaps); setSelectedColIdx(4); }} className="text-xs font-medium text-slate-500 italic">{row.recommendationValue || "0"}</TableCell>
+              <TableCell isHighlighted={selectedColIdx === 5} onClick={() => { setSelectedVaps(row.vaps === selectedVaps ? null : row.vaps); setSelectedColIdx(5); }}>{row.coveredText || "No"}</TableCell>
+              <TableCell isHighlighted={selectedColIdx === 6} onClick={() => { setSelectedVaps(row.vaps === selectedVaps ? null : row.vaps); setSelectedColIdx(6); }} isNum>{fmtNum(row.activations)}</TableCell>
+              <TableCell isHighlighted={selectedColIdx === 7} onClick={() => { setSelectedVaps(row.vaps === selectedVaps ? null : row.vaps); setSelectedColIdx(7); }} isNum>{fmtNum(row.associated)}</TableCell>
+              <TableCell isHighlighted={selectedColIdx === 8} onClick={() => { setSelectedVaps(row.vaps === selectedVaps ? null : row.vaps); setSelectedColIdx(8); }} isNum isBold className="text-blue-600">{fmtPct(row.attachRate)}</TableCell>
+              <TableCell isHighlighted={selectedColIdx === 9} onClick={() => { setSelectedVaps(row.vaps === selectedVaps ? null : row.vaps); setSelectedColIdx(9); }} isNum isBold>{fmtPct(row.unitAttachRate)}</TableCell>
+              <TableCell isHighlighted={selectedColIdx === 10} onClick={() => { setSelectedVaps(row.vaps === selectedVaps ? null : row.vaps); setSelectedColIdx(10); }} isNum isBold className="text-emerald-600">{row.leverage ? row.leverage.toFixed(2) + "x" : "---"}</TableCell>
+              <TableCell isHighlighted={selectedColIdx === 11} onClick={() => { setSelectedVaps(row.vaps === selectedVaps ? null : row.vaps); setSelectedColIdx(11); }} isNum isBold>{row.opportunityScore?.toFixed(1)}</TableCell>
+              <TableCell isHighlighted={selectedColIdx === 12} onClick={() => { setSelectedVaps(row.vaps === selectedVaps ? null : row.vaps); setSelectedColIdx(12); }}>
                 <Badge variant={row.industrySignal?.includes('Strong') ? 'success' : row.industrySignal?.includes('Good') ? 'info' : 'default'}>
                   {row.industrySignal}
                 </Badge>
               </TableCell>
-              <TableCell className="min-w-[250px]">{row.industrySignalReason}</TableCell>
+              <TableCell isHighlighted={selectedColIdx === 13} onClick={() => { setSelectedVaps(row.vaps === selectedVaps ? null : row.vaps); setSelectedColIdx(13); }} className="text-slate-500 leading-normal">{row.industrySignalReason}</TableCell>
             </TableRow>
           ))}
         </tbody>

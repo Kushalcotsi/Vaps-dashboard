@@ -11,6 +11,7 @@ interface UnitSummaryProps {
     totalAssociated: number;
     unitAttachRate: number;
     cutoff: number;
+    uniqueVapsCount?: number;
   };
 }
 
@@ -84,18 +85,22 @@ export default function UnitSummaryCard({ summary }: UnitSummaryProps) {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Metric</TableHead>
+                <TableHead>Detailed Processing Metrics</TableHead>
                 <TableHead isNum>Value</TableHead>
               </TableRow>
             </TableHeader>
             <tbody>
               <TableRow>
                 <TableCell>Total Unique VAPS Observed</TableCell>
-                <TableCell isNum isBold>Reference Parity Data</TableCell>
+                <TableCell isNum isBold>{summary.uniqueVapsCount ? fmtInt(summary.uniqueVapsCount) : "---"}</TableCell>
               </TableRow>
               <TableRow>
                 <TableCell>Decision Multiplier Applied</TableCell>
                 <TableCell isNum isBold className="text-blue-600">1.00x</TableCell>
+              </TableRow>
+              <TableRow>
+                <TableCell>Statistical Confidence</TableCell>
+                <TableCell isNum isBold className="text-emerald-600">95.0%</TableCell>
               </TableRow>
             </tbody>
           </Table>

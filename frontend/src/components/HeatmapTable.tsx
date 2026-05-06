@@ -7,7 +7,7 @@ import { cn } from "@/lib/utils";
 import { Card, CardHeader } from "./ui/Card";
 import { Input } from "./ui/Input";
 import { Button } from "./ui/Button";
-import { Table, TableHeader, TableRow, TableHead } from "./ui/TablePrims";
+import { Table, TableHeader, TableRow, TableHead, TableCell } from "./ui/TablePrims";
 import { typography } from "@/design-system/typography";
 
 interface HeatmapTableProps {
@@ -19,6 +19,9 @@ interface HeatmapTableProps {
 
 export default function HeatmapTable({ title, data, segmentName, cutoff }: HeatmapTableProps) {
   const [filter, setFilter] = useState("");
+  const [selectedVaps, setSelectedVaps] = useState<string | null>(null);
+  const [selectedSegment, setSelectedSegment] = useState<string | null>(null);
+  
   const pivotKey = segmentName.toLowerCase();
 
   const pivoted = useMemo(() => {
@@ -48,12 +51,22 @@ export default function HeatmapTable({ title, data, segmentName, cutoff }: Heatm
     );
   }, [pivoted, filter]);
 
-  const getHeatStyle = (signal: string | undefined) => {
+  const getHeatStyle = (signal: string | undefined, isHighlighted: boolean) => {
+    if (isHighlighted) {
+       switch (signal) {
+         case "Strong Industry Opportunity": return { bg: "bg-primary text-white scale-[1.05] z-30 shadow-xl ring-2 ring-primary ring-offset-1", text: "text-white" };
+         case "Good General Fit": return { bg: "bg-blue-600 text-white scale-[1.05] z-30 shadow-xl ring-2 ring-blue-600 ring-offset-1", text: "text-white" };
+         case "Niche Industry Signal": return { bg: "bg-blue-400 text-white scale-[1.05] z-30 shadow-xl ring-2 ring-blue-400 ring-offset-1", text: "text-white" };
+         case "Monitor": return { bg: "bg-amber-400 text-slate-900 scale-[1.05] z-30 shadow-xl ring-2 ring-amber-400 ring-offset-1", text: "text-slate-900" };
+         default: return { bg: "bg-slate-200 text-slate-500 scale-[1.05] z-30 shadow-xl ring-2 ring-slate-200 ring-offset-1", text: "text-slate-500" };
+       }
+    }
+
     switch (signal) {
-      case "Strong Industry Opportunity": return { bg: "bg-primary text-white" };
-      case "Good General Fit": return { bg: "bg-blue-100 text-slate-900" };
-      case "Niche Industry Signal": return { bg: "bg-blue-50 text-slate-700" };
-      case "Monitor": return { bg: "bg-amber-100 text-slate-900" };
+      case "Strong Industry Opportunity": return { bg: "bg-[#002b5c] text-white", text: "text-white" };
+      case "Good General Fit": return { bg: "bg-blue-100 text-slate-900", text: "text-slate-900" };
+      case "Niche Industry Signal": return { bg: "bg-blue-50 text-slate-700", text: "text-slate-700" };
+      case "Monitor": return { bg: "bg-amber-50 text-slate-900", text: "text-slate-900" };
       default: return { bg: "bg-white", text: "text-slate-300" };
     }
   };
@@ -82,14 +95,18 @@ export default function HeatmapTable({ title, data, segmentName, cutoff }: Heatm
         </div>
       </CardHeader>
 
-      <Table className="table-fixed min-w-[1200px]">
+      <Table className="table-auto min-w-full">
         <TableHeader>
           <TableRow>
-            <TableHead className="sticky left-0 z-30 w-[280px] border-r">
+            <TableHead className="sticky left-0 z-50 min-w-[320px] border-r bg-slate-50 shadow-[2px_0_5px_-2px_rgba(0,0,0,0.1)]">
               VAPS ID & Description
             </TableHead>
             {pivoted.columns.map(col => (
-              <TableHead key={col} className="text-center min-w-[140px] border-r last:border-r-0">
+              <TableHead 
+                key={col} 
+                isHighlighted={selectedSegment === col}
+                className="text-center min-w-[180px] border-r last:border-r-0"
+              >
                 {col}
               </TableHead>
             ))}
@@ -97,35 +114,51 @@ export default function HeatmapTable({ title, data, segmentName, cutoff }: Heatm
         </TableHeader>
         <tbody className="divide-y divide-slate-100">
           {filteredRows.map(([vaps, row]) => (
-            <TableRow key={vaps}>
-              <td className="sticky left-0 z-10 bg-white group-hover:bg-slate-50/80 border-r border-slate-200 px-4 py-3 transition-colors shadow-[2px_0_5px_-2px_rgba(0,0,0,0.05)]">
-                <div className="flex flex-col">
-                  <span className={cn(typography.mono, "text-slate-800 leading-tight uppercase tabular-nums")}>{vaps}</span>
-                  <span className="text-[10px] font-medium text-slate-500 mt-1 line-clamp-1">{row.desc}</span>
+            <TableRow key={vaps} isHighlighted={selectedVaps === vaps}>
+              <TableCell 
+                onClick={() => setSelectedVaps(vaps === selectedVaps ? null : vaps)}
+                className={cn(
+                  "sticky left-0 z-20 border-r border-slate-200 transition-all cursor-pointer shadow-[2px_0_5px_-2px_rgba(0,0,0,0.1)] h-auto py-5",
+                  selectedVaps === vaps 
+                    ? "bg-[#f1f5f9] z-30" 
+                    : "bg-white group-hover:bg-[#f8fafc]"
+                )}
+              >
+                <div className="flex flex-col gap-1">
+                  <span className={cn(typography.mono, "text-slate-800 leading-none uppercase tabular-nums font-bold")}>{vaps}</span>
+                  <span className="text-[11px] font-medium text-slate-500 leading-normal">{row.desc}</span>
                 </div>
-              </td>
+              </TableCell>
               {pivoted.columns.map(col => {
                 const cell = row.cells.get(col);
-                const style = getHeatStyle(cell?.industrySignal);
+                const isCellHighlighted = selectedVaps === vaps && selectedSegment === col;
+                const isColHighlighted = selectedSegment === col;
+                const style = getHeatStyle(cell?.industrySignal, isCellHighlighted);
+                
                 return (
-                  <td 
+                  <TableCell 
                     key={col} 
+                    onClick={() => {
+                      setSelectedVaps(vaps === selectedVaps && selectedSegment === col ? null : vaps);
+                      setSelectedSegment(vaps === selectedVaps && selectedSegment === col ? null : col);
+                    }}
+                    isHighlighted={isColHighlighted && !isCellHighlighted}
                     className={cn(
-                      "p-0 border-r border-slate-100 last:border-r-0 transition-all duration-200",
+                      "p-0 border-r border-slate-100 last:border-r-0 transition-all duration-200 cursor-pointer relative overflow-visible",
                       style.bg
                     )}
                   >
                     {cell && (
-                      <div className="w-full h-[54px] flex flex-col items-center justify-center gap-0.5 group/cell">
-                        <span className={cn("text-[11px] font-bold tabular-nums", style.text)}>
+                      <div className="w-full min-h-[70px] flex flex-col items-center justify-center gap-1 group/cell p-4 relative z-20">
+                        <span className={cn("text-xs font-bold tabular-nums", style.text)}>
                           {fmtPct(cell.attachRate)}
                         </span>
-                        <span className={cn("text-[8px] font-bold uppercase tracking-wider text-center px-2", style.text)}>
+                        <span className={cn("text-[9px] font-bold uppercase tracking-wider text-center leading-tight px-1", style.text)}>
                           {cell.industrySignal === "No Signal" ? "" : cell.industrySignal}
                         </span>
                       </div>
                     )}
-                  </td>
+                  </TableCell>
                 );
               })}
             </TableRow>

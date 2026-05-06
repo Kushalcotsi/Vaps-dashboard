@@ -13,11 +13,11 @@ export function GlobalHeader() {
         </div>
         
         {/* Navigation or User Profile could go here in the future */}
-        <div className="flex items-center gap-4">
+        {/* <div className="flex items-center gap-4">
            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest bg-slate-50 px-2 py-1 rounded border border-slate-100">
              Analytical Intelligence v2.0
            </span>
-        </div>
+        </div> */}
       </div>
     </header>
   );

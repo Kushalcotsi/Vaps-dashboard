@@ -101,7 +101,7 @@ export default function DashboardPage() {
         
         {/* Persistent Control Plane */}
         <DashboardHeader />
-        {data?.summary && <UnitSummaryCard summary={data.summary} />}
+        {data?.summary && <UnitSummaryCard summary={{ ...data.summary, uniqueVapsCount: data.unitRows.length }} />}
 
         {/* Workspace Navigation */}
         <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6 mt-8">

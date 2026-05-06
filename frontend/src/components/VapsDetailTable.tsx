@@ -9,6 +9,7 @@ import { Button } from "./ui/Button";
 import { Table, TableHeader, TableRow, TableHead, TableCell } from "./ui/TablePrims";
 import { typography } from "@/design-system/typography";
 import { Badge } from "./ui/Badge";
+import { cn } from "@/lib/utils";
 
 interface ColumnDef {
   key: keyof VapsAttachRate | string;
@@ -27,6 +28,8 @@ interface VapsDetailTableProps {
 export default function VapsDetailTable({ title, data, columns, downloadId }: VapsDetailTableProps) {
   const [filter, setFilter] = useState("");
   const [sortConfig, setSortConfig] = useState<{ key: string; direction: 'asc' | 'desc' } | null>(null);
+  const [selectedRowIdx, setSelectedRowIdx] = useState<number | null>(null);
+  const [selectedColKey, setSelectedColKey] = useState<string | null>(null);
 
   const filteredAndSortedData = useMemo(() => {
     let result = [...data];
@@ -115,7 +118,11 @@ export default function VapsDetailTable({ title, data, columns, downloadId }: Va
                 key={col.key} 
                 onClick={() => handleSort(col.key as string)}
                 isNum={col.isNum}
-                className="cursor-pointer hover:bg-slate-100 transition-colors"
+                isHighlighted={selectedColKey === col.key}
+                className={cn(
+                  "cursor-pointer hover:bg-slate-100 transition-colors whitespace-nowrap",
+                  col.key === 'vapsDesc' && "min-w-[250px]"
+                )}
               >
                 <div className={`flex items-center gap-2 ${col.isNum ? 'justify-end' : ''}`}>
                   {col.label}
@@ -127,15 +134,23 @@ export default function VapsDetailTable({ title, data, columns, downloadId }: Va
         </TableHeader>
         <tbody className="divide-y divide-slate-100">
           {filteredAndSortedData.map((row, idx) => (
-            <TableRow key={idx}>
+            <TableRow key={idx} isHighlighted={selectedRowIdx === idx}>
               {columns.map(col => {
                 const val = (row as any)[col.key];
                 return (
                   <TableCell 
                     key={col.key} 
                     isNum={col.isNum}
+                    isHighlighted={selectedColKey === col.key}
+                    onClick={() => {
+                       setSelectedRowIdx(idx === selectedRowIdx ? null : idx);
+                       setSelectedColKey(col.key === selectedColKey ? null : col.key as string);
+                    }}
                     isBold={col.isNum && col.key === 'attachRate'}
-                    className={col.key === 'vaps' ? typography.mono : ''}
+                    className={cn(
+                      col.key === 'vaps' ? typography.mono : '',
+                      col.key === 'vapsDesc' && "font-semibold text-slate-700 leading-normal"
+                    )}
                   >
                     {col.fmt ? col.fmt(val) : (val ?? "")}
                   </TableCell>

@@ -6,7 +6,7 @@ export const typography = {
   label: "text-xs font-medium uppercase tracking-widest text-slate-400",
   
   // Table Specific
-  tableHeader: "text-[10px] font-bold uppercase tracking-widest text-slate-500",
+  tableHeader: "text-[9px] font-bold uppercase tracking-wider text-slate-500 leading-normal",
   tableCell: "text-xs font-medium text-slate-600",
   tableCellBold: "text-xs font-semibold text-slate-900",
   

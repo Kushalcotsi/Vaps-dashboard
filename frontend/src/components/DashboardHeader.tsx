@@ -40,6 +40,7 @@ export default function DashboardHeader() {
             value={selectedUnit}
             onChange={(e) => setSelectedUnit(e.target.value)}
           >
+            <option value="all">All Units</option>
             {units?.map((unit) => (
               <option key={unit.code} value={unit.code}>
                 {unit.code} - {unit.name}

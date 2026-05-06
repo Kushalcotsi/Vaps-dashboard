@@ -29,6 +29,8 @@ interface RecommendationTableProps {
 export default function RecommendationTable({ data }: RecommendationTableProps) {
   const [sorting, setSorting] = useState<SortingState>([])
   const [globalFilter, setGlobalFilter] = useState("")
+  const [selectedRowId, setSelectedRowId] = useState<string | null>(null)
+  const [selectedColId, setSelectedColId] = useState<string | null>(null)
 
   const columns = useMemo(() => [
     columnHelper.accessor("vaps", {
@@ -37,7 +39,7 @@ export default function RecommendationTable({ data }: RecommendationTableProps) 
     }),
     columnHelper.accessor("vapsDesc", {
       header: "VAPS description",
-      cell: info => <span className="font-semibold text-slate-700 line-clamp-1" title={info.getValue()}>{info.getValue()}</span>,
+      cell: info => <span className="font-semibold text-slate-700 leading-normal block min-w-[200px]">{info.getValue()}</span>,
     }),
     columnHelper.accessor("recommendationKind" as any, {
       header: "Recommendation logic",
@@ -45,7 +47,7 @@ export default function RecommendationTable({ data }: RecommendationTableProps) 
     }),
     columnHelper.accessor("recommendationValue" as any, {
       header: "Recommendation value",
-      cell: info => <span className="text-xs font-medium text-slate-500 italic truncate block max-w-[120px]">{info.getValue() || "0"}</span>,
+      cell: info => <span className="text-xs font-medium text-slate-500 italic block min-w-[100px]">{info.getValue() || "0"}</span>,
     }),
     columnHelper.accessor("coveredText" as any, {
       header: "Covered",
@@ -53,7 +55,7 @@ export default function RecommendationTable({ data }: RecommendationTableProps) 
     }),
     columnHelper.accessor("activations", {
       header: ({ column }) => (
-        <button onClick={() => column.toggleSorting()} className="flex items-center gap-1 hover:text-primary transition-colors">
+        <button onClick={() => column.toggleSorting()} className="flex items-center gap-1 hover:text-primary transition-colors whitespace-nowrap">
           Unit activations <ArrowUpDown size={10} />
         </button>
       ),
@@ -65,7 +67,7 @@ export default function RecommendationTable({ data }: RecommendationTableProps) 
     }),
     columnHelper.accessor("attachRate", {
       header: ({ column }) => (
-        <button onClick={() => column.toggleSorting()} className="flex items-center gap-1 hover:text-primary transition-colors">
+        <button onClick={() => column.toggleSorting()} className="flex items-center gap-1 hover:text-primary transition-colors whitespace-nowrap">
           Attach rate <ArrowUpDown size={10} />
         </button>
       ),
@@ -96,7 +98,7 @@ export default function RecommendationTable({ data }: RecommendationTableProps) 
     }),
     columnHelper.accessor("decisionReason", {
       header: "Reason",
-      cell: info => <span className="text-[11px] font-medium text-slate-500 leading-tight block max-w-[200px]">{info.getValue()}</span>,
+      cell: info => <span className="text-[11px] font-medium text-slate-500 leading-relaxed block min-w-[250px]">{info.getValue()}</span>,
     }),
   ], []);
 
@@ -135,7 +137,11 @@ export default function RecommendationTable({ data }: RecommendationTableProps) 
           {table.getHeaderGroups().map(headerGroup => (
             <TableRow key={headerGroup.id}>
               {headerGroup.headers.map(header => (
-                <TableHead key={header.id} isNum={header.column.columnDef.header?.toString().toLowerCase().includes('activations') || header.column.id === 'attachRate'}>
+                <TableHead 
+                  key={header.id} 
+                  isHighlighted={selectedColId === header.column.id}
+                  isNum={header.column.columnDef.header?.toString().toLowerCase().includes('activations') || header.column.id === 'attachRate'}
+                >
                   {header.isPlaceholder ? null : flexRender(header.column.columnDef.header, header.getContext())}
                 </TableHead>
               ))}
@@ -144,9 +150,17 @@ export default function RecommendationTable({ data }: RecommendationTableProps) 
         </TableHeader>
         <tbody className="divide-y divide-slate-100">
           {table.getRowModel().rows.map(row => (
-            <TableRow key={row.id}>
+            <TableRow key={row.id} isHighlighted={selectedRowId === row.id}>
               {row.getVisibleCells().map(cell => (
-                <TableCell key={cell.id} isNum={cell.column.id === 'activations' || cell.column.id === 'associated' || cell.column.id === 'attachRate' || cell.column.id === 'elbowCutoff'}>
+                <TableCell 
+                  key={cell.id} 
+                  isHighlighted={selectedColId === cell.column.id}
+                  onClick={() => {
+                    setSelectedRowId(row.id === selectedRowId ? null : row.id);
+                    setSelectedColId(cell.column.id === selectedColId ? null : cell.column.id);
+                  }}
+                  isNum={cell.column.id === 'activations' || cell.column.id === 'associated' || cell.column.id === 'attachRate' || cell.column.id === 'elbowCutoff'}
+                >
                   {flexRender(cell.column.columnDef.cell, cell.getContext())}
                 </TableCell>
               ))}

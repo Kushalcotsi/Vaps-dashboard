@@ -76,7 +76,10 @@ class DashboardService:
     def get_dashboard_data(self, unit_id: str) -> Dict:
         # 1. Base Unit Data
         all_unit_rows = self.repo.get_unit_attach_rates()
-        unit_rows = [r for r in all_unit_rows if r.unit == unit_id and r.activations >= self.MIN_BASKETS]
+        if unit_id.lower() == 'all':
+            unit_rows = [r for r in all_unit_rows if r.activations >= self.MIN_BASKETS]
+        else:
+            unit_rows = [r for r in all_unit_rows if r.unit == unit_id and r.activations >= self.MIN_BASKETS]
         
         # 2. Calculate Cutoff
         cutoff_rates = [r.attachRate for r in unit_rows if r.associated >= self.MIN_BASKETS]
@@ -107,7 +110,8 @@ class DashboardService:
         for name, rows in segment_data.items():
             segment_processed = []
             for r in rows:
-                if r.unit == unit_id and r.activations >= self.MIN_BASKETS:
+                is_all = unit_id.lower() == 'all'
+                if (is_all or r.unit == unit_id) and r.activations >= self.MIN_BASKETS:
                     unit_rate = unit_attach_map.get(r.vaps, 0.0)
                     sig = self.get_industry_signal(r, cutoff, unit_rate)
                     r_dict = r.dict()
