@@ -73,7 +73,8 @@ export function TableCell({
   isNum, 
   isBold, 
   isHighlighted,
-  onClick 
+  onClick,
+  colSpan
 }: { 
   children: React.ReactNode; 
   className?: string; 
@@ -81,10 +82,12 @@ export function TableCell({
   isBold?: boolean;
   isHighlighted?: boolean;
   onClick?: () => void;
+  colSpan?: number;
 }) {
   return (
     <td 
       onClick={onClick}
+      colSpan={colSpan}
       className={cn(
         "relative px-6 py-4 border-b border-slate-100 transition-colors cursor-pointer align-middle h-14 overflow-hidden",
         isBold ? typography.tableCellBold : typography.tableCell,

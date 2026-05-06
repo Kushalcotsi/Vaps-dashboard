@@ -1,16 +1,51 @@
 import pandas as pd
 import os
 import re
-from typing import List, Dict, Tuple, Optional
+import logging
+from typing import List, Dict, Tuple, Optional, Any
 from app.repositories.base import BaseRepository
 from app.models.dashboard import VapsAttachRate, RecommendationEntry
 from app.core.config import settings
 from openpyxl import load_workbook
 
+logger = logging.getLogger(__name__)
+
 class CSVRepository(BaseRepository):
+    # Class-level cache to ensure data is loaded and PROCESSED only once
+    _cache: Dict[str, Any] = {}
+    _is_loaded = False
+
     def __init__(self):
         self.data_dir = settings.DATA_PATH
-        self.recommendations = self._load_recommendations()
+        if not CSVRepository._is_loaded:
+            self._initialize_cache()
+
+    def _initialize_cache(self):
+        logger.info("Initializing Full In-Memory Processing Cache...")
+        recommendations = self._load_recommendations()
+        CSVRepository._cache["recommendations"] = recommendations
+        
+        # Files and their segment keys
+        segment_configs = {
+            "Market": ("unit_market_segment_vaps_attach_rate.csv", "market"),
+            "Division": ("attach_rate_unit_division.csv", "division"),
+            "Region": ("attach_rate_unit_region.csv", "region"),
+            "Unit": ("unit_segment_vaps_attach_rate.csv", None)
+        }
+        
+        for name, (filename, key) in segment_configs.items():
+            path = os.path.join(self.data_dir, filename)
+            if os.path.exists(path):
+                logger.info(f"Loading and Processing {filename}...")
+                df = pd.read_csv(path)
+                # PROCESS ONCE and cache the list of objects
+                CSVRepository._cache[f"obj_{name}"] = self._process_dataframe_to_objects(df, recommendations, segment_key=key)
+            else:
+                logger.warning(f"Data file {filename} not found!")
+                CSVRepository._cache[f"obj_{name}"] = []
+        
+        CSVRepository._is_loaded = True
+        logger.info("Full In-Memory Cache initialization complete.")
 
     def _text(self, val) -> str:
         if pd.isna(val):
@@ -97,30 +132,11 @@ class CSVRepository(BaseRepository):
                 )
         return entries
 
-    def get_all_segments_data(self) -> Dict[str, List[VapsAttachRate]]:
+    def _process_dataframe_to_objects(self, df: pd.DataFrame, recommendations: Dict, segment_key: Optional[str] = None) -> List[VapsAttachRate]:
         """
-        Dynamically load all predefined segments for parity.
+        Private method to convert raw DF rows to Pydantic objects ONCE.
         """
-        segment_files = {
-            "Market": "unit_market_segment_vaps_attach_rate.csv",
-            "Division": "attach_rate_unit_division.csv",
-            "Region": "attach_rate_unit_region.csv"
-        }
-        
-        segments = {}
-        for name, filename in segment_files.items():
-            segments[name] = self._load_csv_rows(filename, segment_key=name.lower())
-        return segments
-
-    def _load_csv_rows(self, filename: str, segment_key: Optional[str] = None) -> List[VapsAttachRate]:
-        path = os.path.join(self.data_dir, filename)
-        if not os.path.exists(path):
-            return []
-        
-        df = pd.read_csv(path)
         rows = []
-        
-        # Column mappings differ across files in the reference folder
         for _, source_row in df.iterrows():
             vaps_code = self._text(source_row.get("vaps_item_id") or source_row.get("vaps_code"))
             unit_code = self._text(source_row.get("UNIT_PRODUCTCODE_SF") or source_row.get("unit_code"))
@@ -128,9 +144,8 @@ class CSVRepository(BaseRepository):
             if not vaps_code or not unit_code:
                 continue
                 
-            rec = self.recommendations.get((unit_code, vaps_code))
+            rec = recommendations.get((unit_code, vaps_code))
             
-            # Map segment column based on the segment type
             market = ""
             division = ""
             region = ""
@@ -141,7 +156,7 @@ class CSVRepository(BaseRepository):
                 division = self._text(source_row.get("division"))
             elif segment_key == "region":
                 region = self._text(source_row.get("region"))
-                division = self._text(source_row.get("division")) # Regions file often has parent division
+                division = self._text(source_row.get("division"))
 
             rows.append(VapsAttachRate(
                 unit=unit_code,
@@ -165,17 +180,25 @@ class CSVRepository(BaseRepository):
             ))
         return rows
 
+    def get_all_segments_data(self) -> Dict[str, List[VapsAttachRate]]:
+        # Return pre-processed objects directly
+        return {
+            "Market": CSVRepository._cache["obj_Market"],
+            "Division": CSVRepository._cache["obj_Division"],
+            "Region": CSVRepository._cache["obj_Region"]
+        }
+
     def get_unit_attach_rates(self) -> List[VapsAttachRate]:
-        return self._load_csv_rows("unit_segment_vaps_attach_rate.csv")
+        return CSVRepository._cache["obj_Unit"]
 
     def get_market_attach_rates(self) -> List[VapsAttachRate]:
-        return self._load_csv_rows("unit_market_segment_vaps_attach_rate.csv", "market")
+        return CSVRepository._cache["obj_Market"]
 
     def get_division_attach_rates(self) -> List[VapsAttachRate]:
-        return self._load_csv_rows("attach_rate_unit_division.csv", "division")
+        return CSVRepository._cache["obj_Division"]
 
     def get_region_attach_rates(self) -> List[VapsAttachRate]:
-        return self._load_csv_rows("attach_rate_unit_region.csv", "region")
+        return CSVRepository._cache["obj_Region"]
 
     def get_recommendation_entries(self) -> Dict[Tuple[str, str], RecommendationEntry]:
-        return self.recommendations
+        return CSVRepository._cache["recommendations"]

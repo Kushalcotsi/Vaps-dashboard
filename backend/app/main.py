@@ -1,5 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.middleware.gzip import GZipMiddleware
 from app.core.config import settings
 from app.api.endpoints import dashboard
 
@@ -11,6 +12,9 @@ app = FastAPI(
 
 # Register routers
 app.include_router(dashboard.router, prefix="/api/v1")
+
+# Set up Compression
+app.add_middleware(GZipMiddleware, minimum_size=1000)
 
 # Set up CORS
 app.add_middleware(

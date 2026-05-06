@@ -15,13 +15,15 @@ import { VapsAttachRate } from "@/types"
 import { Card, CardHeader, CardContent } from "./ui/Card"
 import { typography } from "@/design-system/typography"
 import { colors } from "@/design-system/colors"
+import { Skeleton } from "./ui/Skeleton"
 
 interface ElbowChartProps {
   data: VapsAttachRate[];
   cutoff: number;
+  isLoading?: boolean;
 }
 
-export default function ElbowChart({ data, cutoff }: ElbowChartProps) {
+export default function ElbowChart({ data, cutoff, isLoading }: ElbowChartProps) {
   const chartData = useMemo(() => {
     return data
       .filter(r => r.attachRate > 0)
@@ -32,6 +34,24 @@ export default function ElbowChart({ data, cutoff }: ElbowChartProps) {
         index: index
       }));
   }, [data]);
+
+  if (isLoading) {
+    return (
+      <Card>
+        <CardHeader>
+          <h2 className={typography.sectionTitle}>Geometric Elbow Distribution</h2>
+        </CardHeader>
+        <CardContent className="h-[450px] flex flex-col gap-4">
+           <div className="flex-1 w-full bg-slate-50/50 rounded-xl relative overflow-hidden">
+             <Skeleton className="absolute inset-0" />
+             <div className="absolute inset-0 flex items-center justify-center">
+               <span className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Recalculating Distribution...</span>
+             </div>
+           </div>
+        </CardContent>
+      </Card>
+    );
+  }
 
   if (chartData.length === 0) {
     return (

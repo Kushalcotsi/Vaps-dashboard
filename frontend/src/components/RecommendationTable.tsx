@@ -19,14 +19,16 @@ import { Button } from "./ui/Button"
 import { Input } from "./ui/Input"
 import { Table, TableHeader, TableRow, TableHead, TableCell } from "./ui/TablePrims"
 import { typography } from "@/design-system/typography"
+import { Skeleton } from "./ui/Skeleton"
 
 const columnHelper = createColumnHelper<VapsAttachRate>()
 
 interface RecommendationTableProps {
   data: VapsAttachRate[];
+  isLoading?: boolean;
 }
 
-export default function RecommendationTable({ data }: RecommendationTableProps) {
+export default function RecommendationTable({ data, isLoading }: RecommendationTableProps) {
   const [sorting, setSorting] = useState<SortingState>([])
   const [globalFilter, setGlobalFilter] = useState("")
   const [selectedRowId, setSelectedRowId] = useState<string | null>(null)
@@ -140,7 +142,7 @@ export default function RecommendationTable({ data }: RecommendationTableProps) 
                 <TableHead 
                   key={header.id} 
                   isHighlighted={selectedColId === header.column.id}
-                  isNum={header.column.columnDef.header?.toString().toLowerCase().includes('activations') || header.column.id === 'attachRate'}
+                  isNum={header.column.id === 'activations' || header.column.id === 'associated' || header.column.id === 'attachRate' || header.column.id === 'elbowCutoff'}
                 >
                   {header.isPlaceholder ? null : flexRender(header.column.columnDef.header, header.getContext())}
                 </TableHead>
@@ -149,23 +151,41 @@ export default function RecommendationTable({ data }: RecommendationTableProps) 
           ))}
         </TableHeader>
         <tbody className="divide-y divide-slate-100">
-          {table.getRowModel().rows.map(row => (
-            <TableRow key={row.id} isHighlighted={selectedRowId === row.id}>
-              {row.getVisibleCells().map(cell => (
-                <TableCell 
-                  key={cell.id} 
-                  isHighlighted={selectedColId === cell.column.id}
-                  onClick={() => {
-                    setSelectedRowId(row.id === selectedRowId ? null : row.id);
-                    setSelectedColId(cell.column.id === selectedColId ? null : cell.column.id);
-                  }}
-                  isNum={cell.column.id === 'activations' || cell.column.id === 'associated' || cell.column.id === 'attachRate' || cell.column.id === 'elbowCutoff'}
-                >
-                  {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                </TableCell>
-              ))}
+          {isLoading ? (
+            Array.from({ length: 8 }).map((_, i) => (
+              <TableRow key={i}>
+                {columns.map((_, j) => (
+                  <TableCell key={j}>
+                    <Skeleton className="h-4 w-full" />
+                  </TableCell>
+                ))}
+              </TableRow>
+            ))
+          ) : table.getRowModel().rows.length === 0 ? (
+            <TableRow>
+              <TableCell colSpan={columns.length} className="h-32 text-center text-slate-400 italic">
+                No matching VAPS records found
+              </TableCell>
             </TableRow>
-          ))}
+          ) : (
+            table.getRowModel().rows.map(row => (
+              <TableRow key={row.id} isHighlighted={selectedRowId === row.id}>
+                {row.getVisibleCells().map(cell => (
+                  <TableCell 
+                    key={cell.id} 
+                    isHighlighted={selectedColId === cell.column.id}
+                    onClick={() => {
+                      setSelectedRowId(row.id === selectedRowId ? null : row.id);
+                      setSelectedColId(cell.column.id === selectedColId ? null : cell.column.id);
+                    }}
+                    isNum={cell.column.id === 'activations' || cell.column.id === 'associated' || cell.column.id === 'attachRate' || cell.column.id === 'elbowCutoff'}
+                  >
+                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                  </TableCell>
+                ))}
+              </TableRow>
+            ))
+          )}
         </tbody>
       </Table>
     </Card>

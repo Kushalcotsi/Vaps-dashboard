@@ -9,15 +9,17 @@ import { Input } from "./ui/Input";
 import { Button } from "./ui/Button";
 import { Table, TableHeader, TableRow, TableHead, TableCell } from "./ui/TablePrims";
 import { typography } from "@/design-system/typography";
+import { Skeleton } from "./ui/Skeleton";
 
 interface HeatmapTableProps {
   title: string;
   data: VapsAttachRate[];
   segmentName: string;
   cutoff: number;
+  isLoading?: boolean;
 }
 
-export default function HeatmapTable({ title, data, segmentName, cutoff }: HeatmapTableProps) {
+export default function HeatmapTable({ title, data, segmentName, cutoff, isLoading }: HeatmapTableProps) {
   const [filter, setFilter] = useState("");
   const [selectedVaps, setSelectedVaps] = useState<string | null>(null);
   const [selectedSegment, setSelectedSegment] = useState<string | null>(null);
@@ -101,68 +103,94 @@ export default function HeatmapTable({ title, data, segmentName, cutoff }: Heatm
             <TableHead className="sticky left-0 z-50 min-w-[320px] border-r bg-slate-50 shadow-[2px_0_5px_-2px_rgba(0,0,0,0.1)]">
               VAPS ID & Description
             </TableHead>
-            {pivoted.columns.map(col => (
-              <TableHead 
-                key={col} 
-                isHighlighted={selectedSegment === col}
-                className="text-center min-w-[180px] border-r last:border-r-0"
-              >
-                {col}
-              </TableHead>
-            ))}
+            {isLoading ? (
+              Array.from({ length: 5 }).map((_, i) => (
+                <TableHead key={i} className="text-center min-w-[180px] border-r last:border-r-0">
+                  <Skeleton className="h-4 w-24 mx-auto" />
+                </TableHead>
+              ))
+            ) : (
+              pivoted.columns.map(col => (
+                <TableHead 
+                  key={col} 
+                  isHighlighted={selectedSegment === col}
+                  className="text-center min-w-[180px] border-r last:border-r-0"
+                >
+                  {col}
+                </TableHead>
+              ))
+            )}
           </TableRow>
         </TableHeader>
         <tbody className="divide-y divide-slate-100">
-          {filteredRows.map(([vaps, row]) => (
-            <TableRow key={vaps} isHighlighted={selectedVaps === vaps}>
-              <TableCell 
-                onClick={() => setSelectedVaps(vaps === selectedVaps ? null : vaps)}
-                className={cn(
-                  "sticky left-0 z-20 border-r border-slate-200 transition-all cursor-pointer shadow-[2px_0_5px_-2px_rgba(0,0,0,0.1)] h-auto py-5",
-                  selectedVaps === vaps 
-                    ? "bg-[#f1f5f9] z-30" 
-                    : "bg-white group-hover:bg-[#f8fafc]"
-                )}
-              >
-                <div className="flex flex-col gap-1">
-                  <span className={cn(typography.mono, "text-slate-800 leading-none uppercase tabular-nums font-bold")}>{vaps}</span>
-                  <span className="text-[11px] font-medium text-slate-500 leading-normal">{row.desc}</span>
-                </div>
-              </TableCell>
-              {pivoted.columns.map(col => {
-                const cell = row.cells.get(col);
-                const isCellHighlighted = selectedVaps === vaps && selectedSegment === col;
-                const isColHighlighted = selectedSegment === col;
-                const style = getHeatStyle(cell?.industrySignal, isCellHighlighted);
-                
-                return (
-                  <TableCell 
-                    key={col} 
-                    onClick={() => {
-                      setSelectedVaps(vaps === selectedVaps && selectedSegment === col ? null : vaps);
-                      setSelectedSegment(vaps === selectedVaps && selectedSegment === col ? null : col);
-                    }}
-                    isHighlighted={isColHighlighted && !isCellHighlighted}
-                    className={cn(
-                      "p-0 border-r border-slate-100 last:border-r-0 transition-all duration-200 cursor-pointer relative overflow-visible",
-                      style.bg
-                    )}
-                  >
-                    {cell && (
-                      <div className="w-full min-h-[70px] flex flex-col items-center justify-center gap-1 group/cell p-4 relative z-20">
-                        <span className={cn("text-xs font-bold tabular-nums", style.text)}>
-                          {fmtPct(cell.attachRate)}
-                        </span>
-                        <span className={cn("text-[9px] font-bold uppercase tracking-wider text-center leading-tight px-1", style.text)}>
-                          {cell.industrySignal === "No Signal" ? "" : cell.industrySignal}
-                        </span>
-                      </div>
-                    )}
+          {isLoading ? (
+            Array.from({ length: 6 }).map((_, i) => (
+              <TableRow key={i}>
+                <TableCell className="sticky left-0 z-20 bg-white border-r">
+                   <div className="flex flex-col gap-2">
+                     <Skeleton className="h-4 w-24" />
+                     <Skeleton className="h-3 w-48" />
+                   </div>
+                </TableCell>
+                {Array.from({ length: 5 }).map((_, j) => (
+                  <TableCell key={j} className="p-4 border-r">
+                    <Skeleton className="h-10 w-full rounded" />
                   </TableCell>
-                );
-              })}
-            </TableRow>
-          ))}
+                ))}
+              </TableRow>
+            ))
+          ) : (
+            filteredRows.map(([vaps, row]) => (
+              <TableRow key={vaps} isHighlighted={selectedVaps === vaps}>
+                <TableCell 
+                  onClick={() => setSelectedVaps(vaps === selectedVaps ? null : vaps)}
+                  className={cn(
+                    "sticky left-0 z-20 border-r border-slate-200 transition-all cursor-pointer shadow-[2px_0_5px_-2px_rgba(0,0,0,0.1)] h-auto py-5",
+                    selectedVaps === vaps 
+                      ? "bg-[#f1f5f9] z-30" 
+                      : "bg-white group-hover:bg-[#f8fafc]"
+                  )}
+                >
+                  <div className="flex flex-col gap-1">
+                    <span className={cn(typography.mono, "text-slate-800 leading-none uppercase tabular-nums font-bold")}>{vaps}</span>
+                    <span className="text-[11px] font-medium text-slate-500 leading-normal">{row.desc}</span>
+                  </div>
+                </TableCell>
+                {pivoted.columns.map(col => {
+                  const cell = row.cells.get(col);
+                  const isCellHighlighted = selectedVaps === vaps && selectedSegment === col;
+                  const isColHighlighted = selectedSegment === col;
+                  const style = getHeatStyle(cell?.industrySignal, isCellHighlighted);
+                  
+                  return (
+                    <TableCell 
+                      key={col} 
+                      onClick={() => {
+                        setSelectedVaps(vaps === selectedVaps && selectedSegment === col ? null : vaps);
+                        setSelectedSegment(vaps === selectedVaps && selectedSegment === col ? null : col);
+                      }}
+                      isHighlighted={isColHighlighted && !isCellHighlighted}
+                      className={cn(
+                        "p-0 border-r border-slate-100 last:border-r-0 transition-all duration-200 cursor-pointer relative overflow-visible",
+                        style.bg
+                      )}
+                    >
+                      {cell && (
+                        <div className="w-full min-h-[70px] flex flex-col items-center justify-center gap-1 group/cell p-4 relative z-20">
+                          <span className={cn("text-xs font-bold tabular-nums", style.text)}>
+                            {fmtPct(cell.attachRate)}
+                          </span>
+                          <span className={cn("text-[9px] font-bold uppercase tracking-wider text-center leading-tight px-1", style.text)}>
+                            {cell.industrySignal === "No Signal" ? "" : cell.industrySignal}
+                          </span>
+                        </div>
+                      )}
+                    </TableCell>
+                  );
+                })}
+              </TableRow>
+            ))
+          )}
         </tbody>
       </Table>
     </Card>

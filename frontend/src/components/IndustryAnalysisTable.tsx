@@ -10,12 +10,14 @@ import { Table, TableHeader, TableRow, TableHead, TableCell } from "./ui/TablePr
 import { typography } from "@/design-system/typography";
 import { Badge } from "./ui/Badge";
 import { cn } from "@/lib/utils";
+import { Skeleton } from './ui/Skeleton';
 
 interface IndustryAnalysisProps {
   marketRows: VapsAttachRate[];
+  isLoading?: boolean;
 }
 
-export default function IndustryAnalysisTable({ marketRows }: IndustryAnalysisProps) {
+export default function IndustryAnalysisTable({ marketRows, isLoading }: IndustryAnalysisProps) {
   const [selectedMarket, setSelectedMarket] = useState<string>(''); // Default to empty (All)
   const [search, setSearch] = useState('');
   const [selectedVaps, setSelectedVaps] = useState<string | null>(null);
@@ -24,8 +26,6 @@ export default function IndustryAnalysisTable({ marketRows }: IndustryAnalysisPr
   const markets = useMemo(() => {
     return Array.from(new Set(marketRows.map(r => r.market).filter(Boolean))).sort();
   }, [marketRows]);
-
-  // Removed useEffect that was defaulting to markets[0]
 
   const filteredRows = useMemo(() => {
     return marketRows.filter(r => 
@@ -100,7 +100,17 @@ export default function IndustryAnalysisTable({ marketRows }: IndustryAnalysisPr
           </TableRow>
         </TableHeader>
         <tbody className="divide-y divide-slate-100">
-          {filteredRows.map((row, idx) => (
+          {isLoading ? (
+             Array.from({ length: 8 }).map((_, i) => (
+              <TableRow key={i}>
+                {columns.map((_, j) => (
+                  <TableCell key={j}>
+                    <Skeleton className="h-4 w-full" />
+                  </TableCell>
+                ))}
+              </TableRow>
+            ))
+          ) : filteredRows.map((row, idx) => (
             <TableRow key={row.vaps + idx} isHighlighted={selectedVaps === row.vaps}>
               <TableCell isHighlighted={selectedColIdx === 0} onClick={() => { setSelectedVaps(row.vaps === selectedVaps ? null : row.vaps); setSelectedColIdx(0); }} className="text-slate-500">{row.market}</TableCell>
               <TableCell isHighlighted={selectedColIdx === 1} onClick={() => { setSelectedVaps(row.vaps === selectedVaps ? null : row.vaps); setSelectedColIdx(1); }} isBold className={typography.mono}>{row.vaps}</TableCell>

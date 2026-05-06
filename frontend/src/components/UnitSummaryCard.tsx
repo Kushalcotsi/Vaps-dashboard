@@ -4,6 +4,7 @@ import { Card, CardContent, CardHeader } from './ui/Card';
 import { Table, TableHeader, TableRow, TableHead, TableCell } from './ui/TablePrims';
 import { typography } from '@/design-system/typography';
 import { cn } from '@/lib/utils';
+import { Skeleton } from './ui/Skeleton';
 
 interface UnitSummaryProps {
   summary: {
@@ -12,38 +13,39 @@ interface UnitSummaryProps {
     unitAttachRate: number;
     cutoff: number;
     uniqueVapsCount?: number;
-  };
+  } | null;
+  isLoading?: boolean;
 }
 
-export default function UnitSummaryCard({ summary }: UnitSummaryProps) {
+export default function UnitSummaryCard({ summary, isLoading }: UnitSummaryProps) {
   const fmtInt = (val: number) => val.toLocaleString();
   const fmtPct = (val: number) => `${(val * 100).toFixed(1)}%`;
 
   const kpis = [
     { 
       label: "Total Activations", 
-      value: fmtInt(summary.totalActivations),
+      value: summary ? fmtInt(summary.totalActivations) : "---",
       icon: Activity,
       color: "bg-blue-50 text-blue-600",
       description: "Total unit activations observed in data"
     },
     { 
       label: "Total Associated", 
-      value: fmtInt(summary.totalAssociated),
+      value: summary ? fmtInt(summary.totalAssociated) : "---",
       icon: CheckCircle2,
       color: "bg-emerald-50 text-emerald-600",
       description: "Total number of VAPS sold with this unit"
     },
     { 
       label: "Unit Attach Rate", 
-      value: fmtPct(summary.unitAttachRate),
+      value: summary ? fmtPct(summary.unitAttachRate) : "---",
       icon: TrendingUp,
       color: "bg-indigo-50 text-indigo-600",
       description: "Aggregated baseline attachment performance"
     },
     { 
       label: "Unit Cutoff", 
-      value: fmtPct(summary.cutoff),
+      value: summary ? fmtPct(summary.cutoff) : "---",
       icon: Target,
       color: "bg-orange-50 text-orange-600",
       description: "Geometric elbow point for recommendations"
@@ -70,7 +72,11 @@ export default function UnitSummaryCard({ summary }: UnitSummaryProps) {
                   </span>
                 </div>
                 <div className="flex items-baseline gap-1">
-                  <span className="text-xl font-bold text-slate-900 tabular-nums">{kpi.value}</span>
+                  {isLoading ? (
+                    <Skeleton className="h-7 w-24 mb-1" />
+                  ) : (
+                    <span className="text-xl font-bold text-slate-900 tabular-nums">{kpi.value}</span>
+                  )}
                 </div>
                 <p className="mt-2 text-[11px] text-slate-500 leading-normal font-medium">
                   {kpi.description}
@@ -92,15 +98,21 @@ export default function UnitSummaryCard({ summary }: UnitSummaryProps) {
             <tbody>
               <TableRow>
                 <TableCell>Total Unique VAPS Observed</TableCell>
-                <TableCell isNum isBold>{summary.uniqueVapsCount ? fmtInt(summary.uniqueVapsCount) : "---"}</TableCell>
+                <TableCell isNum isBold>
+                  {isLoading ? <Skeleton className="h-4 w-12 ml-auto" /> : (summary?.uniqueVapsCount ? fmtInt(summary.uniqueVapsCount) : "---")}
+                </TableCell>
               </TableRow>
               <TableRow>
                 <TableCell>Decision Multiplier Applied</TableCell>
-                <TableCell isNum isBold className="text-blue-600">1.00x</TableCell>
+                <TableCell isNum isBold className="text-blue-600">
+                  {isLoading ? <Skeleton className="h-4 w-12 ml-auto" /> : "1.00x"}
+                </TableCell>
               </TableRow>
               <TableRow>
                 <TableCell>Statistical Confidence</TableCell>
-                <TableCell isNum isBold className="text-emerald-600">95.0%</TableCell>
+                <TableCell isNum isBold className="text-emerald-600">
+                  {isLoading ? <Skeleton className="h-4 w-12 ml-auto" /> : "95.0%"}
+                </TableCell>
               </TableRow>
             </tbody>
           </Table>

@@ -10,6 +10,7 @@ import { Table, TableHeader, TableRow, TableHead, TableCell } from "./ui/TablePr
 import { typography } from "@/design-system/typography";
 import { Badge } from "./ui/Badge";
 import { cn } from "@/lib/utils";
+import { Skeleton } from "./ui/Skeleton";
 
 interface ColumnDef {
   key: keyof VapsAttachRate | string;
@@ -23,9 +24,10 @@ interface VapsDetailTableProps {
   data: VapsAttachRate[];
   columns: ColumnDef[];
   downloadId?: string;
+  isLoading?: boolean;
 }
 
-export default function VapsDetailTable({ title, data, columns, downloadId }: VapsDetailTableProps) {
+export default function VapsDetailTable({ title, data, columns, downloadId, isLoading }: VapsDetailTableProps) {
   const [filter, setFilter] = useState("");
   const [sortConfig, setSortConfig] = useState<{ key: string; direction: 'asc' | 'desc' } | null>(null);
   const [selectedRowIdx, setSelectedRowIdx] = useState<number | null>(null);
@@ -87,7 +89,7 @@ export default function VapsDetailTable({ title, data, columns, downloadId }: Va
         <div className="flex items-center gap-4">
           <h2 className={typography.cardTitle}>{title}</h2>
           <Badge variant="outline">
-            {filteredAndSortedData.length} VAPS
+            {isLoading ? <Skeleton className="h-3 w-10" /> : `${filteredAndSortedData.length} VAPS`}
           </Badge>
         </div>
         <div className="flex items-center gap-4 w-full md:w-auto">
@@ -133,7 +135,17 @@ export default function VapsDetailTable({ title, data, columns, downloadId }: Va
           </TableRow>
         </TableHeader>
         <tbody className="divide-y divide-slate-100">
-          {filteredAndSortedData.map((row, idx) => (
+          {isLoading ? (
+             Array.from({ length: 10 }).map((_, i) => (
+              <TableRow key={i}>
+                {columns.map((_, j) => (
+                  <TableCell key={j}>
+                    <Skeleton className="h-4 w-full" />
+                  </TableCell>
+                ))}
+              </TableRow>
+            ))
+          ) : filteredAndSortedData.map((row, idx) => (
             <TableRow key={idx} isHighlighted={selectedRowIdx === idx}>
               {columns.map(col => {
                 const val = (row as any)[col.key];

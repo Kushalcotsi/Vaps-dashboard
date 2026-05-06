@@ -15,17 +15,18 @@ import VapsDetailTable from "@/components/VapsDetailTable"
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs"
 import { DashboardLayout } from "@/components/layout/DashboardLayout"
 import { PageContainer } from "@/components/layout/PageContainer"
-import { typography } from "@/design-system/typography"
 import { spacing } from "@/design-system/spacing"
 import { cn } from "@/lib/utils"
+import { Loader2 } from "lucide-react"
 
 export default function DashboardPage() {
   const { selectedUnit, selectedSource, selectedGroup, searchQuery } = useDashboardStore()
 
-  const { data, isLoading, error } = useQuery({
+  const { data, isLoading, isFetching, error } = useQuery({
     queryKey: ["dashboard", selectedUnit],
     queryFn: () => fetchDashboardData(selectedUnit),
     enabled: !!selectedUnit,
+    staleTime: 30000, // Keep data fresh for 30s
   })
 
   const matchesSearch = (r: any) => {
@@ -56,7 +57,6 @@ export default function DashboardPage() {
     return result;
   }, [data, selectedSource, selectedGroup, searchQuery]);
 
-  // Column Definitions for Detail Tables (EXACT PARITY)
   const detailColumns = {
     unit: [
       { key: "vaps", label: "VAPS" },
@@ -92,19 +92,36 @@ export default function DashboardPage() {
   const [segmentTab, setSegmentTab] = useState("Market");
   const [rawTab, setRawTab] = useState("Unit");
 
-  if (isLoading) return <div className={cn("flex items-center justify-center min-h-screen", typography.label)}>Loading Analytical Intelligence...</div>;
-  if (error) return <div className={cn("flex items-center justify-center min-h-screen text-rose-500", typography.label)}>Connection Error</div>;
+  // Show a "Processing" indicator for background fetches
+  const isSoftLoading = isFetching && !isLoading;
 
   return (
     <DashboardLayout>
       <PageContainer className={spacing.section}>
         
         {/* Persistent Control Plane */}
-        <DashboardHeader />
-        {data?.summary && <UnitSummaryCard summary={{ ...data.summary, uniqueVapsCount: data.unitRows.length }} />}
+        <div className="relative">
+           <DashboardHeader />
+           {isSoftLoading && (
+             <div className="absolute top-0 right-0 flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest text-primary animate-pulse bg-white/80 px-3 py-1 rounded-full border border-blue-100 shadow-sm z-50">
+               <Loader2 size={12} className="animate-spin" />
+               Refreshing Intelligence...
+             </div>
+           )}
+        </div>
+
+        <UnitSummaryCard 
+          isLoading={isLoading}
+          summary={data?.summary ? { ...data.summary, uniqueVapsCount: data.unitRows.length } : null} 
+        />
 
         {/* Workspace Navigation */}
-        <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6 mt-8">
+        <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6 mt-8 relative overflow-hidden">
+          {/* Content Loading Overlay (Soft) */}
+          {isSoftLoading && (
+            <div className="absolute inset-0 bg-slate-50/10 backdrop-blur-[1px] z-10 transition-all duration-300 pointer-events-none" />
+          )}
+
           <Tabs>
             <TabsList>
               <TabsTrigger active={activeTab === "overview"} onClick={() => setActiveTab("overview")}>Executive Overview</TabsTrigger>
@@ -117,17 +134,27 @@ export default function DashboardPage() {
             <TabsContent active={activeTab === "overview"}>
               <div className="space-y-8 mt-4">
                 <div className="grid grid-cols-1 xl:grid-cols-2 gap-8">
-                  <DistributionBars title="Top 5 Recommended VAPS Attach Rates" data={filteredUnitRows.filter(r => r.coveredByRecommendationLogic).sort((a,b)=>b.attachRate-a.attachRate).slice(0,5)} cutoff={data?.summary?.cutoff || 0} />
-                  <DistributionBars title="Top 5 Missed Opportunity Rate" data={filteredUnitRows.filter(r => !r.coveredByRecommendationLogic && r.attachRate >= (data?.summary?.cutoff || 0)).sort((a,b)=>b.attachRate-a.attachRate).slice(0,5)} cutoff={data?.summary?.cutoff || 0} />
+                  <DistributionBars 
+                    isLoading={isLoading}
+                    title="Top 5 Recommended VAPS Attach Rates" 
+                    data={filteredUnitRows.filter(r => r.coveredByRecommendationLogic).sort((a,b)=>b.attachRate-a.attachRate).slice(0,5)} 
+                    cutoff={data?.summary?.cutoff || 0} 
+                  />
+                  <DistributionBars 
+                    isLoading={isLoading}
+                    title="Top 5 Missed Opportunity Rate" 
+                    data={filteredUnitRows.filter(r => !r.coveredByRecommendationLogic && r.attachRate >= (data?.summary?.cutoff || 0)).sort((a,b)=>b.attachRate-a.attachRate).slice(0,5)} 
+                    cutoff={data?.summary?.cutoff || 0} 
+                  />
                 </div>
-                <ElbowChart data={filteredUnitRows} cutoff={data?.summary?.cutoff || 0.05} />
+                <ElbowChart isLoading={isLoading} data={filteredUnitRows} cutoff={data?.summary?.cutoff || 0.05} />
               </div>
             </TabsContent>
 
             {/* Tab 2: Recommendation Engine */}
             <TabsContent active={activeTab === "recommendation"}>
               <div className="mt-4">
-                <RecommendationTable data={filteredUnitRows} />
+                <RecommendationTable isLoading={isLoading} data={filteredUnitRows} />
               </div>
             </TabsContent>
 
@@ -135,7 +162,7 @@ export default function DashboardPage() {
             <TabsContent active={activeTab === "segments"}>
               <div className="mt-4 flex flex-col gap-6">
                 <div className="flex items-center gap-2 border-b border-slate-100 pb-2">
-                  {Object.keys(filteredSegments).map(name => (
+                  {["Market", "Division", "Region"].map(name => (
                     <button 
                       key={name}
                       onClick={() => setSegmentTab(name)}
@@ -152,17 +179,18 @@ export default function DashboardPage() {
                   </button>
                 </div>
 
-                {segmentTab !== "Industry" && filteredSegments[segmentTab] && (
+                {segmentTab !== "Industry" && (
                   <HeatmapTable 
+                    isLoading={isLoading}
                     title={`${segmentTab} Segment Heatmap`} 
-                    data={filteredSegments[segmentTab]} 
+                    data={filteredSegments[segmentTab] || []} 
                     segmentName={segmentTab.toLowerCase()}
                     cutoff={data?.summary?.cutoff || 0.05}
                   />
                 )}
                 
-                {segmentTab === "Industry" && data?.segments["Market"] && (
-                  <IndustryAnalysisTable marketRows={filteredSegments["Market"]} />
+                {segmentTab === "Industry" && (
+                  <IndustryAnalysisTable isLoading={isLoading} marketRows={filteredSegments["Market"] || []} />
                 )}
               </div>
             </TabsContent>
@@ -177,7 +205,7 @@ export default function DashboardPage() {
                   >
                     Unit Level
                   </button>
-                  {Object.keys(filteredSegments).map(name => (
+                  {["Market", "Division", "Region"].map(name => (
                     <button 
                       key={name}
                       onClick={() => setRawTab(name)}
@@ -190,16 +218,18 @@ export default function DashboardPage() {
 
                 {rawTab === "Unit" && (
                   <VapsDetailTable 
+                    isLoading={isLoading}
                     title="Unit-Level VAPS Detail" 
                     data={filteredUnitRows} 
                     columns={detailColumns.unit} 
                   />
                 )}
 
-                {rawTab !== "Unit" && filteredSegments[rawTab] && (
+                {rawTab !== "Unit" && (
                   <VapsDetailTable 
+                    isLoading={isLoading}
                     title={`${rawTab} Segment VAPS Detail`} 
-                    data={filteredSegments[rawTab]} 
+                    data={filteredSegments[rawTab] || []} 
                     columns={detailColumns.segment(rawTab.toLowerCase())} 
                   />
                 )}

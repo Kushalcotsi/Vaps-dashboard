@@ -5,15 +5,17 @@ import { cn } from "@/lib/utils"
 import { Card, CardHeader, CardContent } from "./ui/Card"
 import { Badge } from "./ui/Badge"
 import { typography } from "@/design-system/typography"
+import { Skeleton } from "./ui/Skeleton"
 
 interface DistributionBarsProps {
   title: string;
   data: VapsAttachRate[];
   cutoff: number;
   subtitle?: string;
+  isLoading?: boolean;
 }
 
-export default function DistributionBars({ title, data, cutoff, subtitle }: DistributionBarsProps) {
+export default function DistributionBars({ title, data, cutoff, subtitle, isLoading }: DistributionBarsProps) {
   const getTooltip = (row: VapsAttachRate) => {
     return [
       `Decision: ${row.decision}`,
@@ -34,12 +36,28 @@ export default function DistributionBars({ title, data, cutoff, subtitle }: Dist
           {subtitle && <span className={typography.label}>{subtitle}</span>}
         </div>
         <Badge variant="outline">
-          Cutoff: {(cutoff * 100).toFixed(1)}%
+          {isLoading ? <Skeleton className="h-3 w-16" /> : `Cutoff: ${(cutoff * 100).toFixed(1)}%`}
         </Badge>
       </CardHeader>
       
       <CardContent className="flex flex-col gap-6">
-        {data.length === 0 ? (
+        {isLoading ? (
+          Array.from({ length: 5 }).map((_, i) => (
+            <div key={i} className="flex flex-col gap-2">
+              <div className="flex justify-between items-end">
+                <div className="flex flex-col gap-1">
+                  <Skeleton className="h-4 w-48" />
+                  <Skeleton className="h-3 w-32" />
+                </div>
+                <div className="flex flex-col items-end gap-1">
+                  <Skeleton className="h-4 w-12" />
+                  <Skeleton className="h-2 w-16" />
+                </div>
+              </div>
+              <Skeleton className="h-2 w-full rounded-full" />
+            </div>
+          ))
+        ) : data.length === 0 ? (
           <div className="py-12 text-center flex flex-col items-center gap-2">
             <p className="text-slate-400 text-sm font-medium italic">No missed opportunities match the current filters.</p>
           </div>
