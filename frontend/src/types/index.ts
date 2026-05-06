@@ -23,24 +23,29 @@ export interface VapsAttachRate {
   division?: string;
   region?: string;
   // Enriched fields from backend
-  decision: string;
-  decisionReason: string;
-  elbowCutoff: number;
-  recommendationKind: string;
-  recommendationValue: string;
-  coveredText: string;
-  industrySignal: string;
-  industrySignalReason: string;
-  leverage: number;
-  opportunityScore: number;
-  unitAttachRate: number;
-  unitCutoff: number;
+  decision?: string;
+  decisionReason?: string;
+  elbowCutoff?: number;
+  industrySignal?: string;
+  industrySignalReason?: string;
+  leverage?: number | null;
+  opportunityScore?: number;
+  unitAttachRate?: number;
+  recommendationValue?: string;
+  recommendationKind?: string;
+  coveredText?: string;
+  elbowCutoff?: number;
+  cutoffStatus?: string;
 }
 
 export interface DashboardData {
   unitRows: VapsAttachRate[];
+  segments: Record<string, VapsAttachRate[]>;
   marketRows: VapsAttachRate[];
-  divisionRows: VapsAttachRate[];
-  regionRows: VapsAttachRate[];
-  cutoff: number;
+  summary: {
+    totalActivations: number;
+    totalAssociated: number;
+    unitAttachRate: number;
+    cutoff: number;
+  };
 }

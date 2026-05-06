@@ -1,5 +1,5 @@
 from pydantic import BaseModel
-from typing import List, Optional
+from typing import List, Optional, Dict
 
 class VapsAttachRate(BaseModel):
     unit: str
@@ -20,6 +20,20 @@ class VapsAttachRate(BaseModel):
     market: Optional[str] = ""
     division: Optional[str] = ""
     region: Optional[str] = ""
+    # Enrichment fields for parity
+    decision: Optional[str] = ""
+    decisionReason: Optional[str] = ""
+    elbowCutoff: Optional[float] = 0.0
+    cutoffStatus: Optional[str] = ""
+    coveredText: Optional[str] = ""
+    unitAttachRate: Optional[float] = 0.0
+    unitCutoff: Optional[float] = 0.0
+    industrySignal: Optional[str] = ""
+    industrySignalReason: Optional[str] = ""
+    opportunityScore: Optional[float] = 0.0
+    leverage: Optional[float] = None
+    recommendationValue: Optional[str] = ""
+    recommendationKind: Optional[str] = ""
 
 class RecommendationEntry(BaseModel):
     unit: str
@@ -32,7 +46,5 @@ class RecommendationEntry(BaseModel):
 
 class DashboardData(BaseModel):
     unitRows: List[VapsAttachRate]
-    marketRows: List[VapsAttachRate]
-    divisionRows: List[VapsAttachRate]
-    regionRows: List[VapsAttachRate]
-    recommendationRows: List[RecommendationEntry]
+    segments: Dict[str, List[VapsAttachRate]]
+    summary: Dict[str, float]

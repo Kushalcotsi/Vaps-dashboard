@@ -4,10 +4,15 @@ import { useMemo } from "react"
 import { useQuery } from "@tanstack/react-query"
 import { fetchUnits, fetchDashboardData, fetchMetadata } from "@/lib/api"
 import { useDashboardStore } from "@/store/useDashboardStore"
-import { Filter } from "lucide-react"
+import { Filter, Search } from "lucide-react"
 
 export default function DashboardHeader() {
-  const { selectedUnit, setSelectedUnit, selectedSource, setSelectedSource, selectedGroup, setSelectedGroup } = useDashboardStore()
+  const { 
+    selectedUnit, setSelectedUnit, 
+    selectedSource, setSelectedSource, 
+    selectedGroup, setSelectedGroup,
+    searchQuery, setSearchQuery
+  } = useDashboardStore()
   
   const { data: units } = useQuery({
     queryKey: ["units"],
@@ -81,6 +86,20 @@ export default function DashboardHeader() {
               <option key={group} value={group}>{group}</option>
             ))}
           </select>
+        </div>
+
+        <div className="flex flex-col gap-2 flex-1">
+          <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Search VAPS</label>
+          <div className="relative group">
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-teal-500 transition-colors" size={16} />
+            <input 
+              type="text"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="Search description or code..."
+              className="w-full bg-slate-50 border border-slate-200 rounded-xl pl-12 pr-4 py-2.5 text-sm font-semibold focus:outline-none focus:ring-4 focus:ring-teal-500/10 focus:border-teal-500 transition-all"
+            />
+          </div>
         </div>
       </div>
     </header>

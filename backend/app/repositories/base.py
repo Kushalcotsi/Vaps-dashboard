@@ -20,5 +20,9 @@ class BaseRepository(ABC):
         pass
 
     @abstractmethod
+    def get_all_segments_data(self) -> Dict[str, List[VapsAttachRate]]:
+        pass
+
+    @abstractmethod
     def get_recommendation_entries(self) -> Dict[Tuple[str, str], RecommendationEntry]:
         pass

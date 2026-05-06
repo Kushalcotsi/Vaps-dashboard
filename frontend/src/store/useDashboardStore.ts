@@ -7,6 +7,8 @@ interface DashboardState {
   setSelectedUnit: (unit: string) => void;
   setSelectedSource: (source: string) => void;
   setSelectedGroup: (group: string) => void;
+  searchQuery: string;
+  setSearchQuery: (query: string) => void;
 }
 
 export const useDashboardStore = create<DashboardState>((set) => ({
@@ -16,4 +18,6 @@ export const useDashboardStore = create<DashboardState>((set) => ({
   setSelectedUnit: (unit) => set({ selectedUnit: unit }),
   setSelectedSource: (source) => set({ selectedSource: source }),
   setSelectedGroup: (group) => set({ selectedGroup: group }),
+  searchQuery: '',
+  setSearchQuery: (query) => set({ searchQuery: query }),
 }))

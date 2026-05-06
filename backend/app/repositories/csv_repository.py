@@ -56,7 +56,6 @@ class CSVRepository(BaseRepository):
         ws = wb.active
         entries = {}
 
-        # Logic adapted from references/generate_analytical_dashboard.py
         header_row = None
         unit_col = None
         for row in ws.iter_rows():
@@ -98,40 +97,71 @@ class CSVRepository(BaseRepository):
                 )
         return entries
 
-    def _load_csv_rows(self, filename: str, segment_column: Optional[str] = None, segment_key: Optional[str] = None) -> List[VapsAttachRate]:
+    def get_all_segments_data(self) -> Dict[str, List[VapsAttachRate]]:
+        """
+        Dynamically load all predefined segments for parity.
+        """
+        segment_files = {
+            "Market": "unit_market_segment_vaps_attach_rate.csv",
+            "Division": "attach_rate_unit_division.csv",
+            "Region": "attach_rate_unit_region.csv"
+        }
+        
+        segments = {}
+        for name, filename in segment_files.items():
+            segments[name] = self._load_csv_rows(filename, segment_key=name.lower())
+        return segments
+
+    def _load_csv_rows(self, filename: str, segment_key: Optional[str] = None) -> List[VapsAttachRate]:
         path = os.path.join(self.data_dir, filename)
         if not os.path.exists(path):
             return []
         
         df = pd.read_csv(path)
         rows = []
+        
+        # Column mappings differ across files in the reference folder
         for _, source_row in df.iterrows():
-            vaps_code = self._text(source_row.get("vaps_code"))
-            unit_code = self._text(source_row.get("unit_code"))
+            vaps_code = self._text(source_row.get("vaps_item_id") or source_row.get("vaps_code"))
+            unit_code = self._text(source_row.get("UNIT_PRODUCTCODE_SF") or source_row.get("unit_code"))
+            
             if not vaps_code or not unit_code:
                 continue
-            
+                
             rec = self.recommendations.get((unit_code, vaps_code))
             
+            # Map segment column based on the segment type
+            market = ""
+            division = ""
+            region = ""
+            
+            if segment_key == "market":
+                market = self._text(source_row.get("MARKET_SEGMENT_DESCRIPTION") or source_row.get("market"))
+            elif segment_key == "division":
+                division = self._text(source_row.get("division"))
+            elif segment_key == "region":
+                region = self._text(source_row.get("region"))
+                division = self._text(source_row.get("division")) # Regions file often has parent division
+
             rows.append(VapsAttachRate(
                 unit=unit_code,
                 vaps=vaps_code,
-                vapsDesc=self._text(source_row.get("VAPS_DESCRIPTION")),
-                activations=int(self._number(source_row.get("Unit_Activations"))),
-                associated=int(self._number(source_row.get("Vaps_Associated_With_Unit"))),
-                attachRate=self._number(source_row.get("Vaps_Attach_Rate")) / 100,
-                unitName=self._text(source_row.get("UNIT_PRODUCTNAME_SF")),
-                unitDescription=self._text(source_row.get("UNIT_DESCRIPTION")),
-                unitL2=self._text(source_row.get("UNIT_L2_CORE_SOLUTION")),
-                unitL3=self._text(source_row.get("UNIT_L3_PRODUCTS")),
-                mainGroup=self._text(source_row.get("VAPS_MAIN_GROUP")) or "Unmapped",
-                detailedGroup=self._text(source_row.get("VAPS_DETAILED_GROUP")) or "Unmapped",
-                tier=self._text(source_row.get("VAPS_PACKAGE_TIER")) or "Unmapped",
-                source=self._text(source_row.get("VAPS_SOURCE")) or "Unmapped",
+                vapsDesc=self._text(source_row.get("VAPS_DESCRIPTION") or source_row.get("vaps_desc") or (rec.vapsDesc if rec else "")),
+                activations=int(self._number(source_row.get("Unit_Activations") or source_row.get("unit_baskets_2024_26") or source_row.get("unit_baskets_2024"))),
+                associated=int(self._number(source_row.get("Vaps_Associated_With_Unit") or source_row.get("vaps_baskets_2024_26") or source_row.get("vaps_baskets_2024"))),
+                attachRate=self._number(source_row.get("Vaps_Attach_Rate") or source_row.get("attach_rate_2024_26") or source_row.get("attach_rate_2024")) / (100 if "Vaps_Attach_Rate" in source_row else 1),
+                unitName=self._text(source_row.get("UNIT_PRODUCTNAME_SF") or (rec.unitName if rec else "")),
+                unitDescription=self._text(source_row.get("UNIT_DESCRIPTION") or (rec.unitDescription if rec else "")),
+                unitL2=self._text(source_row.get("UNIT_L2_CORE_SOLUTION") or (rec.unitL2 if rec else "")),
+                unitL3=self._text(source_row.get("UNIT_L3_PRODUCTS") or (rec.unitL3 if rec else "")),
+                mainGroup=self._text(source_row.get("VAPS_MAIN_GROUP") or source_row.get("vaps_main_group")) or "Unmapped",
+                detailedGroup=self._text(source_row.get("VAPS_DETAILED_GROUP") or source_row.get("vaps_detailed_group")) or "Unmapped",
+                tier=self._text(source_row.get("VAPS_PACKAGE_TIER") or source_row.get("vaps_package_tier")) or "Unmapped",
+                source=self._text(source_row.get("VAPS_SOURCE") or source_row.get("vaps_source")) or "Unmapped",
                 coveredByRecommendationLogic=rec.coveredByRecommendationLogic if rec else False,
-                market=self._text(source_row.get(segment_column)) if segment_key == "market" else "",
-                division=self._text(source_row.get("division")) if segment_key == "region" else (self._text(source_row.get(segment_column)) if segment_key == "division" else ""),
-                region=self._text(source_row.get(segment_column)) if segment_key == "region" else ""
+                market=market,
+                division=division,
+                region=region
             ))
         return rows
 
@@ -139,13 +169,13 @@ class CSVRepository(BaseRepository):
         return self._load_csv_rows("unit_segment_vaps_attach_rate.csv")
 
     def get_market_attach_rates(self) -> List[VapsAttachRate]:
-        return self._load_csv_rows("unit_market_segment_vaps_attach_rate.csv", "MARKET_SEGMENT_DESCRIPTION", "market")
+        return self._load_csv_rows("unit_market_segment_vaps_attach_rate.csv", "market")
 
     def get_division_attach_rates(self) -> List[VapsAttachRate]:
-        return self._load_csv_rows("attach_rate_unit_division.csv", "division", "division")
+        return self._load_csv_rows("attach_rate_unit_division.csv", "division")
 
     def get_region_attach_rates(self) -> List[VapsAttachRate]:
-        return self._load_csv_rows("attach_rate_unit_region.csv", "region", "region")
+        return self._load_csv_rows("attach_rate_unit_region.csv", "region")
 
     def get_recommendation_entries(self) -> Dict[Tuple[str, str], RecommendationEntry]:
         return self.recommendations
