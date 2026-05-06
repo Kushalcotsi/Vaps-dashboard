@@ -18,6 +18,7 @@ export const metadata: Metadata = {
 };
 
 import Providers from "./providers";
+import { GlobalHeader } from "@/components/GlobalHeader";
 
 export default function RootLayout({
   children,
@@ -29,9 +30,12 @@ export default function RootLayout({
       lang="en"
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col">
+      <body className="min-h-full flex flex-col bg-slate-50 text-slate-900 font-sans selection:bg-blue-100">
+        <GlobalHeader />
         <Providers>
-          {children}
+          <main className="flex-1">
+            {children}
+          </main>
         </Providers>
       </body>
     </html>

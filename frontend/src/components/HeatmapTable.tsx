@@ -2,7 +2,7 @@
 
 import React, { useMemo, useState } from 'react';
 import { VapsAttachRate } from "@/types";
-import { Info } from "lucide-react";
+import { Info, Search, Download } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface HeatmapTableProps {
@@ -57,47 +57,49 @@ export default function HeatmapTable({ title, data, segmentName, cutoff }: Heatm
 
   return (
     <div className="bg-white border border-slate-200 rounded-xl overflow-hidden shadow-sm">
-      <div className="p-4 bg-slate-50 border-b border-slate-200 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+      <div className="p-4 bg-slate-50/50 border-b border-slate-200 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div className="flex items-center gap-2">
-          <h2 className="text-sm font-black text-slate-800 uppercase tracking-tight">{title}</h2>
+          <h2 className="text-sm font-bold text-slate-900 uppercase tracking-tight">{title}</h2>
           <Info size={14} className="text-slate-400 cursor-help" />
         </div>
-        <div className="flex items-center gap-4">
-          <div className="relative group">
+        <div className="flex items-center gap-4 w-full md:w-auto">
+          <div className="relative flex-1 md:flex-initial">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={14} />
             <input 
               value={filter}
               onChange={e => setFilter(e.target.value)}
               placeholder="FILTER VAPS ID"
-              className="bg-white border border-slate-200 rounded-md px-3 py-1.5 text-[11px] font-bold uppercase tracking-widest focus:outline-none focus:ring-2 focus:ring-blue-500/20 w-48"
+              className="bg-white border border-slate-200 rounded-md pl-9 pr-4 py-1.5 text-[11px] font-bold uppercase tracking-widest focus:outline-none focus:ring-2 focus:ring-blue-500/20 w-full md:w-48"
             />
           </div>
-          <button className="px-3 py-1.5 bg-white border border-slate-200 rounded-md text-[11px] font-bold text-slate-600 hover:bg-slate-50 transition-colors uppercase tracking-widest">
+          <button className="px-3 py-1.5 bg-white border border-slate-200 rounded-md text-[11px] font-bold text-slate-600 hover:bg-slate-50 transition-colors uppercase tracking-widest flex items-center gap-2">
+            <Download size={12} />
             Download CSV
           </button>
         </div>
       </div>
 
-      <div className="overflow-x-auto overflow-y-auto max-h-[600px]">
-        <table className="w-full border-collapse table-fixed min-w-[1200px]">
-          <thead className="bg-slate-50 sticky top-0 z-20">
-            <tr className="border-b border-slate-200">
-              <th className="sticky left-0 z-30 bg-slate-50 border-r border-slate-200 px-4 py-3 text-left text-[10px] font-black text-slate-500 uppercase tracking-widest w-[280px]">
-                VAPS <span className="text-[9px] font-bold text-slate-300 ml-1">SORT</span>
+      <div className="overflow-auto max-h-[600px] relative">
+        <table className="w-full border-separate border-spacing-0 table-fixed min-w-[1200px]">
+          <thead className="sticky top-0 z-20">
+            <tr>
+              <th className="sticky left-0 z-30 bg-slate-50 border-b border-r border-slate-200 px-4 py-3 text-left text-[10px] font-bold text-slate-500 uppercase tracking-widest w-[280px]">
+                VAPS ID & Description
               </th>
               {pivoted.columns.map(col => (
-                <th key={col} className="px-2 py-3 text-center text-[10px] font-black text-slate-500 uppercase tracking-widest min-w-[140px] border-r border-slate-200 last:border-r-0 leading-tight">
-                  {col} <span className="block text-[8px] font-bold text-slate-300 mt-0.5 tracking-tighter">SORT</span>
+                <th key={col} className="px-2 py-3 text-center text-[10px] font-bold text-slate-500 uppercase tracking-widest min-w-[140px] border-b border-r border-slate-200 last:border-r-0 bg-slate-50 leading-tight">
+                  {col}
                 </th>
               ))}
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-100">
             {filteredRows.map(([vaps, row]) => (
-              <tr key={vaps} className="hover:bg-slate-50 transition-colors group">
-                <td className="sticky left-0 z-10 bg-white group-hover:bg-slate-50 border-r border-slate-200 px-4 py-3 transition-colors">
+              <tr key={vaps} className="hover:bg-slate-50/50 transition-colors group">
+                <td className="sticky left-0 z-10 bg-white group-hover:bg-slate-50/80 border-r border-slate-200 px-4 py-3 transition-colors shadow-[2px_0_5px_-2px_rgba(0,0,0,0.05)]">
                   <div className="flex flex-col">
-                    <span className="text-[11px] font-black text-slate-800 leading-tight uppercase">{vaps}</span>
-                    <span className="text-[10px] font-bold text-slate-500 mt-0.5 line-clamp-1">{row.desc}</span>
+                    <span className="text-[11px] font-bold text-slate-800 leading-tight uppercase tabular-nums">{vaps}</span>
+                    <span className="text-[10px] font-medium text-slate-500 mt-1 line-clamp-1">{row.desc}</span>
                   </div>
                 </td>
                 {pivoted.columns.map(col => {
@@ -107,17 +109,17 @@ export default function HeatmapTable({ title, data, segmentName, cutoff }: Heatm
                     <td 
                       key={col} 
                       className={cn(
-                        "p-0 border-r border-slate-200 last:border-r-0 transition-all duration-300",
+                        "p-0 border-r border-slate-100 last:border-r-0 transition-all duration-200",
                         style.bg
                       )}
                     >
                       {cell && (
-                        <div className="w-full h-[64px] flex flex-col items-center justify-center gap-0.5 group/cell">
-                          <span className={cn("text-[11px] font-black tabular-nums", style.text)}>
+                        <div className="w-full h-[54px] flex flex-col items-center justify-center gap-0.5 group/cell">
+                          <span className={cn("text-[11px] font-bold tabular-nums", style.text)}>
                             {fmtPct(cell.attachRate)}
                           </span>
-                          <span className={cn("text-[9px] font-bold uppercase tracking-tighter", style.text)}>
-                            {cell.industrySignal === "No Signal" ? "No Signal" : cell.industrySignal}
+                          <span className={cn("text-[8px] font-bold uppercase tracking-wider text-center px-2", style.text)}>
+                            {cell.industrySignal === "No Signal" ? "" : cell.industrySignal}
                           </span>
                         </div>
                       )}

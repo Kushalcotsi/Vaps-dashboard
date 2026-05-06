@@ -1,6 +1,6 @@
 "use client"
 
-import { useMemo } from "react"
+import { useMemo, useState } from "react"
 import { useQuery } from "@tanstack/react-query"
 import { fetchDashboardData } from "@/lib/api"
 import { useDashboardStore } from "@/store/useDashboardStore"
@@ -12,6 +12,7 @@ import HeatmapTable from "@/components/HeatmapTable"
 import UnitSummaryCard from "@/components/UnitSummaryCard"
 import IndustryAnalysisTable from "@/components/IndustryAnalysisTable"
 import VapsDetailTable from "@/components/VapsDetailTable"
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs"
 
 export default function DashboardPage() {
   const { selectedUnit, selectedSource, selectedGroup, searchQuery } = useDashboardStore()
@@ -82,78 +83,126 @@ export default function DashboardPage() {
     ]
   };
 
-  if (isLoading) return <div className="p-10 text-slate-400 font-black uppercase tracking-widest text-xs">Loading Analytical Intelligence...</div>;
-  if (error) return <div className="p-10 text-rose-500 font-black">Connection Error</div>;
+  const [activeTab, setActiveTab] = useState("overview");
+  const [segmentTab, setSegmentTab] = useState("Market");
+  const [rawTab, setRawTab] = useState("Unit");
+
+  if (isLoading) return <div className="p-10 text-slate-400 font-bold uppercase tracking-widest text-xs flex items-center justify-center min-h-screen">Loading Analytical Intelligence...</div>;
+  if (error) return <div className="p-10 text-rose-500 font-bold flex items-center justify-center min-h-screen">Connection Error</div>;
 
   return (
     <div className="min-h-screen bg-[#f8fafc] text-slate-900 font-sans selection:bg-teal-100">
-      <div className="max-w-[1600px] mx-auto p-4 md:p-10 space-y-12">
+      <div className="max-w-[1600px] mx-auto p-4 md:p-10 space-y-8">
         
+        {/* Persistent Control Plane */}
         <DashboardHeader />
         {data?.summary && <UnitSummaryCard summary={data.summary} />}
 
-        <div className="grid grid-cols-1 xl:grid-cols-2 gap-8">
-          <DistributionBars title="Top 5 Recommended VAPS Attach Rates" data={filteredUnitRows.filter(r => r.coveredByRecommendationLogic).sort((a,b)=>b.attachRate-a.attachRate).slice(0,5)} cutoff={data?.summary?.cutoff || 0} />
-          <DistributionBars title="Top 5 Missed Opportunity Rate" data={filteredUnitRows.filter(r => !r.coveredByRecommendationLogic && r.attachRate >= (data?.summary?.cutoff || 0)).sort((a,b)=>b.attachRate-a.attachRate).slice(0,5)} cutoff={data?.summary?.cutoff || 0} />
+        {/* Workspace Navigation */}
+        <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6 mt-8">
+          <Tabs>
+            <TabsList>
+              <TabsTrigger active={activeTab === "overview"} onClick={() => setActiveTab("overview")}>Executive Overview</TabsTrigger>
+              <TabsTrigger active={activeTab === "recommendation"} onClick={() => setActiveTab("recommendation")}>Recommendation Engine</TabsTrigger>
+              <TabsTrigger active={activeTab === "segments"} onClick={() => setActiveTab("segments")}>Segment Intelligence</TabsTrigger>
+              <TabsTrigger active={activeTab === "raw"} onClick={() => setActiveTab("raw")}>Raw VAPS Detail</TabsTrigger>
+            </TabsList>
+
+            {/* Tab 1: Overview */}
+            <TabsContent active={activeTab === "overview"}>
+              <div className="space-y-8 mt-4">
+                <div className="grid grid-cols-1 xl:grid-cols-2 gap-8">
+                  <DistributionBars title="Top 5 Recommended VAPS Attach Rates" data={filteredUnitRows.filter(r => r.coveredByRecommendationLogic).sort((a,b)=>b.attachRate-a.attachRate).slice(0,5)} cutoff={data?.summary?.cutoff || 0} />
+                  <DistributionBars title="Top 5 Missed Opportunity Rate" data={filteredUnitRows.filter(r => !r.coveredByRecommendationLogic && r.attachRate >= (data?.summary?.cutoff || 0)).sort((a,b)=>b.attachRate-a.attachRate).slice(0,5)} cutoff={data?.summary?.cutoff || 0} />
+                </div>
+                <ElbowChart data={filteredUnitRows} cutoff={data?.summary?.cutoff || 0.05} />
+              </div>
+            </TabsContent>
+
+            {/* Tab 2: Recommendation Engine */}
+            <TabsContent active={activeTab === "recommendation"}>
+              <div className="mt-4">
+                <RecommendationTable data={filteredUnitRows} />
+              </div>
+            </TabsContent>
+
+            {/* Tab 3: Segment Intelligence */}
+            <TabsContent active={activeTab === "segments"}>
+              <div className="mt-4 flex flex-col gap-6">
+                <div className="flex items-center gap-2 border-b border-slate-100 pb-2">
+                  {Object.keys(filteredSegments).map(name => (
+                    <button 
+                      key={name}
+                      onClick={() => setSegmentTab(name)}
+                      className={`px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-widest transition-colors ${segmentTab === name ? 'bg-slate-800 text-white' : 'bg-slate-100 text-slate-500 hover:bg-slate-200'}`}
+                    >
+                      {name} Heatmap
+                    </button>
+                  ))}
+                  <button 
+                    onClick={() => setSegmentTab("Industry")}
+                    className={`px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-widest transition-colors ${segmentTab === "Industry" ? 'bg-slate-800 text-white' : 'bg-slate-100 text-slate-500 hover:bg-slate-200'}`}
+                  >
+                    Industry Comparison
+                  </button>
+                </div>
+
+                {segmentTab !== "Industry" && filteredSegments[segmentTab] && (
+                  <HeatmapTable 
+                    title={`${segmentTab} Segment Heatmap`} 
+                    data={filteredSegments[segmentTab]} 
+                    segmentName={segmentTab.toLowerCase()}
+                    cutoff={data?.summary?.cutoff || 0.05}
+                  />
+                )}
+                
+                {segmentTab === "Industry" && data?.segments["Market"] && (
+                  <IndustryAnalysisTable marketRows={filteredSegments["Market"]} />
+                )}
+              </div>
+            </TabsContent>
+
+            {/* Tab 4: Raw VAPS Detail */}
+            <TabsContent active={activeTab === "raw"}>
+              <div className="mt-4 flex flex-col gap-6">
+                <div className="flex items-center gap-2 border-b border-slate-100 pb-2">
+                  <button 
+                    onClick={() => setRawTab("Unit")}
+                    className={`px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-widest transition-colors ${rawTab === "Unit" ? 'bg-slate-800 text-white' : 'bg-slate-100 text-slate-500 hover:bg-slate-200'}`}
+                  >
+                    Unit Level
+                  </button>
+                  {Object.keys(filteredSegments).map(name => (
+                    <button 
+                      key={name}
+                      onClick={() => setRawTab(name)}
+                      className={`px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-widest transition-colors ${rawTab === name ? 'bg-slate-800 text-white' : 'bg-slate-100 text-slate-500 hover:bg-slate-200'}`}
+                    >
+                      {name} Segment
+                    </button>
+                  ))}
+                </div>
+
+                {rawTab === "Unit" && (
+                  <VapsDetailTable 
+                    title="Unit-Level VAPS Detail" 
+                    data={filteredUnitRows} 
+                    columns={detailColumns.unit} 
+                  />
+                )}
+
+                {rawTab !== "Unit" && filteredSegments[rawTab] && (
+                  <VapsDetailTable 
+                    title={`${rawTab} Segment VAPS Detail`} 
+                    data={filteredSegments[rawTab]} 
+                    columns={detailColumns.segment(rawTab.toLowerCase())} 
+                  />
+                )}
+              </div>
+            </TabsContent>
+            
+          </Tabs>
         </div>
-
-        <ElbowChart data={filteredUnitRows} cutoff={data?.summary?.cutoff || 0.05} />
-
-        {/* THE 9 CORE TABLES (STRICT PARITY) */}
-        
-        {/* 01. Recommendation Sheet Comparison */}
-        <RecommendationTable data={filteredUnitRows} />
-
-        {/* 02-04. Heatmaps */}
-        {Object.entries(filteredSegments).map(([name, rows]) => (
-          <HeatmapTable 
-            key={name}
-            title={`${name} Segment Heatmap`} 
-            data={rows} 
-            segmentName={name.toLowerCase()}
-            cutoff={data?.summary?.cutoff || 0.05}
-          />
-        ))}
-
-        {/* 05. Recommendation Sheet Comparison by Industry */}
-        {data?.segments["Market"] && (
-          <IndustryAnalysisTable marketRows={filteredSegments["Market"]} />
-        )}
-
-        {/* 06. Unit-Level VAPS Detail */}
-        <VapsDetailTable 
-          title="Unit-Level VAPS Detail" 
-          data={filteredUnitRows} 
-          columns={detailColumns.unit} 
-        />
-
-        {/* 07. Market Segment VAPS Detail */}
-        {filteredSegments["Market"] && (
-          <VapsDetailTable 
-            title="Market Segment VAPS Detail" 
-            data={filteredSegments["Market"]} 
-            columns={detailColumns.segment("market")} 
-          />
-        )}
-
-        {/* 08. Division VAPS Detail */}
-        {filteredSegments["Division"] && (
-          <VapsDetailTable 
-            title="Division VAPS Detail" 
-            data={filteredSegments["Division"]} 
-            columns={detailColumns.segment("division")} 
-          />
-        )}
-
-        {/* 09. Region VAPS Detail */}
-        {filteredSegments["Region"] && (
-          <VapsDetailTable 
-            title="Region VAPS Detail" 
-            data={filteredSegments["Region"]} 
-            columns={detailColumns.segment("region")} 
-          />
-        )}
-
       </div>
     </div>
   )
