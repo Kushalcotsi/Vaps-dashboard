@@ -13,7 +13,13 @@ export const fetchDashboardData = async (unitId: string): Promise<DashboardData>
   return data;
 };
 
-export const fetchMetadata = async (): Promise<{ sources: string[], groups: string[] }> => {
+export const fetchMetadata = async (): Promise<{ 
+  sources: string[], 
+  groups: string[],
+  markets: string[],
+  divisions: string[],
+  regions: string[]
+}> => {
   const { data } = await axios.get(`${API_BASE_URL}/metadata`);
   return data;
 };

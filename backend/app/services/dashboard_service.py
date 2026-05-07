@@ -219,15 +219,17 @@ class DashboardService:
                 industry_recommendation_rows.append(row_data)
 
         # 7. Summary Metrics
+        is_all = unit_id.lower() == 'all'
         first_row = unit_rows[0] if unit_rows else None
+        
         summary = {
             "cutoff": cutoff,
             "activations": max([r.activations for r in unit_rows]) if unit_rows else 0,
             "associated": sum([r.associated for r in unit_rows]),
-            "unitName": first_row.unitName if first_row else "",
-            "unitDescription": first_row.unitDescription if first_row else "",
-            "unitL2": first_row.unitL2 if first_row else "",
-            "unitL3": first_row.unitL3 if first_row else ""
+            "unitName": "Consolidated Unit Overview" if is_all else (first_row.unitName if first_row else ""),
+            "unitDescription": "Aggregated analytics across all filtered fleet units" if is_all else (first_row.unitDescription if first_row else ""),
+            "unitL2": "Multiple" if is_all else (first_row.unitL2 if first_row else ""),
+            "unitL3": "Multiple" if is_all else (first_row.unitL3 if first_row else "")
         }
 
         return {
@@ -240,7 +242,12 @@ class DashboardService:
 
     def get_metadata(self) -> Dict:
         rows = self.repo.get_unit_attach_rates()
+        segments = self.repo.get_all_segments_data()
+        
         return {
             "sources": sorted(list(set(r.source for r in rows if r.source))),
-            "groups": sorted(list(set(r.mainGroup for r in rows if r.mainGroup)))
+            "groups": sorted(list(set(r.mainGroup for r in rows if r.mainGroup))),
+            "markets": sorted(list(set(r.market for r in segments.get("Market", []) if r.market))),
+            "divisions": sorted(list(set(r.division for r in segments.get("Division", []) if r.division))),
+            "regions": sorted(list(set(r.region for r in segments.get("Region", []) if r.region)))
         }

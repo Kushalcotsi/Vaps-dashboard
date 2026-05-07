@@ -44,6 +44,13 @@ export default function UnitSummaryCard({ summary, isLoading }: UnitSummaryProps
 
   const kpis = [
     { 
+      label: "VAPS ID Count", 
+      value: summary ? fmtInt(summary.uniqueVapsCount || 0) : "---",
+      icon: Target,
+      color: "bg-slate-50 text-slate-600",
+      description: "Count of unique VAPS included in current filter"
+    },
+    { 
       label: "Max Unit Activations", 
       value: summary ? fmtInt(summary.activations) : "---",
       icon: Activity,
@@ -103,15 +110,15 @@ export default function UnitSummaryCard({ summary, isLoading }: UnitSummaryProps
       </div>
       
       <CardContent className="p-8">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-6">
           {kpis.map((kpi) => (
             <div key={kpi.label} className="group relative">
-              <div className="p-5 rounded-xl border border-slate-100 bg-white hover:shadow-xl hover:border-blue-100 transition-all duration-300">
+              <div className="p-5 rounded-xl border border-slate-100 bg-white hover:shadow-xl hover:border-blue-100 transition-all duration-300 h-full">
                 <div className="flex items-center gap-3 mb-4">
                   <div className={cn("p-2 rounded-lg", kpi.color)}>
                     <kpi.icon size={18} />
                   </div>
-                  <span className="text-[11px] font-bold text-slate-500 uppercase tracking-widest">
+                  <span className="text-[11px] font-bold text-slate-500 uppercase tracking-widest leading-tight">
                     {kpi.label}
                   </span>
                 </div>

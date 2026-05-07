@@ -1,6 +1,6 @@
 "use client"
 
-import { useMemo } from "react"
+import { useMemo, useState, useEffect } from "react"
 import {
   XAxis,
   YAxis,
@@ -24,6 +24,12 @@ interface ElbowChartProps {
 }
 
 export default function ElbowChart({ data, cutoff, isLoading }: ElbowChartProps) {
+  const [isMounted, setIsMounted] = useState(false);
+
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
+
   const chartData = useMemo(() => {
     return data
       .filter(r => r.attachRate > 0)
@@ -35,7 +41,7 @@ export default function ElbowChart({ data, cutoff, isLoading }: ElbowChartProps)
       }));
   }, [data]);
 
-  if (isLoading) {
+  if (isLoading || !isMounted) {
     return (
       <Card>
         <CardHeader>
@@ -69,7 +75,7 @@ export default function ElbowChart({ data, cutoff, isLoading }: ElbowChartProps)
         <h2 className={typography.sectionTitle}>Geometric Elbow Distribution</h2>
       </CardHeader>
       <CardContent className="h-[450px]">
-        <ResponsiveContainer width="100%" height="100%">
+        <ResponsiveContainer width="100%" height="100%" debounce={1}>
           <AreaChart data={chartData} margin={{ top: 20, right: 30, left: 20, bottom: 20 }}>
             <defs>
               <linearGradient id="colorRate" x1="0" y1="0" x2="0" y2="1">

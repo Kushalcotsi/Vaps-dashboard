@@ -20,7 +20,11 @@ import { cn } from "@/lib/utils"
 import { Loader2 } from "lucide-react"
 
 export default function DashboardPage() {
-  const { selectedUnit, selectedSource, selectedGroup, searchQuery } = useDashboardStore()
+  const { 
+    selectedUnit, selectedSource, selectedGroup, 
+    selectedMarket, selectedDivision, selectedRegion,
+    searchQuery 
+  } = useDashboardStore()
 
   const { data, isLoading, isFetching, error } = useQuery({
     queryKey: ["dashboard", selectedUnit],
@@ -40,19 +44,32 @@ export default function DashboardPage() {
     return data.unitRows.filter(r => 
       (!selectedSource || r.source === selectedSource) &&
       (!selectedGroup || r.mainGroup === selectedGroup) &&
+      (!selectedMarket || r.market === selectedMarket) &&
+      (!selectedDivision || r.division === selectedDivision) &&
+      (!selectedRegion || r.region === selectedRegion) &&
       matchesSearch(r)
     );
-  }, [data, selectedSource, selectedGroup, searchQuery]);
+  }, [data, selectedSource, selectedGroup, selectedMarket, selectedDivision, selectedRegion, searchQuery]);
 
   const filteredRecommendationRows = useMemo(() => {
     if (!data?.recommendationRows) return [];
-    return data.recommendationRows.filter(r => matchesSearch(r));
-  }, [data, searchQuery]);
+    return data.recommendationRows.filter(r => 
+      (!selectedMarket || r.market === selectedMarket) &&
+      (!selectedDivision || r.division === selectedDivision) &&
+      (!selectedRegion || r.region === selectedRegion) &&
+      matchesSearch(r)
+    );
+  }, [data, selectedMarket, selectedDivision, selectedRegion, searchQuery]);
 
   const filteredIndustryRecommendationRows = useMemo(() => {
     if (!data?.industryRecommendationRows) return [];
-    return data.industryRecommendationRows.filter(r => matchesSearch(r));
-  }, [data, searchQuery]);
+    return data.industryRecommendationRows.filter(r => 
+      (!selectedMarket || r.market === selectedMarket) &&
+      (!selectedDivision || r.division === selectedDivision) &&
+      (!selectedRegion || r.region === selectedRegion) &&
+      matchesSearch(r)
+    );
+  }, [data, selectedMarket, selectedDivision, selectedRegion, searchQuery]);
 
   const filteredSegments = useMemo(() => {
     if (!data?.segments) return {};
@@ -61,11 +78,31 @@ export default function DashboardPage() {
       result[name] = (rows as any[]).filter(r => 
         (!selectedSource || r.source === selectedSource) &&
         (!selectedGroup || r.mainGroup === selectedGroup) &&
+        (!selectedMarket || r.market === selectedMarket) &&
+        (!selectedDivision || r.division === selectedDivision) &&
+        (!selectedRegion || r.region === selectedRegion) &&
         matchesSearch(r)
       );
     });
     return result;
-  }, [data, selectedSource, selectedGroup, searchQuery]);
+  }, [data, selectedSource, selectedGroup, selectedMarket, selectedDivision, selectedRegion, searchQuery]);
+
+  const dynamicSummary = useMemo(() => {
+    if (!data?.summary) return null;
+    
+    // Dynamically calculate based on filtered dataset
+    const activations = filteredUnitRows.length > 0 
+      ? Math.max(...filteredUnitRows.map(r => r.activations)) 
+      : 0;
+    const associated = filteredUnitRows.reduce((sum, r) => sum + r.associated, 0);
+    
+    return {
+      ...data.summary,
+      activations,
+      associated,
+      uniqueVapsCount: filteredUnitRows.length
+    };
+  }, [data?.summary, filteredUnitRows]);
 
   const detailColumns = {
     unit: [
@@ -122,7 +159,7 @@ export default function DashboardPage() {
 
         <UnitSummaryCard 
           isLoading={isLoading}
-          summary={data?.summary ? { ...data.summary, uniqueVapsCount: data.unitRows.length } : null} 
+          summary={dynamicSummary} 
         />
 
         {/* Workspace Navigation */}
