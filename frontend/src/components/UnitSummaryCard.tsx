@@ -8,11 +8,14 @@ import { Skeleton } from './ui/Skeleton';
 
 interface UnitSummaryProps {
   summary: {
-    totalActivations: number;
-    totalAssociated: number;
-    unitAttachRate: number;
+    activations: number;
+    associated: number;
     cutoff: number;
     uniqueVapsCount?: number;
+    unitName: string;
+    unitDescription: string;
+    unitL2: string;
+    unitL3: string;
   } | null;
   isLoading?: boolean;
 }
@@ -21,101 +24,106 @@ export default function UnitSummaryCard({ summary, isLoading }: UnitSummaryProps
   const fmtInt = (val: number) => val.toLocaleString();
   const fmtPct = (val: number) => `${(val * 100).toFixed(1)}%`;
 
+  if (isLoading) {
+    return (
+      <Card>
+        <CardContent className="py-8">
+          <div className="flex flex-col gap-6">
+            <Skeleton className="h-10 w-1/3" />
+            <Skeleton className="h-6 w-2/3" />
+            <div className="grid grid-cols-4 gap-6 mt-4">
+              {Array.from({ length: 4 }).map((_, i) => <Skeleton key={i} className="h-24 w-full" />)}
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  const unitAttachRate = summary && summary.activations > 0 ? summary.associated / summary.activations : 0;
+
   const kpis = [
     { 
-      label: "Total Activations", 
-      value: summary ? fmtInt(summary.totalActivations) : "---",
+      label: "Max Unit Activations", 
+      value: summary ? fmtInt(summary.activations) : "---",
       icon: Activity,
       color: "bg-blue-50 text-blue-600",
-      description: "Total unit activations observed in data"
+      description: "Highest activation count observed for this unit"
     },
     { 
-      label: "Total Associated", 
-      value: summary ? fmtInt(summary.totalAssociated) : "---",
+      label: "Total VAPS Associated", 
+      value: summary ? fmtInt(summary.associated) : "---",
       icon: CheckCircle2,
       color: "bg-emerald-50 text-emerald-600",
-      description: "Total number of VAPS sold with this unit"
+      description: "Sum of all VAPS associated with this unit"
     },
     { 
       label: "Unit Attach Rate", 
-      value: summary ? fmtPct(summary.unitAttachRate) : "---",
+      value: summary ? fmtPct(unitAttachRate) : "---",
       icon: TrendingUp,
       color: "bg-indigo-50 text-indigo-600",
-      description: "Aggregated baseline attachment performance"
+      description: "Aggregated baseline performance (Associated / Activations)"
     },
     { 
-      label: "Unit Cutoff", 
+      label: "Unit Cutoff Benchmark", 
       value: summary ? fmtPct(summary.cutoff) : "---",
       icon: Target,
       color: "bg-orange-50 text-orange-600",
-      description: "Geometric elbow point for recommendations"
+      description: "Geometric elbow point for this specific unit"
     }
   ];
 
   return (
-    <Card>
-      <CardHeader>
-        <h2 className={typography.cardTitle}>Unit Summary Analysis</h2>
-      </CardHeader>
+    <Card className="overflow-hidden">
+      <div className="bg-gradient-to-r from-slate-900 to-slate-800 p-8 text-white">
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
+          <div className="space-y-2">
+            <div className="flex items-center gap-2">
+              <span className="px-2 py-0.5 bg-blue-500/20 text-blue-400 text-[10px] font-black uppercase tracking-widest rounded border border-blue-500/30">Target Unit</span>
+              <h1 className="text-3xl font-bold tracking-tight">{summary?.unitName || "---"}</h1>
+            </div>
+            <p className="text-slate-400 font-medium max-w-2xl">{summary?.unitDescription || "Unit description not available"}</p>
+            <div className="flex flex-wrap gap-x-6 gap-y-2 pt-2">
+              <div className="flex items-center gap-2">
+                <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Solution L2</span>
+                <span className="text-xs font-semibold text-slate-300">{summary?.unitL2 || "---"}</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Product L3</span>
+                <span className="text-xs font-semibold text-slate-300">{summary?.unitL3 || "---"}</span>
+              </div>
+            </div>
+          </div>
+          
+          <div className="bg-white/5 backdrop-blur-sm rounded-xl p-4 border border-white/10 flex flex-col items-center justify-center min-w-[140px]">
+            <span className="text-[10px] font-black text-blue-400 uppercase tracking-widest mb-1">Elbow Cutoff</span>
+            <span className="text-4xl font-black tabular-nums">{summary ? fmtPct(summary.cutoff) : "---"}</span>
+          </div>
+        </div>
+      </div>
       
-      <CardContent>
+      <CardContent className="p-8">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           {kpis.map((kpi) => (
             <div key={kpi.label} className="group relative">
-              <div className="p-4 rounded-lg border border-slate-100 bg-slate-50/50 hover:bg-white hover:shadow-md hover:border-blue-100 transition-all duration-300">
-                <div className="flex items-center gap-3 mb-3">
-                  <div className={cn("p-1.5 rounded-md", kpi.color)}>
-                    <kpi.icon size={16} />
+              <div className="p-5 rounded-xl border border-slate-100 bg-white hover:shadow-xl hover:border-blue-100 transition-all duration-300">
+                <div className="flex items-center gap-3 mb-4">
+                  <div className={cn("p-2 rounded-lg", kpi.color)}>
+                    <kpi.icon size={18} />
                   </div>
-                  <span className={typography.label}>
+                  <span className="text-[11px] font-bold text-slate-500 uppercase tracking-widest">
                     {kpi.label}
                   </span>
                 </div>
                 <div className="flex items-baseline gap-1">
-                  {isLoading ? (
-                    <Skeleton className="h-7 w-24 mb-1" />
-                  ) : (
-                    <span className="text-xl font-bold text-slate-900 tabular-nums">{kpi.value}</span>
-                  )}
+                  <span className="text-2xl font-black text-slate-900 tabular-nums">{kpi.value}</span>
                 </div>
-                <p className="mt-2 text-[11px] text-slate-500 leading-normal font-medium">
+                <p className="mt-3 text-[10px] text-slate-400 leading-normal font-medium italic">
                   {kpi.description}
                 </p>
               </div>
             </div>
           ))}
-        </div>
-        
-        {/* Detail Table */}
-        <div className="mt-8 overflow-hidden rounded-lg border border-slate-100">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Detailed Processing Metrics</TableHead>
-                <TableHead isNum>Value</TableHead>
-              </TableRow>
-            </TableHeader>
-            <tbody>
-              <TableRow>
-                <TableCell>Total Unique VAPS Observed</TableCell>
-                <TableCell isNum isBold>
-                  {isLoading ? <Skeleton className="h-4 w-12 ml-auto" /> : (summary?.uniqueVapsCount ? fmtInt(summary.uniqueVapsCount) : "---")}
-                </TableCell>
-              </TableRow>
-              <TableRow>
-                <TableCell>Decision Multiplier Applied</TableCell>
-                <TableCell isNum isBold className="text-blue-600">
-                  {isLoading ? <Skeleton className="h-4 w-12 ml-auto" /> : "1.00x"}
-                </TableCell>
-              </TableRow>
-              <TableRow>
-                <TableCell>Statistical Confidence</TableCell>
-                <TableCell isNum isBold className="text-emerald-600">
-                  {isLoading ? <Skeleton className="h-4 w-12 ml-auto" /> : "95.0%"}
-                </TableCell>
-              </TableRow>
-            </tbody>
-          </Table>
         </div>
       </CardContent>
     </Card>

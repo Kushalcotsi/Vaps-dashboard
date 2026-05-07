@@ -27,12 +27,24 @@ export default function HeatmapTable({ title, data, segmentName, cutoff, isLoadi
   const pivotKey = segmentName.toLowerCase();
 
   const pivoted = useMemo(() => {
-    const columns = new Set<string>();
+    const segmentStats = new Map<string, number>();
+    data.forEach(r => {
+      const segmentValue = (r as any)[pivotKey] || "Unmapped";
+      segmentStats.set(segmentValue, (segmentStats.get(segmentValue) || 0) + r.activations);
+    });
+
+    const topSegments = Array.from(segmentStats.entries())
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 10)
+      .map(([seg]) => seg);
+
+    const columns = new Set(topSegments);
     const rows = new Map<string, { desc: string; cells: Map<string, VapsAttachRate> }>();
 
     data.forEach(r => {
       const segmentValue = (r as any)[pivotKey] || "Unmapped";
-      columns.add(segmentValue);
+      if (!columns.has(segmentValue)) return;
+      
       if (!rows.has(r.vaps)) {
         rows.set(r.vaps, { desc: r.vapsDesc, cells: new Map() });
       }
@@ -41,7 +53,11 @@ export default function HeatmapTable({ title, data, segmentName, cutoff, isLoadi
 
     return { 
       columns: Array.from(columns).sort(), 
-      rows: Array.from(rows.entries()).sort((a, b) => a[1].desc.localeCompare(b[1].desc)) 
+      rows: Array.from(rows.entries()).sort((a, b) => {
+        const aAvg = Array.from(a[1].cells.values()).reduce((sum, c) => sum + (c.attachRate || 0), 0) / (a[1].cells.size || 1);
+        const bAvg = Array.from(b[1].cells.values()).reduce((sum, c) => sum + (c.attachRate || 0), 0) / (b[1].cells.size || 1);
+        return bAvg - aAvg || a[1].desc.localeCompare(b[1].desc);
+      })
     };
   }, [data, pivotKey]);
 
@@ -53,34 +69,76 @@ export default function HeatmapTable({ title, data, segmentName, cutoff, isLoadi
     );
   }, [pivoted, filter]);
 
-  const getHeatStyle = (signal: string | undefined, isHighlighted: boolean) => {
-    if (isHighlighted) {
-       switch (signal) {
-         case "Strong Industry Opportunity": return { bg: "bg-[#00205B] text-white scale-[1.05] z-30 shadow-2xl ring-2 ring-[#00205B] ring-offset-2", text: "text-white" };
-         case "Good General Fit": return { bg: "bg-blue-700 text-white scale-[1.05] z-30 shadow-2xl ring-2 ring-blue-700 ring-offset-2", text: "text-white" };
-         case "Niche Industry Signal": return { bg: "bg-blue-500 text-white scale-[1.05] z-30 shadow-2xl ring-2 ring-blue-500 ring-offset-2", text: "text-white" };
-         case "Monitor": return { bg: "bg-amber-500 text-white scale-[1.05] z-30 shadow-2xl ring-2 ring-amber-500 ring-offset-2", text: "text-white" };
-         default: return { bg: "bg-slate-300 text-slate-700 scale-[1.05] z-30 shadow-2xl ring-2 ring-slate-300 ring-offset-2", text: "text-slate-700" };
-       }
-    }
+  const fmtPct = (val?: number | null) => (val === null || val === undefined) ? "0.0%" : `${(val * 100).toFixed(1)}%`;
+  const fmtLeverage = (val?: number | null) => (val === null || val === undefined) ? "---" : `${val.toFixed(2)}x`;
+  const fmtScore = (val?: number | null) => (val === null || val === undefined) ? "0.0" : val.toFixed(1);
+  const fmtNum = (val?: number | null) => (val === null || val === undefined) ? "0" : val.toLocaleString();
 
-    switch (signal) {
-      case "Strong Industry Opportunity": return { bg: "bg-[#00205B]", text: "text-white" };
-      case "Good General Fit": return { bg: "bg-blue-700", text: "text-white" };
-      case "Niche Industry Signal": return { bg: "bg-blue-500", text: "text-white" };
-      case "Monitor": return { bg: "bg-amber-500", text: "text-white" };
-      default: return { bg: "bg-slate-50", text: "text-slate-400" };
-    }
+  const exportData = () => {
+    const filename = `${pivotKey}_segment_heatmap.csv`;
+    const exportColumns = [
+      { label: "VAPS", key: "vaps" },
+      { label: "Description", key: "desc" },
+      ...pivoted.columns.map(col => ({
+        label: col,
+        key: col,
+        fmt: (v: VapsAttachRate) => v ? fmtPct(v.attachRate) : "0.0%"
+      }))
+    ];
+    
+    const rows = pivoted.rows.map(([vaps, data]) => {
+      const row: any = { vaps, desc: data.desc };
+      pivoted.columns.forEach(col => {
+        row[col] = data.cells.get(col);
+      });
+      return row;
+    });
+
+    import('@/lib/export').then(({ exportToCsv }) => {
+      exportToCsv(filename, exportColumns, rows);
+    });
   };
 
-  const fmtPct = (val?: number) => val !== undefined ? `${(val * 100).toFixed(1)}%` : "";
+  const getHeatColor = (rate: number, maxRate: number) => {
+    if (!rate) return "#f6f8fa";
+    const intensity = Math.min(1, rate / Math.max(maxRate, 0.01));
+    const light = 96 - intensity * 44;
+    return `hsl(170, 45%, ${light}%)`;
+  };
+
+  const maxRate = useMemo(() => {
+    let max = 0;
+    data.forEach(r => { if (r.attachRate > max) max = r.attachRate; });
+    return max;
+  }, [data]);
+
+  const cellTooltip = (vaps: string, segment: string, row: any, cell?: VapsAttachRate) => {
+    if (!cell) return `${segment} | ${vaps}\nNo observed attachment in this segment.`;
+    
+    return [
+      `${segment} | ${vaps}`,
+      `${segment} attach rate: ${fmtPct(cell.attachRate)}`,
+      `Unit cutoff benchmark: ${fmtPct(cutoff)}`,
+      `Unit attach rate baseline: ${fmtPct(cell.unitAttachRate)}`,
+      `Leverage = segment attach rate / unit attach rate = ${fmtLeverage(cell.leverage)}`,
+      `Opportunity score = max(0, segment attach rate - unit cutoff) x segment activations = ${fmtScore(cell.opportunityScore)}`,
+      `Volume: ${fmtNum(cell.associated)} associated / ${fmtNum(cell.activations)} activations`,
+      `Industry signal: ${cell.industrySignal}`,
+      `Reason: ${cell.industrySignalReason}`
+    ].join('\n');
+  };
 
   return (
     <Card>
       <CardHeader className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div className="flex items-center gap-2">
           <h2 className={typography.cardTitle}>{title}</h2>
-          <Info size={14} className="text-slate-400 cursor-help" />
+          <span 
+            className="inline-flex items-center justify-center w-3.5 h-3.5 rounded-full border border-slate-300 text-[9px] font-bold text-slate-400 cursor-help hover:border-primary hover:text-primary transition-colors"
+            title={`Segment heatmap logic\n\nColoring: intensity matches attach rate relative to the maximum observed (${fmtPct(maxRate)}).\nSignals: industry signal logic is applied at the segment level.\n\nClick a cell to highlight related data across the workspace.`}
+          >
+            i
+          </span>
         </div>
         <div className="flex items-center gap-4 w-full md:w-auto">
           <Input 
@@ -90,7 +148,7 @@ export default function HeatmapTable({ title, data, segmentName, cutoff, isLoadi
             icon={<Search size={14} />}
             className="md:w-48"
           />
-          <Button variant="outline" size="sm" className="flex items-center gap-2">
+          <Button variant="outline" size="sm" onClick={exportData} className="flex items-center gap-2">
             <Download size={12} />
             CSV
           </Button>
@@ -133,7 +191,7 @@ export default function HeatmapTable({ title, data, segmentName, cutoff, isLoadi
                    </div>
                 </TableCell>
                 {Array.from({ length: 5 }).map((_, j) => (
-                  <TableCell key={j} className="p-4 border-r">
+                   <TableCell key={j} className="p-4 border-r">
                     <Skeleton className="h-10 w-full rounded" />
                   </TableCell>
                 ))}
@@ -160,7 +218,9 @@ export default function HeatmapTable({ title, data, segmentName, cutoff, isLoadi
                   const cell = row.cells.get(col);
                   const isCellHighlighted = selectedVaps === vaps && selectedSegment === col;
                   const isColHighlighted = selectedSegment === col;
-                  const style = getHeatStyle(cell?.industrySignal, isCellHighlighted);
+                  
+                  const bgColor = getHeatColor(cell?.attachRate || 0, maxRate);
+                  const isDark = (cell?.attachRate || 0) / maxRate > 0.6;
                   
                   return (
                     <TableCell 
@@ -172,14 +232,16 @@ export default function HeatmapTable({ title, data, segmentName, cutoff, isLoadi
                       isHighlighted={isColHighlighted && !isCellHighlighted}
                       className={cn(
                         "p-0 border-r border-slate-100 last:border-r-0 transition-all duration-200 cursor-pointer relative overflow-visible",
-                        style.bg
+                        isCellHighlighted && "scale-[1.05] z-30 shadow-2xl ring-2 ring-primary ring-offset-2"
                       )}
+                      style={{ backgroundColor: bgColor }}
+                      title={cellTooltip(vaps, col, row, cell)}
                     >
                       <div className="w-full min-h-[50px] flex flex-col items-center justify-center gap-0.5 group/cell p-2 relative z-20">
-                        <span className={cn("text-xs font-bold tabular-nums", style.text)}>
+                        <span className={cn("text-xs font-bold tabular-nums", isDark ? "text-white" : "text-slate-900")}>
                           {cell ? fmtPct(cell.attachRate) : "0.0%"}
                         </span>
-                        <span className={cn("text-[8px] font-bold uppercase tracking-wider text-center leading-tight px-0.5", style.text)}>
+                        <span className={cn("text-[8px] font-bold uppercase tracking-wider text-center leading-tight px-0.5", isDark ? "text-teal-50" : "text-slate-500")}>
                           {cell?.industrySignal || "No Signal"}
                         </span>
                       </div>

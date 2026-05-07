@@ -40,7 +40,8 @@ export function TableHead({
   isNum, 
   onClick, 
   isHighlighted, 
-  style 
+  style,
+  ...props 
 }: { 
   children: React.ReactNode; 
   className?: string; 
@@ -48,7 +49,7 @@ export function TableHead({
   onClick?: () => void; 
   isHighlighted?: boolean; 
   style?: React.CSSProperties 
-}) {
+} & React.ThHTMLAttributes<HTMLTableCellElement>) {
   return (
     <th 
       onClick={onClick}
@@ -61,6 +62,7 @@ export function TableHead({
         isHighlighted && "text-primary after:absolute after:inset-0 after:bg-primary/[0.06] after:pointer-events-none after:z-10",
         className
       )}
+      {...props}
     >
       <span className="relative z-20">{children}</span>
     </th>
@@ -74,7 +76,9 @@ export function TableCell({
   isBold, 
   isHighlighted,
   onClick,
-  colSpan
+  colSpan,
+  style,
+  ...props
 }: { 
   children: React.ReactNode; 
   className?: string; 
@@ -83,11 +87,13 @@ export function TableCell({
   isHighlighted?: boolean;
   onClick?: () => void;
   colSpan?: number;
-}) {
+  style?: React.CSSProperties;
+} & React.TdHTMLAttributes<HTMLTableCellElement>) {
   return (
     <td 
       onClick={onClick}
       colSpan={colSpan}
+      style={style}
       className={cn(
         "relative px-4 py-2.5 border-b border-slate-100 transition-colors cursor-pointer align-middle min-h-[40px] overflow-hidden",
         isBold ? typography.tableCellBold : typography.tableCell,
@@ -96,6 +102,7 @@ export function TableCell({
         isHighlighted && "after:absolute after:inset-0 after:bg-primary/[0.04] after:pointer-events-none after:z-10",
         className
       )}
+      {...props}
     >
       <div className="relative z-20 w-full h-full flex items-center">
         {children}

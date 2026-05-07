@@ -26,6 +26,7 @@ export interface VapsAttachRate {
   decision?: string;
   decisionReason?: string;
   elbowCutoff?: number;
+  unitCutoff?: number;
   industrySignal?: string;
   industrySignalReason?: string;
   leverage?: number | null;
@@ -39,12 +40,16 @@ export interface VapsAttachRate {
 
 export interface DashboardData {
   unitRows: VapsAttachRate[];
+  recommendationRows: VapsAttachRate[];
+  industryRecommendationRows: VapsAttachRate[];
   segments: Record<string, VapsAttachRate[]>;
-  marketRows: VapsAttachRate[];
   summary: {
-    totalActivations: number;
-    totalAssociated: number;
-    unitAttachRate: number;
     cutoff: number;
+    activations: number;
+    associated: number;
+    unitName: string;
+    unitDescription: string;
+    unitL2: string;
+    unitL3: string;
   };
 }

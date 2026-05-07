@@ -80,17 +80,32 @@ export default function RecommendationTable({ data, isLoading }: RecommendationT
       cell: info => <span className="tabular-nums font-medium text-slate-400">{(info.getValue() * 100).toFixed(1)}%</span>,
     }),
     columnHelper.accessor("decision", {
-      header: "Decision",
+      header: () => (
+        <div className="flex items-center gap-1.5">
+          Decision
+          <span 
+            className="inline-flex items-center justify-center w-3.5 h-3.5 rounded-full border border-slate-300 text-[9px] font-bold text-slate-400 cursor-help hover:border-primary hover:text-primary transition-colors"
+            title="Decision logic&#10;&#10;Keep: fixed recommendation and attach rate is at or above unit cutoff.&#10;Review Removal: fixed recommendation but attach rate is below unit cutoff.&#10;Keep Logic + Promote: conditional or quantity-driven logic is present and attach rate is at or above unit cutoff.&#10;Keep Logic: conditional or quantity-driven logic is present, but attach rate is below unit cutoff.&#10;Add: not covered in the sheet and attach rate is at or above unit cutoff.&#10;Monitor: observed attachment, but below unit cutoff.&#10;No Action: no observed attachment and not covered in the recommendation sheet."
+          >
+            i
+          </span>
+        </div>
+      ),
       cell: info => {
         const val = info.getValue() || "No Action";
         const variantMap: Record<string, any> = {
           "Keep": "success",
+          "Keep Logic": "success",
+          "Keep Logic + Promote": "info",
           "Add": "info",
           "Review Removal": "destructive",
           "Monitor": "warning",
           "No Action": "default"
         };
-        const variant = Object.keys(variantMap).find(k => val.startsWith(k)) || "default";
+        
+        // Find the exact match or the best prefix match
+        const variant = variantMap[val] || Object.keys(variantMap).find(k => val.startsWith(k)) || "default";
+        
         return (
           <Badge variant={variantMap[variant]}>
             {val}
@@ -115,6 +130,26 @@ export default function RecommendationTable({ data, isLoading }: RecommendationT
     getFilteredRowModel: getFilteredRowModel(),
   })
 
+  const exportData = () => {
+    const filename = `recommendation_sheet_comparison.csv`;
+    const exportColumns = [
+      { label: "VAPS", key: "vaps" },
+      { label: "VAPS Description", key: "vapsDesc" },
+      { label: "Recommendation Logic", key: "recommendationKind" },
+      { label: "Recommendation Value", key: "recommendationValue" },
+      { label: "Covered", key: "coveredText" },
+      { label: "Unit Activations", key: "activations" },
+      { label: "VAPS Associated", key: "associated" },
+      { label: "Attach Rate", key: "attachRate", fmt: (v: number) => `${(v * 100).toFixed(1)}%` },
+      { label: "Unit Cutoff", key: "elbowCutoff", fmt: (v: number) => `${(v * 100).toFixed(1)}%` },
+      { label: "Decision", key: "decision" },
+      { label: "Reason", key: "decisionReason" }
+    ];
+    import('@/lib/export').then(({ exportToCsv }) => {
+      exportToCsv(filename, exportColumns, data);
+    });
+  };
+
   return (
     <Card>
       <CardHeader className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
@@ -127,7 +162,7 @@ export default function RecommendationTable({ data, isLoading }: RecommendationT
             icon={<Search size={14} />}
             className="md:w-64"
           />
-          <Button variant="outline" size="sm" className="flex items-center gap-2">
+          <Button variant="outline" size="sm" onClick={exportData} className="flex items-center gap-2">
             <Download size={12} />
             CSV
           </Button>

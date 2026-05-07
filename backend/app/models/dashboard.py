@@ -46,5 +46,7 @@ class RecommendationEntry(BaseModel):
 
 class DashboardData(BaseModel):
     unitRows: List[VapsAttachRate]
+    recommendationRows: List[VapsAttachRate]
+    industryRecommendationRows: List[VapsAttachRate]
     segments: Dict[str, List[VapsAttachRate]]
     summary: Dict[str, float]

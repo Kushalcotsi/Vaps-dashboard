@@ -36,8 +36,46 @@ export default function IndustryAnalysisTable({ marketRows, isLoading }: Industr
     ).sort((a, b) => (b.opportunityScore || 0) - (a.opportunityScore || 0));
   }, [marketRows, selectedMarket, search]);
 
-  const fmtPct = (val?: number) => val !== undefined ? `${(val * 100).toFixed(1)}%` : "0.0%";
-  const fmtNum = (val?: number) => val !== undefined ? val.toLocaleString() : "0";
+  const fmtPct = (val?: number | null) => (val === null || val === undefined) ? "0.0%" : `${(val * 100).toFixed(1)}%`;
+  const fmtNum = (val?: number | null) => (val === null || val === undefined) ? "0" : val.toLocaleString();
+  const fmtLeverage = (val?: number | null) => (val === null || val === undefined) ? "---" : `${val.toFixed(2)}x`;
+  const fmtScore = (val?: number | null) => (val === null || val === undefined) ? "0.0" : val.toFixed(1);
+
+  const exportData = () => {
+    const filename = `recommendation_sheet_comparison_by_industry_${selectedMarket || 'all'}.csv`;
+    const exportColumns = [
+      { label: "Market Segment", key: "market" },
+      { label: "VAPS", key: "vaps" },
+      { label: "VAPS Description", key: "vapsDesc" },
+      { label: "Recommendation Logic", key: "recommendationKind" },
+      { label: "Recommendation Value", key: "recommendationValue" },
+      { label: "Covered", key: "coveredText" },
+      { label: "Activations", key: "activations" },
+      { label: "Associated", key: "associated" },
+      { label: "Industry Attach Rate", key: "attachRate", fmt: (v: number) => fmtPct(v) },
+      { label: "Unit Attach Rate", key: "unitAttachRate", fmt: (v: number) => fmtPct(v) },
+      { label: "Leverage", key: "leverage", fmt: (v: number) => fmtLeverage(v) },
+      { label: "Opportunity Score", key: "opportunityScore", fmt: (v: number) => fmtScore(v) },
+      { label: "Industry Signal", key: "industrySignal" },
+      { label: "Interpretation", key: "industrySignalReason" }
+    ];
+    import('@/lib/export').then(({ exportToCsv }) => {
+      exportToCsv(filename, exportColumns, filteredRows);
+    });
+  };
+
+  const industrySignalTooltip = (row: VapsAttachRate) => {
+    return [
+      `Industry signal: ${row.industrySignal}`,
+      `Reason: ${row.industrySignalReason}`,
+      `Industry attach rate: ${fmtPct(row.attachRate)}`,
+      `Unit attach rate: ${fmtPct(row.unitAttachRate)}`,
+      `Unit cutoff: ${fmtPct(row.unitCutoff)}`,
+      `Leverage: ${fmtLeverage(row.leverage)}`,
+      `Opportunity score: ${fmtScore(row.opportunityScore)}`,
+      `Volume: ${fmtNum(row.associated)} associated / ${fmtNum(row.activations)} activations`
+    ].join('\n');
+  };
 
   const columns = [
     { label: "Market segment", minW: "120px" },
@@ -52,7 +90,11 @@ export default function IndustryAnalysisTable({ marketRows, isLoading }: Industr
     { label: "Unit attach rate", isNum: true, minW: "110px" },
     { label: "Leverage", isNum: true, minW: "80px" },
     { label: "Opportunity score", isNum: true, minW: "100px" },
-    { label: "Industry signal", minW: "140px" },
+    { 
+      label: "Industry signal", 
+      minW: "140px",
+      info: "Industry signal logic\n\nBenchmark: selected unit elbow cutoff.\nLeverage: industry attach rate / unit attach rate.\nOpportunity score: max(0, industry attach rate - unit cutoff) x industry activations.\n\nStrong Industry Opportunity: above benchmark and over-indexes versus the unit average.\nGood General Fit: above benchmark and broadly consistent with the unit average.\nNiche Industry Signal: strong over-indexing, but smaller opportunity volume.\nMonitor: observed attachment, but below benchmark.\nNo Signal: no observed attachment in that industry."
+    },
     { label: "Interpretation", minW: "240px" }
   ];
 
@@ -66,7 +108,7 @@ export default function IndustryAnalysisTable({ marketRows, isLoading }: Industr
             onChange={(e) => setSelectedMarket(e.target.value)}
             className="w-auto min-w-[180px]"
           >
-            <option value="">All Markets</option>
+            <option value="">All market segments</option>
             {markets.map(m => <option key={m} value={m}>{m}</option>)}
           </Select>
           <Input 
@@ -76,7 +118,7 @@ export default function IndustryAnalysisTable({ marketRows, isLoading }: Industr
             icon={<Search size={14} />}
             className="w-48"
           />
-          <Button variant="outline" size="sm" className="flex items-center gap-2">
+          <Button variant="outline" size="sm" onClick={exportData} className="flex items-center gap-2">
             <Download size={12} />
             CSV
           </Button>
@@ -94,7 +136,17 @@ export default function IndustryAnalysisTable({ marketRows, isLoading }: Industr
                 style={{ minWidth: col.minW }}
                 className="whitespace-nowrap"
               >
-                {col.label}
+                <div className="flex items-center gap-1.5">
+                  {col.label}
+                  {col.info && (
+                    <span 
+                      className="inline-flex items-center justify-center w-3.5 h-3.5 rounded-full border border-slate-300 text-[9px] font-bold text-slate-400 cursor-help hover:border-primary hover:text-primary transition-colors"
+                      title={col.info}
+                    >
+                      i
+                    </span>
+                  )}
+                </div>
               </TableHead>
             ))}
           </TableRow>
@@ -122,10 +174,13 @@ export default function IndustryAnalysisTable({ marketRows, isLoading }: Industr
               <TableCell isHighlighted={selectedColIdx === 7} onClick={() => { setSelectedVaps(row.vaps === selectedVaps ? null : row.vaps); setSelectedColIdx(7); }} isNum>{fmtNum(row.associated)}</TableCell>
               <TableCell isHighlighted={selectedColIdx === 8} onClick={() => { setSelectedVaps(row.vaps === selectedVaps ? null : row.vaps); setSelectedColIdx(8); }} isNum isBold className="text-blue-600">{fmtPct(row.attachRate)}</TableCell>
               <TableCell isHighlighted={selectedColIdx === 9} onClick={() => { setSelectedVaps(row.vaps === selectedVaps ? null : row.vaps); setSelectedColIdx(9); }} isNum isBold>{fmtPct(row.unitAttachRate)}</TableCell>
-              <TableCell isHighlighted={selectedColIdx === 10} onClick={() => { setSelectedVaps(row.vaps === selectedVaps ? null : row.vaps); setSelectedColIdx(10); }} isNum isBold className="text-emerald-600">{row.leverage ? row.leverage.toFixed(2) + "x" : "---"}</TableCell>
-              <TableCell isHighlighted={selectedColIdx === 11} onClick={() => { setSelectedVaps(row.vaps === selectedVaps ? null : row.vaps); setSelectedColIdx(11); }} isNum isBold>{row.opportunityScore?.toFixed(1)}</TableCell>
+              <TableCell isHighlighted={selectedColIdx === 10} onClick={() => { setSelectedVaps(row.vaps === selectedVaps ? null : row.vaps); setSelectedColIdx(10); }} isNum isBold className="text-emerald-600">{fmtLeverage(row.leverage)}</TableCell>
+              <TableCell isHighlighted={selectedColIdx === 11} onClick={() => { setSelectedVaps(row.vaps === selectedVaps ? null : row.vaps); setSelectedColIdx(11); }} isNum isBold>{fmtScore(row.opportunityScore)}</TableCell>
               <TableCell isHighlighted={selectedColIdx === 12} onClick={() => { setSelectedVaps(row.vaps === selectedVaps ? null : row.vaps); setSelectedColIdx(12); }}>
-                <Badge variant={row.industrySignal?.includes('Strong') ? 'success' : row.industrySignal?.includes('Good') ? 'info' : 'default'}>
+                <Badge 
+                  variant={row.industrySignal?.includes('Strong') ? 'success' : row.industrySignal?.includes('Good') ? 'info' : row.industrySignal?.includes('Niche') ? 'info' : row.industrySignal?.includes('Monitor') ? 'warning' : 'default'}
+                  title={industrySignalTooltip(row)}
+                >
                   {row.industrySignal}
                 </Badge>
               </TableCell>

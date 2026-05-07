@@ -2,13 +2,12 @@ import React from "react";
 import { cn } from "@/lib/utils";
 import { typography } from "@/design-system/typography";
 
-interface BadgeProps {
+interface BadgeProps extends React.HTMLAttributes<HTMLSpanElement> {
   children: React.ReactNode;
   variant?: "default" | "success" | "warning" | "destructive" | "info" | "outline";
-  className?: string;
 }
 
-export function Badge({ children, variant = "default", className }: BadgeProps) {
+export function Badge({ children, variant = "default", className, ...props }: BadgeProps) {
   const variants = {
     default: "bg-slate-200 text-slate-800 border-slate-300",
     success: "bg-emerald-600 text-white border-emerald-700",
@@ -19,11 +18,14 @@ export function Badge({ children, variant = "default", className }: BadgeProps) 
   };
 
   return (
-    <span className={cn(
-      "px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider border whitespace-nowrap",
-      variants[variant],
-      className
-    )}>
+    <span 
+      className={cn(
+        "px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider border whitespace-nowrap inline-flex items-center justify-center",
+        variants[variant],
+        className
+      )}
+      {...props}
+    >
       {children}
     </span>
   );

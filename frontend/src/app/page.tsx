@@ -44,6 +44,16 @@ export default function DashboardPage() {
     );
   }, [data, selectedSource, selectedGroup, searchQuery]);
 
+  const filteredRecommendationRows = useMemo(() => {
+    if (!data?.recommendationRows) return [];
+    return data.recommendationRows.filter(r => matchesSearch(r));
+  }, [data, searchQuery]);
+
+  const filteredIndustryRecommendationRows = useMemo(() => {
+    if (!data?.industryRecommendationRows) return [];
+    return data.industryRecommendationRows.filter(r => matchesSearch(r));
+  }, [data, searchQuery]);
+
   const filteredSegments = useMemo(() => {
     if (!data?.segments) return {};
     const result: Record<string, any[]> = {};
@@ -154,7 +164,7 @@ export default function DashboardPage() {
             {/* Tab 2: Recommendation Engine */}
             <TabsContent active={activeTab === "recommendation"}>
               <div className="mt-4">
-                <RecommendationTable isLoading={isLoading} data={filteredUnitRows} />
+                <RecommendationTable isLoading={isLoading} data={filteredRecommendationRows} />
               </div>
             </TabsContent>
 
@@ -190,7 +200,7 @@ export default function DashboardPage() {
                 )}
                 
                 {segmentTab === "Industry" && (
-                  <IndustryAnalysisTable isLoading={isLoading} marketRows={filteredSegments["Market"] || []} />
+                  <IndustryAnalysisTable isLoading={isLoading} marketRows={filteredIndustryRecommendationRows} />
                 )}
               </div>
             </TabsContent>
