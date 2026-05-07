@@ -40,20 +40,20 @@ export default function IndustryAnalysisTable({ marketRows, isLoading }: Industr
   const fmtNum = (val?: number) => val !== undefined ? val.toLocaleString() : "0";
 
   const columns = [
-    { label: "Market segment", minW: "150px" },
-    { label: "VAPS", minW: "100px" },
-    { label: "VAPS description", minW: "250px" },
-    { label: "Recommendation logic", minW: "150px" },
-    { label: "Recommendation value", minW: "120px" },
-    { label: "Covered", minW: "80px" },
-    { label: "Activations", isNum: true, minW: "100px" },
-    { label: "Associated", isNum: true, minW: "100px" },
-    { label: "Industry attach rate", isNum: true, minW: "120px" },
-    { label: "Unit attach rate", isNum: true, minW: "120px" },
-    { label: "Leverage", isNum: true, minW: "100px" },
-    { label: "Opportunity score", isNum: true, minW: "120px" },
-    { label: "Industry signal", minW: "180px" },
-    { label: "Interpretation", minW: "300px" }
+    { label: "Market segment", minW: "120px" },
+    { label: "VAPS", minW: "80px" },
+    { label: "VAPS description", minW: "200px" },
+    { label: "Recommendation logic", minW: "130px" },
+    { label: "Recommendation value", minW: "100px" },
+    { label: "Covered", minW: "70px" },
+    { label: "Activations", isNum: true, minW: "90px" },
+    { label: "Associated", isNum: true, minW: "90px" },
+    { label: "Industry attach rate", isNum: true, minW: "110px" },
+    { label: "Unit attach rate", isNum: true, minW: "110px" },
+    { label: "Leverage", isNum: true, minW: "80px" },
+    { label: "Opportunity score", isNum: true, minW: "100px" },
+    { label: "Industry signal", minW: "140px" },
+    { label: "Interpretation", minW: "240px" }
   ];
 
   return (

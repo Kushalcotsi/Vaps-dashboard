@@ -10,12 +10,12 @@ interface BadgeProps {
 
 export function Badge({ children, variant = "default", className }: BadgeProps) {
   const variants = {
-    default: "bg-slate-100 text-slate-800 border-slate-200",
-    success: "bg-emerald-50 text-emerald-700 border-emerald-100",
-    warning: "bg-amber-50 text-amber-700 border-amber-100",
-    destructive: "bg-rose-50 text-rose-700 border-rose-100",
-    info: "bg-blue-50 text-blue-700 border-blue-100",
-    outline: "bg-transparent text-slate-600 border-slate-200",
+    default: "bg-slate-200 text-slate-800 border-slate-300",
+    success: "bg-emerald-600 text-white border-emerald-700",
+    warning: "bg-amber-500 text-white border-amber-600",
+    destructive: "bg-rose-600 text-white border-rose-700",
+    info: "bg-blue-600 text-white border-blue-700",
+    outline: "bg-transparent text-slate-600 border-slate-300",
   };
 
   return (

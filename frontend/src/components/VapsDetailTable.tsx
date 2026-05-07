@@ -123,7 +123,7 @@ export default function VapsDetailTable({ title, data, columns, downloadId, isLo
                 isHighlighted={selectedColKey === col.key}
                 className={cn(
                   "cursor-pointer hover:bg-slate-100 transition-colors whitespace-nowrap",
-                  col.key === 'vapsDesc' && "min-w-[250px]"
+                  col.key === 'vapsDesc' && "min-w-[200px]"
                 )}
               >
                 <div className={`flex items-center gap-2 ${col.isNum ? 'justify-end' : ''}`}>

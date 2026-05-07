@@ -56,20 +56,20 @@ export default function HeatmapTable({ title, data, segmentName, cutoff, isLoadi
   const getHeatStyle = (signal: string | undefined, isHighlighted: boolean) => {
     if (isHighlighted) {
        switch (signal) {
-         case "Strong Industry Opportunity": return { bg: "bg-primary text-white scale-[1.05] z-30 shadow-xl ring-2 ring-primary ring-offset-1", text: "text-white" };
-         case "Good General Fit": return { bg: "bg-blue-600 text-white scale-[1.05] z-30 shadow-xl ring-2 ring-blue-600 ring-offset-1", text: "text-white" };
-         case "Niche Industry Signal": return { bg: "bg-blue-400 text-white scale-[1.05] z-30 shadow-xl ring-2 ring-blue-400 ring-offset-1", text: "text-white" };
-         case "Monitor": return { bg: "bg-amber-400 text-slate-900 scale-[1.05] z-30 shadow-xl ring-2 ring-amber-400 ring-offset-1", text: "text-slate-900" };
-         default: return { bg: "bg-slate-200 text-slate-500 scale-[1.05] z-30 shadow-xl ring-2 ring-slate-200 ring-offset-1", text: "text-slate-500" };
+         case "Strong Industry Opportunity": return { bg: "bg-[#00205B] text-white scale-[1.05] z-30 shadow-2xl ring-2 ring-[#00205B] ring-offset-2", text: "text-white" };
+         case "Good General Fit": return { bg: "bg-blue-700 text-white scale-[1.05] z-30 shadow-2xl ring-2 ring-blue-700 ring-offset-2", text: "text-white" };
+         case "Niche Industry Signal": return { bg: "bg-blue-500 text-white scale-[1.05] z-30 shadow-2xl ring-2 ring-blue-500 ring-offset-2", text: "text-white" };
+         case "Monitor": return { bg: "bg-amber-500 text-white scale-[1.05] z-30 shadow-2xl ring-2 ring-amber-500 ring-offset-2", text: "text-white" };
+         default: return { bg: "bg-slate-300 text-slate-700 scale-[1.05] z-30 shadow-2xl ring-2 ring-slate-300 ring-offset-2", text: "text-slate-700" };
        }
     }
 
     switch (signal) {
-      case "Strong Industry Opportunity": return { bg: "bg-[#002b5c] text-white", text: "text-white" };
-      case "Good General Fit": return { bg: "bg-blue-100 text-slate-900", text: "text-slate-900" };
-      case "Niche Industry Signal": return { bg: "bg-blue-50 text-slate-700", text: "text-slate-700" };
-      case "Monitor": return { bg: "bg-amber-50 text-slate-900", text: "text-slate-900" };
-      default: return { bg: "bg-white", text: "text-slate-300" };
+      case "Strong Industry Opportunity": return { bg: "bg-[#00205B]", text: "text-white" };
+      case "Good General Fit": return { bg: "bg-blue-700", text: "text-white" };
+      case "Niche Industry Signal": return { bg: "bg-blue-500", text: "text-white" };
+      case "Monitor": return { bg: "bg-amber-500", text: "text-white" };
+      default: return { bg: "bg-slate-50", text: "text-slate-400" };
     }
   };
 
@@ -100,13 +100,13 @@ export default function HeatmapTable({ title, data, segmentName, cutoff, isLoadi
       <Table className="table-auto min-w-full">
         <TableHeader>
           <TableRow>
-            <TableHead className="sticky left-0 z-50 min-w-[320px] border-r bg-slate-50 shadow-[2px_0_5px_-2px_rgba(0,0,0,0.1)]">
+            <TableHead className="sticky left-0 z-50 min-w-[260px] border-r bg-slate-50 shadow-[2px_0_5px_-2px_rgba(0,0,0,0.1)]">
               VAPS ID & Description
             </TableHead>
             {isLoading ? (
               Array.from({ length: 5 }).map((_, i) => (
-                <TableHead key={i} className="text-center min-w-[180px] border-r last:border-r-0">
-                  <Skeleton className="h-4 w-24 mx-auto" />
+                <TableHead key={i} className="text-center min-w-[130px] border-r last:border-r-0">
+                  <Skeleton className="h-4 w-20 mx-auto" />
                 </TableHead>
               ))
             ) : (
@@ -114,7 +114,7 @@ export default function HeatmapTable({ title, data, segmentName, cutoff, isLoadi
                 <TableHead 
                   key={col} 
                   isHighlighted={selectedSegment === col}
-                  className="text-center min-w-[180px] border-r last:border-r-0"
+                  className="text-center min-w-[130px] border-r last:border-r-0 text-[11px] px-2"
                 >
                   {col}
                 </TableHead>
@@ -175,16 +175,14 @@ export default function HeatmapTable({ title, data, segmentName, cutoff, isLoadi
                         style.bg
                       )}
                     >
-                      {cell && (
-                        <div className="w-full min-h-[70px] flex flex-col items-center justify-center gap-1 group/cell p-4 relative z-20">
-                          <span className={cn("text-xs font-bold tabular-nums", style.text)}>
-                            {fmtPct(cell.attachRate)}
-                          </span>
-                          <span className={cn("text-[9px] font-bold uppercase tracking-wider text-center leading-tight px-1", style.text)}>
-                            {cell.industrySignal === "No Signal" ? "" : cell.industrySignal}
-                          </span>
-                        </div>
-                      )}
+                      <div className="w-full min-h-[50px] flex flex-col items-center justify-center gap-0.5 group/cell p-2 relative z-20">
+                        <span className={cn("text-xs font-bold tabular-nums", style.text)}>
+                          {cell ? fmtPct(cell.attachRate) : "0.0%"}
+                        </span>
+                        <span className={cn("text-[8px] font-bold uppercase tracking-wider text-center leading-tight px-0.5", style.text)}>
+                          {cell?.industrySignal || "No Signal"}
+                        </span>
+                      </div>
                     </TableCell>
                   );
                 })}
