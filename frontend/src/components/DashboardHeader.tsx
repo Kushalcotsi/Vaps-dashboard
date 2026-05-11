@@ -37,7 +37,7 @@ export default function DashboardHeader() {
 
   return (
     <Card>
-      <CardContent className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-7 gap-4 items-end p-4">
+      <CardContent className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-7 gap-4 items-end p-5">
         <div className="flex flex-col gap-1.5">
           <label className={typography.label}>Unit</label>
           <Select value={selectedUnit} onChange={(e) => setSelectedUnit(e.target.value)} variantSize="sm">

@@ -15,7 +15,7 @@ const TabsList = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivEl
     <div
       ref={ref}
       className={cn(
-        "inline-flex h-10 items-center justify-start rounded-md bg-transparent p-1 text-slate-500 gap-6 border-b border-slate-200 w-full mb-6",
+        "inline-flex h-12 items-center justify-start rounded-md bg-transparent p-0 text-slate-500 gap-8 border-b border-slate-200 w-full mb-2",
         className
       )}
       {...props}
@@ -33,16 +33,15 @@ const TabsTrigger = React.forwardRef<HTMLButtonElement, TabsTriggerProps>(
     <button
       ref={ref}
       className={cn(
-        "inline-flex items-center justify-center whitespace-nowrap py-2 text-sm font-medium ring-offset-white transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-950 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 relative",
-        active ? "text-slate-900 font-bold" : "text-slate-500 hover:text-slate-700",
+        "inline-flex items-center justify-center whitespace-nowrap py-4 text-[11px] font-black uppercase tracking-[0.15em] ring-offset-white transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-950 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 relative border-b-2",
+        active 
+          ? "text-primary border-primary" 
+          : "text-slate-400 hover:text-slate-600 border-transparent",
         className
       )}
       {...props}
     >
       {props.children}
-      {active && (
-        <span className="absolute bottom-[-5px] left-0 right-0 h-[2px] bg-slate-900 rounded-t-full" />
-      )}
     </button>
   )
 )

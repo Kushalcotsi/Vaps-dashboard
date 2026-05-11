@@ -103,11 +103,10 @@ export default function RecommendationTable({ data, isLoading }: RecommendationT
           "No Action": "default"
         };
         
-        // Find the exact match or the best prefix match
-        const variant = variantMap[val] || Object.keys(variantMap).find(k => val.startsWith(k)) || "default";
+        const variant = variantMap[val] || "default";
         
         return (
-          <Badge variant={variantMap[variant]}>
+          <Badge variant={variant} title={info.row.original.decisionReason}>
             {val}
           </Badge>
         )
@@ -152,17 +151,22 @@ export default function RecommendationTable({ data, isLoading }: RecommendationT
 
   return (
     <Card>
-      <CardHeader className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+      <CardHeader className="flex flex-col xl:flex-row justify-between items-start xl:items-center gap-4">
         <h2 className={typography.cardTitle}>Recommendation Sheet Comparison</h2>
-        <div className="flex items-center gap-4 w-full md:w-auto">
-          <Input 
-            value={globalFilter ?? ""}
-            onChange={e => setGlobalFilter(e.target.value)}
-            placeholder="FILTER VAPS ID"
-            icon={<Search size={14} />}
-            className="md:w-64"
-          />
-          <Button variant="outline" size="sm" onClick={exportData} className="flex items-center gap-2">
+        <div className="flex flex-nowrap items-center gap-3 shrink-0">
+          <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mr-1">
+            {table.getRowModel().rows.length} Records
+          </span>
+          <div className="w-48">
+            <Input 
+              value={globalFilter ?? ""}
+              onChange={e => setGlobalFilter(e.target.value)}
+              placeholder="FILTER VAPS ID"
+              icon={<Search size={14} />}
+              variantSize="sm"
+            />
+          </div>
+          <Button variant="outline" size="sm" onClick={exportData} className="flex items-center gap-2 whitespace-nowrap">
             <Download size={12} />
             CSV
           </Button>

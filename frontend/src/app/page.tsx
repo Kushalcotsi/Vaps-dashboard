@@ -144,9 +144,8 @@ export default function DashboardPage() {
 
   return (
     <DashboardLayout>
-      <PageContainer className={spacing.section}>
-        
-        {/* Persistent Control Plane */}
+      <PageContainer className="space-y-4">
+        {/* Header Section */}
         <div className="relative">
            <DashboardHeader />
            {isSoftLoading && (
@@ -163,7 +162,7 @@ export default function DashboardPage() {
         />
 
         {/* Workspace Navigation */}
-        <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6 mt-8 relative overflow-hidden">
+        <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-5 mt-4 relative overflow-hidden">
           {/* Content Loading Overlay (Soft) */}
           {isSoftLoading && (
             <div className="absolute inset-0 bg-slate-50/10 backdrop-blur-[1px] z-10 transition-all duration-300 pointer-events-none" />
@@ -179,8 +178,8 @@ export default function DashboardPage() {
 
             {/* Tab 1: Overview */}
             <TabsContent active={activeTab === "overview"}>
-              <div className="space-y-8 mt-4">
-                <div className="grid grid-cols-1 xl:grid-cols-2 gap-8">
+              <div className="space-y-5 mt-4">
+                <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
                   <DistributionBars 
                     isLoading={isLoading}
                     title="Top 5 Recommended VAPS Attach Rates" 
@@ -207,20 +206,30 @@ export default function DashboardPage() {
 
             {/* Tab 3: Segment Intelligence */}
             <TabsContent active={activeTab === "segments"}>
-              <div className="mt-4 flex flex-col gap-6">
-                <div className="flex items-center gap-2 border-b border-slate-100 pb-2">
+              <div className="mt-2 flex flex-col gap-4">
+                <div className="flex items-center border-b border-slate-200">
                   {["Market", "Division", "Region"].map(name => (
                     <button 
                       key={name}
                       onClick={() => setSegmentTab(name)}
-                      className={`px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-widest transition-colors ${segmentTab === name ? 'bg-slate-800 text-white' : 'bg-slate-100 text-slate-500 hover:bg-slate-200'}`}
+                      className={cn(
+                        "px-6 py-3 text-[11px] font-black uppercase tracking-[0.15em] transition-all relative",
+                        segmentTab === name 
+                          ? "text-primary border-b-2 border-primary" 
+                          : "text-slate-400 hover:text-slate-600 border-b-2 border-transparent"
+                      )}
                     >
                       {name} Heatmap
                     </button>
                   ))}
                   <button 
                     onClick={() => setSegmentTab("Industry")}
-                    className={`px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-widest transition-colors ${segmentTab === "Industry" ? 'bg-slate-800 text-white' : 'bg-slate-100 text-slate-500 hover:bg-slate-200'}`}
+                    className={cn(
+                      "px-6 py-3 text-[11px] font-black uppercase tracking-[0.15em] transition-all relative",
+                      segmentTab === "Industry" 
+                        ? "text-primary border-b-2 border-primary" 
+                        : "text-slate-400 hover:text-slate-600 border-b-2 border-transparent"
+                    )}
                   >
                     Industry Comparison
                   </button>
@@ -244,11 +253,16 @@ export default function DashboardPage() {
 
             {/* Tab 4: Raw VAPS Detail */}
             <TabsContent active={activeTab === "raw"}>
-              <div className="mt-4 flex flex-col gap-6">
-                <div className="flex items-center gap-2 border-b border-slate-100 pb-2">
+              <div className="mt-2 flex flex-col gap-4">
+                <div className="flex items-center border-b border-slate-200">
                   <button 
                     onClick={() => setRawTab("Unit")}
-                    className={`px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-widest transition-colors ${rawTab === "Unit" ? 'bg-slate-800 text-white' : 'bg-slate-100 text-slate-500 hover:bg-slate-200'}`}
+                    className={cn(
+                      "px-6 py-3 text-[11px] font-black uppercase tracking-[0.15em] transition-all relative",
+                      rawTab === "Unit" 
+                        ? "text-primary border-b-2 border-primary" 
+                        : "text-slate-400 hover:text-slate-600 border-b-2 border-transparent"
+                    )}
                   >
                     Unit Level
                   </button>
@@ -256,7 +270,12 @@ export default function DashboardPage() {
                     <button 
                       key={name}
                       onClick={() => setRawTab(name)}
-                      className={`px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-widest transition-colors ${rawTab === name ? 'bg-slate-800 text-white' : 'bg-slate-100 text-slate-500 hover:bg-slate-200'}`}
+                      className={cn(
+                        "px-6 py-3 text-[11px] font-black uppercase tracking-[0.15em] transition-all relative",
+                        rawTab === name 
+                          ? "text-primary border-b-2 border-primary" 
+                          : "text-slate-400 hover:text-slate-600 border-b-2 border-transparent"
+                      )}
                     >
                       {name} Segment
                     </button>

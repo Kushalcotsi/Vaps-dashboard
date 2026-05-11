@@ -11,7 +11,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
   return (
     <div className="relative min-h-screen flex flex-col bg-background">
       <GlobalHeader />
-      <main className={cn("flex-1 py-8 md:py-10", spacing.section)}>
+      <main className="flex-1 py-4 md:py-6">
         {children}
       </main>
       

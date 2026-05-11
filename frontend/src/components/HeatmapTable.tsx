@@ -130,7 +130,7 @@ export default function HeatmapTable({ title, data, segmentName, cutoff, isLoadi
 
   return (
     <Card>
-      <CardHeader className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+      <CardHeader className="flex flex-col xl:flex-row justify-between items-start xl:items-center gap-4">
         <div className="flex items-center gap-2">
           <h2 className={typography.cardTitle}>{title}</h2>
           <span 
@@ -140,15 +140,20 @@ export default function HeatmapTable({ title, data, segmentName, cutoff, isLoadi
             i
           </span>
         </div>
-        <div className="flex items-center gap-4 w-full md:w-auto">
-          <Input 
-            value={filter}
-            onChange={e => setFilter(e.target.value)}
-            placeholder="FILTER VAPS ID"
-            icon={<Search size={14} />}
-            className="md:w-48"
-          />
-          <Button variant="outline" size="sm" onClick={exportData} className="flex items-center gap-2">
+        <div className="flex flex-nowrap items-center gap-3 shrink-0">
+          <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mr-1">
+            {filteredRows.length} VAPS
+          </span>
+          <div className="w-48">
+            <Input 
+              value={filter}
+              onChange={e => setFilter(e.target.value)}
+              placeholder="FILTER VAPS ID"
+              icon={<Search size={14} />}
+              variantSize="sm"
+            />
+          </div>
+          <Button variant="outline" size="sm" onClick={exportData} className="flex items-center gap-2 whitespace-nowrap">
             <Download size={12} />
             CSV
           </Button>

@@ -100,25 +100,31 @@ export default function IndustryAnalysisTable({ marketRows, isLoading }: Industr
 
   return (
     <Card>
-      <CardHeader className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+      <CardHeader className="flex flex-col xl:flex-row justify-between items-start xl:items-center gap-4">
         <h2 className={typography.cardTitle}>Recommendation Sheet Comparison by Industry</h2>
-        <div className="flex flex-wrap items-center gap-4">
+        <div className="flex flex-nowrap items-center gap-3 shrink-0">
+          <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mr-1">
+            {filteredRows.length} Rows
+          </span>
           <Select 
             value={selectedMarket}
             onChange={(e) => setSelectedMarket(e.target.value)}
-            className="w-auto min-w-[180px]"
+            variantSize="sm"
+            className="w-auto min-w-[160px]"
           >
             <option value="">All market segments</option>
             {markets.map(m => <option key={m} value={m}>{m}</option>)}
           </Select>
-          <Input 
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            placeholder="FILTER VAPS ID"
-            icon={<Search size={14} />}
-            className="w-48"
-          />
-          <Button variant="outline" size="sm" onClick={exportData} className="flex items-center gap-2">
+          <div className="w-44">
+            <Input 
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder="FILTER VAPS ID"
+              icon={<Search size={14} />}
+              variantSize="sm"
+            />
+          </div>
+          <Button variant="outline" size="sm" onClick={exportData} className="flex items-center gap-2 whitespace-nowrap">
             <Download size={12} />
             CSV
           </Button>
