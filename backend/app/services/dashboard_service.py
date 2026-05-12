@@ -241,13 +241,4 @@ class DashboardService:
         }
 
     def get_metadata(self) -> Dict:
-        rows = self.repo.get_unit_attach_rates()
-        segments = self.repo.get_all_segments_data()
-        
-        return {
-            "sources": sorted(list(set(r.source for r in rows if r.source))),
-            "groups": sorted(list(set(r.mainGroup for r in rows if r.mainGroup))),
-            "markets": sorted(list(set(r.market for r in segments.get("Market", []) if r.market))),
-            "divisions": sorted(list(set(r.division for r in segments.get("Division", []) if r.division))),
-            "regions": sorted(list(set(r.region for r in segments.get("Region", []) if r.region)))
-        }
+        return self.repo.get_metadata()

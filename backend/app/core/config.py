@@ -19,6 +19,7 @@ class Settings(BaseSettings):
     SNOWFLAKE_DATABASE: str = ""
     SNOWFLAKE_SCHEMA: str = ""
     SNOWFLAKE_ROLE: str = ""
+    SNOWFLAKE_AUTHENTICATOR: str = "externalbrowser"
     
     # Paths
     DATA_PATH: str = "data"

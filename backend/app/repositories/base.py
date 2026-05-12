@@ -26,3 +26,7 @@ class BaseRepository(ABC):
     @abstractmethod
     def get_recommendation_entries(self) -> Dict[Tuple[str, str], RecommendationEntry]:
         pass
+
+    @abstractmethod
+    def get_metadata(self) -> Dict:
+        pass
