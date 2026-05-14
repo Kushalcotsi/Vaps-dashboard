@@ -127,7 +127,7 @@ export default function DashboardPage() {
   const isSoftLoading = isFetching && !isLoading;
 
   const ToggleUI = ({ options, value, onChange }: { options: { id: string, label: string }[], value: string, onChange: (id: string) => void }) => (
-    <div className="flex p-1 bg-slate-100 rounded-lg w-fit mb-4">
+    <div className="flex p-1 bg-slate-100 rounded-lg w-fit mb-2">
       {options.map((opt) => (
         <button
           key={opt.id}
@@ -172,18 +172,34 @@ export default function DashboardPage() {
           )}
 
           <Tabs>
-            <TabsList className="overflow-x-auto no-scrollbar justify-start">
-              <TabsTrigger active={activeTab === "overview"} onClick={() => setActiveTab("overview")}>Overview</TabsTrigger>
-              <TabsTrigger active={activeTab === "unit"} onClick={() => setActiveTab("unit")}>VAPS Attach Rate by Unit</TabsTrigger>
-              <TabsTrigger active={activeTab === "market"} onClick={() => setActiveTab("market")}>VAPS Attach Rate by Market and Unit</TabsTrigger>
-              <TabsTrigger active={activeTab === "division"} onClick={() => setActiveTab("division")}>VAPS Attach Rate by Unit and Division</TabsTrigger>
-              <TabsTrigger active={activeTab === "region"} onClick={() => setActiveTab("region")}>VAPS Attach Rate by Unit and Region</TabsTrigger>
-              <TabsTrigger active={activeTab === "raw"} onClick={() => setActiveTab("raw")}>VAPS Details</TabsTrigger>
+            <TabsList className="bg-slate-100/80 p-1.5 rounded-xl border-none h-auto gap-2 mb-4 flex w-fit mx-auto">
+              {[
+                { id: "overview", label: "Overview" },
+                { id: "unit", label: "VAPS Attach Rate by Unit" },
+                { id: "market", label: "VAPS Attach Rate by Market and Unit" },
+                { id: "division", label: "VAPS Attach Rate by Unit and Division" },
+                { id: "region", label: "VAPS Attach Rate by Unit and Region" },
+                { id: "raw", label: "VAPS Details" },
+              ].map((tab) => (
+                <TabsTrigger 
+                  key={tab.id}
+                  active={activeTab === tab.id} 
+                  onClick={() => setActiveTab(tab.id)}
+                  className={cn(
+                    "py-2.5 px-5 rounded-lg border-none text-[10px] font-bold tracking-tight transition-all duration-200 whitespace-nowrap",
+                    activeTab === tab.id 
+                      ? "bg-white text-primary shadow-md scale-[1.02]" 
+                      : "bg-transparent text-slate-500 hover:text-slate-700 hover:bg-slate-200/50"
+                  )}
+                >
+                  {tab.label}
+                </TabsTrigger>
+              ))}
             </TabsList>
 
             {/* Tab 1: Overview */}
             <TabsContent active={activeTab === "overview"}>
-              <div className="space-y-5 mt-4">
+              <div className="space-y-4 mt-1">
                 <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
                   <DistributionBars 
                     isLoading={isLoading}
@@ -204,7 +220,7 @@ export default function DashboardPage() {
 
             {/* Tab 2: VAPS Attach Rate by Unit */}
             <TabsContent active={activeTab === "unit"}>
-              <div className="mt-4">
+              <div className="mt-1">
                 <ToggleUI 
                   options={[
                     { id: "recommendation", label: "Recommendation Sheet Comparison" },
@@ -224,7 +240,7 @@ export default function DashboardPage() {
 
             {/* Tab 3: VAPS Attach Rate by Market and Unit */}
             <TabsContent active={activeTab === "market"}>
-              <div className="mt-4">
+              <div className="mt-1">
                 <ToggleUI 
                   options={[
                     { id: "heatmap", label: "Market Heatmap" },
@@ -255,7 +271,7 @@ export default function DashboardPage() {
 
             {/* Tab 4: VAPS Attach Rate by Unit and Division */}
             <TabsContent active={activeTab === "division"}>
-              <div className="mt-4">
+              <div className="mt-1">
                 <ToggleUI 
                   options={[
                     { id: "heatmap", label: "Division Heatmap" },
@@ -286,7 +302,7 @@ export default function DashboardPage() {
 
             {/* Tab 5: VAPS Attach Rate by Unit and Region */}
             <TabsContent active={activeTab === "region"}>
-              <div className="mt-4">
+              <div className="mt-1">
                 <ToggleUI 
                   options={[
                     { id: "heatmap", label: "Region Heatmap" },
@@ -317,7 +333,7 @@ export default function DashboardPage() {
 
             {/* Tab 6: Raw VAPS Details */}
             <TabsContent active={activeTab === "raw"}>
-              <div className="mt-4">
+              <div className="mt-1">
                 <VapsDetailTable 
                   isLoading={isLoading}
                   title="Unit-Level VAPS Detail" 
