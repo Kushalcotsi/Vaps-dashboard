@@ -119,7 +119,7 @@ export default function IndustryAnalysisTable({ marketRows, isLoading }: Industr
             <Input 
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              placeholder="FILTER VAPS ID"
+              placeholder="SEARCH VAPS ID"
               icon={<Search size={14} />}
               variantSize="sm"
             />

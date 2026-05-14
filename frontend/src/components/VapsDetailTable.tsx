@@ -95,7 +95,7 @@ export default function VapsDetailTable({ title, data, columns, downloadId, isLo
             <Input 
               value={filter}
               onChange={e => setFilter(e.target.value)}
-              placeholder="FILTER VAPS ID"
+              placeholder="SEARCH VAPS ID"
               icon={<Search size={14} />}
               variantSize="sm"
             />

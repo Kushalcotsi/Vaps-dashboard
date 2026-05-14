@@ -5,7 +5,7 @@ import { VapsAttachRate } from "@/types";
 import { Info, Search, Download } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Card, CardHeader } from "./ui/Card";
-import { Input } from "./ui/Input";
+import { Input, Select } from "./ui/Input";
 import { Button } from "./ui/Button";
 import { Table, TableHeader, TableRow, TableHead, TableCell } from "./ui/TablePrims";
 import { typography } from "@/design-system/typography";
@@ -21,14 +21,25 @@ interface HeatmapTableProps {
 
 export default function HeatmapTable({ title, data, segmentName, cutoff, isLoading }: HeatmapTableProps) {
   const [filter, setFilter] = useState("");
+  const [divisionFilter, setDivisionFilter] = useState("");
   const [selectedVaps, setSelectedVaps] = useState<string | null>(null);
   const [selectedSegment, setSelectedSegment] = useState<string | null>(null);
   
   const pivotKey = segmentName.toLowerCase();
+  const isRegionView = pivotKey === "region";
+
+  const divisions = useMemo(() => {
+    if (!isRegionView) return [];
+    return Array.from(new Set(data.map(r => r.division).filter(Boolean))).sort();
+  }, [data, isRegionView]);
 
   const pivoted = useMemo(() => {
     const segmentStats = new Map<string, number>();
-    data.forEach(r => {
+    const filteredData = isRegionView && divisionFilter 
+      ? data.filter(r => r.division === divisionFilter)
+      : data;
+
+    filteredData.forEach(r => {
       const segmentValue = (r as any)[pivotKey] || "Unmapped";
       segmentStats.set(segmentValue, (segmentStats.get(segmentValue) || 0) + r.activations);
     });
@@ -41,7 +52,7 @@ export default function HeatmapTable({ title, data, segmentName, cutoff, isLoadi
     const columns = new Set(topSegments);
     const rows = new Map<string, { desc: string; cells: Map<string, VapsAttachRate> }>();
 
-    data.forEach(r => {
+    filteredData.forEach(r => {
       const segmentValue = (r as any)[pivotKey] || "Unmapped";
       if (!columns.has(segmentValue)) return;
       
@@ -59,7 +70,7 @@ export default function HeatmapTable({ title, data, segmentName, cutoff, isLoadi
         return bAvg - aAvg || a[1].desc.localeCompare(b[1].desc);
       })
     };
-  }, [data, pivotKey]);
+  }, [data, pivotKey, isRegionView, divisionFilter]);
 
   const filteredRows = useMemo(() => {
     if (!filter) return pivoted.rows;
@@ -144,11 +155,25 @@ export default function HeatmapTable({ title, data, segmentName, cutoff, isLoadi
           <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mr-1">
             {filteredRows.length} VAPS
           </span>
-          <div className="w-48">
+          
+          {isRegionView && (
+            <div className="w-40">
+              <Select 
+                value={divisionFilter} 
+                onChange={e => setDivisionFilter(e.target.value)} 
+                variantSize="sm"
+              >
+                <option value="">All Divisions</option>
+                {divisions.map(d => <option key={d} value={d}>{d}</option>)}
+              </Select>
+            </div>
+          )}
+
+          <div className="w-44">
             <Input 
               value={filter}
               onChange={e => setFilter(e.target.value)}
-              placeholder="FILTER VAPS ID"
+              placeholder="SEARCH VAPS ID"
               icon={<Search size={14} />}
               variantSize="sm"
             />

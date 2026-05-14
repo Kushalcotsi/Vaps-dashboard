@@ -8,7 +8,7 @@ export function GlobalHeader() {
           <BrandLogo className="h-10 w-auto" />
           <div className="hidden md:block h-6 w-px bg-slate-200" />
           <h1 className="hidden md:block text-sm font-semibold text-slate-800 uppercase tracking-widest">
-            Guided Selling Dashboard
+            Guided Selling: VAPS Recommendation for Office Space | Single Wide
           </h1>
         </div>
         

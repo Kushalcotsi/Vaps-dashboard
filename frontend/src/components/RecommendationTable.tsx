@@ -12,11 +12,11 @@ import {
 import { VapsAttachRate } from "@/types"
 import { useState, useMemo } from "react"
 import { cn } from "@/lib/utils"
-import { ArrowUpDown, Search, Download } from "lucide-react"
-import { Card, CardHeader } from "./ui/Card"
+import { ArrowUpDown, Search, Download, Filter } from "lucide-react"
+import { Card, CardHeader, CardContent } from "./ui/Card"
 import { Badge } from "./ui/Badge"
 import { Button } from "./ui/Button"
-import { Input } from "./ui/Input"
+import { Input, Select } from "./ui/Input"
 import { Table, TableHeader, TableRow, TableHead, TableCell } from "./ui/TablePrims"
 import { typography } from "@/design-system/typography"
 import { Skeleton } from "./ui/Skeleton"
@@ -33,6 +33,29 @@ export default function RecommendationTable({ data, isLoading }: RecommendationT
   const [globalFilter, setGlobalFilter] = useState("")
   const [selectedRowId, setSelectedRowId] = useState<string | null>(null)
   const [selectedColId, setSelectedColId] = useState<string | null>(null)
+
+  // Local filters
+  const [marketFilter, setMarketFilter] = useState("")
+  const [statusFilter, setStatusFilter] = useState("")
+  const [actionFilter, setActionFilter] = useState("")
+  const [recFilter, setRecFilter] = useState("")
+  const [tierFilter, setTierFilter] = useState("")
+  const [minAttach, setMinAttach] = useState("0")
+
+  const markets = useMemo(() => Array.from(new Set(data.map(r => r.market).filter(Boolean))).sort(), [data])
+  const tiers = useMemo(() => Array.from(new Set(data.map(r => r.tier).filter(Boolean))).sort(), [data])
+
+  const filteredData = useMemo(() => {
+    return data.filter(r => {
+      if (marketFilter && r.market !== marketFilter) return false;
+      if (statusFilter && r.cutoffStatus !== statusFilter) return false;
+      if (actionFilter && r.decision !== actionFilter) return false;
+      if (recFilter && r.coveredText !== recFilter) return false;
+      if (tierFilter && r.tier !== tierFilter) return false;
+      if (parseFloat(minAttach) > 0 && (r.attachRate * 100) < parseFloat(minAttach)) return false;
+      return true;
+    });
+  }, [data, marketFilter, statusFilter, actionFilter, recFilter, tierFilter, minAttach]);
 
   const columns = useMemo(() => [
     columnHelper.accessor("vaps", {
@@ -119,7 +142,7 @@ export default function RecommendationTable({ data, isLoading }: RecommendationT
   ], []);
 
   const table = useReactTable({
-    data,
+    data: filteredData,
     columns,
     state: { sorting, globalFilter },
     onSortingChange: setSorting,
@@ -145,14 +168,17 @@ export default function RecommendationTable({ data, isLoading }: RecommendationT
       { label: "Reason", key: "decisionReason" }
     ];
     import('@/lib/export').then(({ exportToCsv }) => {
-      exportToCsv(filename, exportColumns, data);
+      exportToCsv(filename, exportColumns, filteredData);
     });
   };
 
   return (
     <Card>
-      <CardHeader className="flex flex-col xl:flex-row justify-between items-start xl:items-center gap-4">
-        <h2 className={typography.cardTitle}>Recommendation Sheet Comparison</h2>
+      <CardHeader className="flex flex-col xl:flex-row justify-between items-start xl:items-center gap-4 pb-2">
+        <div className="flex items-center gap-2">
+          <Filter size={18} className="text-slate-400" />
+          <h2 className={typography.cardTitle}>Recommendation Sheet Comparison</h2>
+        </div>
         <div className="flex flex-nowrap items-center gap-3 shrink-0">
           <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mr-1">
             {table.getRowModel().rows.length} Records
@@ -161,7 +187,7 @@ export default function RecommendationTable({ data, isLoading }: RecommendationT
             <Input 
               value={globalFilter ?? ""}
               onChange={e => setGlobalFilter(e.target.value)}
-              placeholder="FILTER VAPS ID"
+              placeholder="SEARCH VAPS ID"
               icon={<Search size={14} />}
               variantSize="sm"
             />
@@ -172,6 +198,74 @@ export default function RecommendationTable({ data, isLoading }: RecommendationT
           </Button>
         </div>
       </CardHeader>
+
+      <CardContent className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-3 pt-0 pb-4 border-b border-slate-100">
+        <div className="flex flex-col gap-1">
+          <label className={typography.label}>Market</label>
+          <Select value={marketFilter} onChange={e => setMarketFilter(e.target.value)} variantSize="sm">
+            <option value="">All Markets</option>
+            {markets.map(m => <option key={m} value={m}>{m}</option>)}
+          </Select>
+        </div>
+        <div className="flex flex-col gap-1">
+          <label className={typography.label}>Status</label>
+          <Select value={statusFilter} onChange={e => setStatusFilter(e.target.value)} variantSize="sm">
+            <option value="">All Statuses</option>
+            <option value="Above cutoff">Above cutoff</option>
+            <option value="Below cutoff">Below cutoff</option>
+          </Select>
+        </div>
+        <div className="flex flex-col gap-1">
+          <label className={typography.label}>Action</label>
+          <Select value={actionFilter} onChange={e => setActionFilter(e.target.value)} variantSize="sm">
+            <option value="">All Actions</option>
+            {["Add", "Keep", "Keep Logic", "Monitor", "No Action", "Review Removal"].map(a => <option key={a} value={a}>{a}</option>)}
+          </Select>
+        </div>
+        <div className="flex flex-col gap-1">
+          <label className={typography.label}>Covered</label>
+          <Select value={recFilter} onChange={e => setRecFilter(e.target.value)} variantSize="sm">
+            <option value="">All</option>
+            <option value="Yes">Yes</option>
+            <option value="No">No</option>
+          </Select>
+        </div>
+        <div className="flex flex-col gap-1">
+          <label className={typography.label}>Tier</label>
+          <Select value={tierFilter} onChange={e => setTierFilter(e.target.value)} variantSize="sm">
+            <option value="">All Tiers</option>
+            {tiers.map(t => <option key={t} value={t}>{t}</option>)}
+          </Select>
+        </div>
+        <div className="flex flex-col gap-1">
+          <label className={typography.label}>Min Attach %</label>
+          <Input 
+            type="number" 
+            value={minAttach} 
+            onChange={e => setMinAttach(e.target.value)} 
+            variantSize="sm" 
+            min="0" max="100" step="0.1"
+          />
+        </div>
+        <div className="flex flex-col gap-1 justify-end">
+           <Button 
+            variant="ghost" 
+            size="sm" 
+            className="text-[10px] font-bold text-slate-400 hover:text-primary uppercase tracking-widest h-8"
+            onClick={() => {
+              setMarketFilter("");
+              setStatusFilter("");
+              setActionFilter("");
+              setRecFilter("");
+              setTierFilter("");
+              setMinAttach("0");
+              setGlobalFilter("");
+            }}
+           >
+             Reset Filters
+           </Button>
+        </div>
+      </CardContent>
 
       <Table>
         <TableHeader>
