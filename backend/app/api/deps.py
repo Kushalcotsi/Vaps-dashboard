@@ -13,7 +13,7 @@ def get_repository() -> BaseRepository:
     if _repository_instance is None:
         with _repo_lock:
             if _repository_instance is None:
-                if settings.USE_SNOWFLAKE:
+                if settings.is_snowflake_enabled:
                     _repository_instance = SnowflakeRepository()
                 else:
                     _repository_instance = CSVRepository()

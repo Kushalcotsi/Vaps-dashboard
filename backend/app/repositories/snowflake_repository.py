@@ -33,17 +33,65 @@ class SnowflakeRepository(BaseRepository):
                 except:
                     pass
 
-            print(f"Connecting to Snowflake as {settings.SNOWFLAKE_USER}...")
-            self._conn = snowflake.connector.connect(
-                user=settings.SNOWFLAKE_USER,
-                account=settings.SNOWFLAKE_ACCOUNT,
-                warehouse=settings.SNOWFLAKE_WAREHOUSE,
-                database=settings.SNOWFLAKE_DATABASE,
-                schema=settings.SNOWFLAKE_SCHEMA,
-                role=settings.SNOWFLAKE_ROLE,
-                authenticator=settings.SNOWFLAKE_AUTHENTICATOR
-            )
-            print("Snowflake connection established.")
+            print(f"Connecting to Snowflake as {settings.SNOWFLAKE_USER} (Auth: {settings.SNOWFLAKE_AUTHENTICATOR})...")
+            
+            # Setup connection arguments with timeouts
+            conn_args = {
+                "user": settings.SNOWFLAKE_USER,
+                "account": settings.SNOWFLAKE_ACCOUNT,
+                "warehouse": settings.SNOWFLAKE_WAREHOUSE,
+                "database": settings.SNOWFLAKE_DATABASE,
+                "schema": settings.SNOWFLAKE_SCHEMA,
+                "role": settings.SNOWFLAKE_ROLE,
+                "login_timeout": settings.SNOWFLAKE_CONNECTION_TIMEOUT,
+                "network_timeout": settings.SNOWFLAKE_CONNECTION_TIMEOUT,
+                "socket_timeout": settings.SNOWFLAKE_CONNECTION_TIMEOUT
+            }
+            
+            authenticator = (settings.SNOWFLAKE_AUTHENTICATOR or "snowflake").lower()
+            
+            if authenticator == "externalbrowser":
+                print("⚠️ WARNING: 'externalbrowser' SSO authenticator is active. In a headless environment (e.g. EC2 under PM2), this will block the process waiting for interactive stdin redirect URLs.")
+                conn_args["authenticator"] = "externalbrowser"
+                
+            elif authenticator == "keypair" or settings.SNOWFLAKE_PRIVATE_KEY_PATH:
+                print(f"Loading private key from path: {settings.SNOWFLAKE_PRIVATE_KEY_PATH}...")
+                try:
+                    from cryptography.hazmat.primitives import serialization
+                    
+                    with open(settings.SNOWFLAKE_PRIVATE_KEY_PATH, "rb") as key_file:
+                        passphrase = settings.SNOWFLAKE_PRIVATE_KEY_PASSPHRASE.encode() if settings.SNOWFLAKE_PRIVATE_KEY_PASSPHRASE else None
+                        private_key = serialization.load_pem_private_key(
+                            key_file.read(),
+                            password=passphrase
+                        )
+                        
+                    private_key_bytes = private_key.private_bytes(
+                        encoding=serialization.Encoding.DER,
+                        format=serialization.PrivateFormat.PKCS8,
+                        encryption_algorithm=serialization.NoEncryption()
+                    )
+                    conn_args["private_key"] = private_key_bytes
+                except Exception as e:
+                    print(f"❌ Error loading or parsing private key: {str(e)}")
+                    raise e
+                    
+            else:
+                # Default username/password authentication
+                if not settings.SNOWFLAKE_PASSWORD:
+                    print("⚠️ WARNING: Snowflake password is empty but using standard password authentication.")
+                conn_args["password"] = settings.SNOWFLAKE_PASSWORD
+                # If authenticator is explicitly set and not empty, pass it.
+                if settings.SNOWFLAKE_AUTHENTICATOR and settings.SNOWFLAKE_AUTHENTICATOR.lower() != "snowflake":
+                    conn_args["authenticator"] = settings.SNOWFLAKE_AUTHENTICATOR
+
+            try:
+                self._conn = snowflake.connector.connect(**conn_args)
+                print("Snowflake connection established successfully.")
+            except Exception as e:
+                print(f"❌ Snowflake connection attempt failed: {str(e)}")
+                raise e
+                
             return self._conn
 
     # Reusing recommendation loading logic since this is from a static file for now
