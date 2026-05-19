@@ -5,6 +5,7 @@ import { VapsAttachRate } from "@/types";
 import { Info, Search, Download } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Card, CardHeader } from "./ui/Card";
+import { Tooltip, TooltipContent, TooltipTrigger } from "./ui/Tooltip";
 import { Input, Select } from "./ui/Input";
 import { Button } from "./ui/Button";
 import { Table, TableHeader, TableRow, TableHead, TableCell } from "./ui/TablePrims";
@@ -144,12 +145,14 @@ export default function HeatmapTable({ title, data, segmentName, cutoff, isLoadi
       <CardHeader className="flex flex-col xl:flex-row justify-between items-start xl:items-center gap-4">
         <div className="flex items-center gap-2">
           <h2 className={typography.cardTitle}>{title}</h2>
-          <span 
-            className="inline-flex items-center justify-center w-3.5 h-3.5 rounded-full border border-slate-300 text-[9px] font-bold text-slate-400 cursor-help hover:border-primary hover:text-primary transition-colors"
-            title={`Segment heatmap logic\n\nColoring: intensity matches attach rate relative to the maximum observed (${fmtPct(maxRate)}).\nSignals: industry signal logic is applied at the segment level.\n\nClick a cell to highlight related data across the workspace.`}
-          >
-            i
-          </span>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Info className="w-4 h-4 text-slate-400 hover:text-primary transition-colors cursor-help" />
+            </TooltipTrigger>
+            <TooltipContent side="right" className="max-w-xs whitespace-pre-wrap text-xs">
+              {`Segment heatmap logic\n\nColoring: intensity matches attach rate relative to the maximum observed (${fmtPct(maxRate)}).\nSignals: industry signal logic is applied at the segment level.\n\nClick a cell to highlight related data across the workspace.`}
+            </TooltipContent>
+          </Tooltip>
         </div>
         <div className="flex flex-nowrap items-center gap-3 shrink-0">
           <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mr-1">
@@ -265,16 +268,22 @@ export default function HeatmapTable({ title, data, segmentName, cutoff, isLoadi
                         isCellHighlighted && "scale-[1.05] z-30 shadow-2xl ring-2 ring-primary ring-offset-2"
                       )}
                       style={{ backgroundColor: bgColor }}
-                      title={cellTooltip(vaps, col, row, cell)}
                     >
-                      <div className="w-full min-h-[50px] flex flex-col items-center justify-center gap-0.5 group/cell p-2 relative z-20">
-                        <span className={cn("text-xs font-bold tabular-nums", isDark ? "text-white" : "text-slate-900")}>
-                          {cell ? fmtPct(cell.attachRate) : "0.0%"}
-                        </span>
-                        <span className={cn("text-[8px] font-bold uppercase tracking-wider text-center leading-tight px-0.5", isDark ? "text-teal-50" : "text-slate-500")}>
-                          {cell?.industrySignal || "No Signal"}
-                        </span>
-                      </div>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <div className="w-full min-h-[50px] flex flex-col items-center justify-center gap-0.5 group/cell p-2 relative z-20">
+                            <span className={cn("text-xs font-bold tabular-nums", isDark ? "text-white" : "text-slate-900")}>
+                              {cell ? fmtPct(cell.attachRate) : "0.0%"}
+                            </span>
+                            <span className={cn("text-[8px] font-bold uppercase tracking-wider text-center leading-tight px-0.5", isDark ? "text-teal-50" : "text-slate-500")}>
+                              {cell?.industrySignal || "No Signal"}
+                            </span>
+                          </div>
+                        </TooltipTrigger>
+                        <TooltipContent side="top" className="max-w-xs whitespace-pre-wrap text-xs">
+                          {cellTooltip(vaps, col, row, cell)}
+                        </TooltipContent>
+                      </Tooltip>
                     </TableCell>
                   );
                 })}

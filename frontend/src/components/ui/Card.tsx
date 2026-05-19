@@ -35,3 +35,11 @@ export function CardContent({ children, className }: CardProps) {
     </div>
   );
 }
+
+export function CardFooter({ children, className }: CardProps) {
+  return (
+    <div className={cn("p-4 md:p-6", className)}>
+      {children}
+    </div>
+  );
+}

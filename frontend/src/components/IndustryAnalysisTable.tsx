@@ -2,13 +2,14 @@
 
 import React, { useMemo, useState } from 'react';
 import { VapsAttachRate } from '@/types';
-import { Search, Download } from 'lucide-react';
+import { Search, Download, Info } from 'lucide-react';
 import { Card, CardHeader } from "./ui/Card";
 import { Input, Select } from "./ui/Input";
 import { Button } from "./ui/Button";
 import { Table, TableHeader, TableRow, TableHead, TableCell } from "./ui/TablePrims";
 import { typography } from "@/design-system/typography";
 import { Badge } from "./ui/Badge";
+import { Tooltip, TooltipContent, TooltipTrigger } from "./ui/Tooltip";
 import { cn } from "@/lib/utils";
 import { Skeleton } from './ui/Skeleton';
 
@@ -145,12 +146,14 @@ export default function IndustryAnalysisTable({ marketRows, isLoading }: Industr
                 <div className="flex items-center gap-1.5">
                   {col.label}
                   {col.info && (
-                    <span 
-                      className="inline-flex items-center justify-center w-3.5 h-3.5 rounded-full border border-slate-300 text-[9px] font-bold text-slate-400 cursor-help hover:border-primary hover:text-primary transition-colors"
-                      title={col.info}
-                    >
-                      i
-                    </span>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Info className="w-4 h-4 text-slate-400 hover:text-primary transition-colors cursor-help" />
+                      </TooltipTrigger>
+                      <TooltipContent side="right" className="max-w-xs whitespace-pre-wrap text-xs">
+                        {col.info}
+                      </TooltipContent>
+                    </Tooltip>
                   )}
                 </div>
               </TableHead>
@@ -183,12 +186,20 @@ export default function IndustryAnalysisTable({ marketRows, isLoading }: Industr
               <TableCell isHighlighted={selectedColIdx === 10} onClick={() => { setSelectedVaps(row.vaps === selectedVaps ? null : row.vaps); setSelectedColIdx(10); }} isNum isBold className="text-emerald-600">{fmtLeverage(row.leverage)}</TableCell>
               <TableCell isHighlighted={selectedColIdx === 11} onClick={() => { setSelectedVaps(row.vaps === selectedVaps ? null : row.vaps); setSelectedColIdx(11); }} isNum isBold>{fmtScore(row.opportunityScore)}</TableCell>
               <TableCell isHighlighted={selectedColIdx === 12} onClick={() => { setSelectedVaps(row.vaps === selectedVaps ? null : row.vaps); setSelectedColIdx(12); }}>
-                <Badge 
-                  variant={row.industrySignal?.includes('Strong') ? 'success' : row.industrySignal?.includes('Good') ? 'info' : row.industrySignal?.includes('Niche') ? 'info' : row.industrySignal?.includes('Monitor') ? 'warning' : 'default'}
-                  title={industrySignalTooltip(row)}
-                >
-                  {row.industrySignal}
-                </Badge>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <div className="inline-block">
+                      <Badge 
+                        variant={row.industrySignal?.includes('Strong') ? 'success' : row.industrySignal?.includes('Good') ? 'info' : row.industrySignal?.includes('Niche') ? 'info' : row.industrySignal?.includes('Monitor') ? 'warning' : 'default'}
+                      >
+                        {row.industrySignal}
+                      </Badge>
+                    </div>
+                  </TooltipTrigger>
+                  <TooltipContent side="top" className="max-w-xs whitespace-pre-wrap text-xs">
+                    {industrySignalTooltip(row)}
+                  </TooltipContent>
+                </Tooltip>
               </TableCell>
               <TableCell isHighlighted={selectedColIdx === 13} onClick={() => { setSelectedVaps(row.vaps === selectedVaps ? null : row.vaps); setSelectedColIdx(13); }} className="text-slate-500 leading-normal">{row.industrySignalReason}</TableCell>
             </TableRow>

@@ -12,9 +12,10 @@ import {
 import { VapsAttachRate } from "@/types"
 import { useState, useMemo } from "react"
 import { cn } from "@/lib/utils"
-import { ArrowUpDown, Search, Download, Filter } from "lucide-react"
+import { ArrowUpDown, Search, Download, Filter, Info } from "lucide-react"
 import { Card, CardHeader, CardContent } from "./ui/Card"
 import { Badge } from "./ui/Badge"
+import { Tooltip, TooltipContent, TooltipTrigger } from "./ui/Tooltip"
 import { Button } from "./ui/Button"
 import { Input, Select } from "./ui/Input"
 import { Table, TableHeader, TableRow, TableHead, TableCell } from "./ui/TablePrims"
@@ -106,12 +107,14 @@ export default function RecommendationTable({ data, isLoading }: RecommendationT
       header: () => (
         <div className="flex items-center gap-1.5">
           Decision
-          <span 
-            className="inline-flex items-center justify-center w-3.5 h-3.5 rounded-full border border-slate-300 text-[9px] font-bold text-slate-400 cursor-help hover:border-primary hover:text-primary transition-colors"
-            title="Decision logic&#10;&#10;Keep: fixed recommendation and attach rate is at or above unit cutoff.&#10;Review Removal: fixed recommendation but attach rate is below unit cutoff.&#10;Keep Logic + Promote: conditional or quantity-driven logic is present and attach rate is at or above unit cutoff.&#10;Keep Logic: conditional or quantity-driven logic is present, but attach rate is below unit cutoff.&#10;Add: not covered in the sheet and attach rate is at or above unit cutoff.&#10;Monitor: observed attachment, but below unit cutoff.&#10;No Action: no observed attachment and not covered in the recommendation sheet."
-          >
-            i
-          </span>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Info className="w-4 h-4 text-slate-400 hover:text-primary transition-colors cursor-help" />
+            </TooltipTrigger>
+            <TooltipContent side="right" className="max-w-xs whitespace-pre-wrap text-xs">
+              {`Decision logic\n\nKeep: fixed recommendation and attach rate is at or above unit cutoff.\nReview Removal: fixed recommendation but attach rate is below unit cutoff.\nKeep Logic + Promote: conditional or quantity-driven logic is present and attach rate is at or above unit cutoff.\nKeep Logic: conditional or quantity-driven logic is present, but attach rate is below unit cutoff.\nAdd: not covered in the sheet and attach rate is at or above unit cutoff.\nMonitor: observed attachment, but below unit cutoff.\nNo Action: no observed attachment and not covered in the recommendation sheet.`}
+            </TooltipContent>
+          </Tooltip>
         </div>
       ),
       cell: info => {
@@ -129,9 +132,18 @@ export default function RecommendationTable({ data, isLoading }: RecommendationT
         const variant = variantMap[val] || "default";
         
         return (
-          <Badge variant={variant} title={info.row.original.decisionReason}>
-            {val}
-          </Badge>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <div className="inline-block">
+                <Badge variant={variant}>
+                  {val}
+                </Badge>
+              </div>
+            </TooltipTrigger>
+            <TooltipContent side="top" className="max-w-xs whitespace-pre-wrap text-xs">
+              {info.row.original.decisionReason}
+            </TooltipContent>
+          </Tooltip>
         )
       },
     }),
