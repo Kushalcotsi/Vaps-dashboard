@@ -4,7 +4,8 @@ import React, { useMemo, useState } from 'react';
 import { VapsAttachRate } from '@/types';
 import { Search, Download, Info } from 'lucide-react';
 import { Card, CardHeader } from "./ui/Card";
-import { Input, Select } from "./ui/Input";
+import { Input } from "./ui/Input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./ui/SelectShadcn";
 import { Button } from "./ui/Button";
 import { Table, TableHeader, TableRow, TableHead, TableCell } from "./ui/TablePrims";
 import { typography } from "@/design-system/typography";
@@ -25,7 +26,7 @@ export default function IndustryAnalysisTable({ marketRows, isLoading }: Industr
   const [selectedColIdx, setSelectedColIdx] = useState<number | null>(null);
 
   const markets = useMemo(() => {
-    return Array.from(new Set(marketRows.map(r => r.market).filter(Boolean))).sort();
+    return Array.from(new Set(marketRows.map(r => r.market).filter(Boolean) as string[])).sort();
   }, [marketRows]);
 
   const filteredRows = useMemo(() => {
@@ -107,15 +108,17 @@ export default function IndustryAnalysisTable({ marketRows, isLoading }: Industr
           <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mr-1">
             {filteredRows.length} Rows
           </span>
-          <Select 
-            value={selectedMarket}
-            onChange={(e) => setSelectedMarket(e.target.value)}
-            variantSize="sm"
-            className="w-auto min-w-[160px]"
-          >
-            <option value="">All market segments</option>
-            {markets.map(m => <option key={m} value={m}>{m}</option>)}
-          </Select>
+          <div className="min-w-[160px]">
+            <Select value={selectedMarket || "all"} onValueChange={(val) => setSelectedMarket(val === "all" ? "" : val)}>
+              <SelectTrigger variantSize="sm" className="bg-white hover:bg-slate-50 transition-colors">
+                <SelectValue placeholder="All market segments" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem variantSize="sm" value="all">All market segments</SelectItem>
+                {markets.map(m => <SelectItem variantSize="sm" key={m} value={m}>{m}</SelectItem>)}
+              </SelectContent>
+            </Select>
+          </div>
           <div className="w-44">
             <Input 
               value={search}

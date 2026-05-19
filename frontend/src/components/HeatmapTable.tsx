@@ -6,7 +6,8 @@ import { Info, Search, Download } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Card, CardHeader } from "./ui/Card";
 import { Tooltip, TooltipContent, TooltipTrigger } from "./ui/Tooltip";
-import { Input, Select } from "./ui/Input";
+import { Input } from "./ui/Input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./ui/SelectShadcn";
 import { Button } from "./ui/Button";
 import { Table, TableHeader, TableRow, TableHead, TableCell } from "./ui/TablePrims";
 import { typography } from "@/design-system/typography";
@@ -31,7 +32,7 @@ export default function HeatmapTable({ title, data, segmentName, cutoff, isLoadi
 
   const divisions = useMemo(() => {
     if (!isRegionView) return [];
-    return Array.from(new Set(data.map(r => r.division).filter(Boolean))).sort();
+    return Array.from(new Set(data.map(r => r.division).filter(Boolean) as string[])).sort();
   }, [data, isRegionView]);
 
   const pivoted = useMemo(() => {
@@ -161,13 +162,14 @@ export default function HeatmapTable({ title, data, segmentName, cutoff, isLoadi
           
           {isRegionView && (
             <div className="w-40">
-              <Select 
-                value={divisionFilter} 
-                onChange={e => setDivisionFilter(e.target.value)} 
-                variantSize="sm"
-              >
-                <option value="">All Divisions</option>
-                {divisions.map(d => <option key={d} value={d}>{d}</option>)}
+              <Select value={divisionFilter || "all"} onValueChange={(val) => setDivisionFilter(val === "all" ? "" : val)}>
+                <SelectTrigger variantSize="sm" className="bg-white hover:bg-slate-50 transition-colors">
+                  <SelectValue placeholder="All Divisions" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem variantSize="sm" value="all">All Divisions</SelectItem>
+                  {divisions.map(d => <SelectItem variantSize="sm" key={d} value={d}>{d}</SelectItem>)}
+                </SelectContent>
               </Select>
             </div>
           )}

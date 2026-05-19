@@ -1,10 +1,9 @@
 "use client"
 
 import { useMemo, useState } from "react"
-import { useQuery } from "@tanstack/react-query"
+import { useQuery, keepPreviousData } from "@tanstack/react-query"
 import { fetchDashboardData } from "@/lib/api"
 import { useDashboardStore } from "@/store/useDashboardStore"
-import DashboardHeader from "@/components/DashboardHeader"
 import DistributionBars from "@/components/DistributionBars"
 import ElbowChart from "@/components/ElbowChart"
 import RecommendationTable from "@/components/RecommendationTable"
@@ -29,6 +28,7 @@ export default function DashboardPage() {
     queryFn: () => fetchDashboardData(selectedUnit),
     enabled: !!selectedUnit,
     staleTime: 30000, // Keep data fresh for 30s
+    placeholderData: keepPreviousData,
   })
 
   const filteredUnitRows = useMemo(() => {
@@ -148,21 +148,20 @@ export default function DashboardPage() {
   return (
     <DashboardLayout>
       <PageContainer className="space-y-4">
-        {/* Header Section */}
         <div className="relative">
-           <DashboardHeader />
-           {isSoftLoading && (
-             <div className="absolute top-0 right-0 flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest text-primary animate-pulse bg-white/80 px-3 py-1 rounded-full border border-blue-100 shadow-sm z-50">
-               <Loader2 size={12} className="animate-spin" />
-               Refreshing Intelligence...
-             </div>
-           )}
+          {isSoftLoading && (
+            <div className="absolute -top-5 left-1/2 -translate-x-1/2 z-[100] flex items-center gap-3 bg-slate-900/95 backdrop-blur-md px-5 py-2 rounded-full shadow-md border border-slate-700/50 text-white animate-in slide-in-from-top-2 fade-in duration-300">
+              <Loader2 size={16} className="animate-spin text-blue-400" />
+              <span className="text-[11px] font-bold tracking-widest uppercase text-slate-200">
+                Syncing Intelligence...
+              </span>
+            </div>
+          )}
+          <UnitSummaryCard 
+            isLoading={isLoading}
+            summary={dynamicSummary} 
+          />
         </div>
-
-        <UnitSummaryCard 
-          isLoading={isLoading}
-          summary={dynamicSummary} 
-        />
 
         {/* Workspace Navigation */}
         <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-5 mt-4 relative overflow-hidden">

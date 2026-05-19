@@ -17,7 +17,8 @@ import { Card, CardHeader, CardContent } from "./ui/Card"
 import { Badge } from "./ui/Badge"
 import { Tooltip, TooltipContent, TooltipTrigger } from "./ui/Tooltip"
 import { Button } from "./ui/Button"
-import { Input, Select } from "./ui/Input"
+import { Input } from "./ui/Input"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./ui/SelectShadcn"
 import { Table, TableHeader, TableRow, TableHead, TableCell } from "./ui/TablePrims"
 import { typography } from "@/design-system/typography"
 import { Skeleton } from "./ui/Skeleton"
@@ -43,8 +44,8 @@ export default function RecommendationTable({ data, isLoading }: RecommendationT
   const [tierFilter, setTierFilter] = useState("")
   const [minAttach, setMinAttach] = useState("0")
 
-  const markets = useMemo(() => Array.from(new Set(data.map(r => r.market).filter(Boolean))).sort(), [data])
-  const tiers = useMemo(() => Array.from(new Set(data.map(r => r.tier).filter(Boolean))).sort(), [data])
+  const markets = useMemo(() => Array.from(new Set(data.map(r => r.market).filter(Boolean) as string[])).sort(), [data])
+  const tiers = useMemo(() => Array.from(new Set(data.map(r => r.tier).filter(Boolean) as string[])).sort(), [data])
 
   const filteredData = useMemo(() => {
     return data.filter(r => {
@@ -214,39 +215,64 @@ export default function RecommendationTable({ data, isLoading }: RecommendationT
       <CardContent className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-3 pt-0 pb-4 border-b border-slate-100">
         <div className="flex flex-col gap-1">
           <label className={typography.label}>Market</label>
-          <Select value={marketFilter} onChange={e => setMarketFilter(e.target.value)} variantSize="sm">
-            <option value="">All Markets</option>
-            {markets.map(m => <option key={m} value={m}>{m}</option>)}
+          <Select value={marketFilter || "all"} onValueChange={(val) => setMarketFilter(val === "all" ? "" : val)}>
+            <SelectTrigger variantSize="sm" className="bg-white hover:bg-slate-50 transition-colors">
+              <SelectValue placeholder="All Markets" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem variantSize="sm" value="all">All Markets</SelectItem>
+              {markets.map(m => <SelectItem variantSize="sm" key={m} value={m}>{m}</SelectItem>)}
+            </SelectContent>
           </Select>
         </div>
         <div className="flex flex-col gap-1">
           <label className={typography.label}>Status</label>
-          <Select value={statusFilter} onChange={e => setStatusFilter(e.target.value)} variantSize="sm">
-            <option value="">All Statuses</option>
-            <option value="Above cutoff">Above cutoff</option>
-            <option value="Below cutoff">Below cutoff</option>
+          <Select value={statusFilter || "all"} onValueChange={(val) => setStatusFilter(val === "all" ? "" : val)}>
+            <SelectTrigger variantSize="sm" className="bg-white hover:bg-slate-50 transition-colors">
+              <SelectValue placeholder="All Statuses" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem variantSize="sm" value="all">All Statuses</SelectItem>
+              <SelectItem variantSize="sm" value="Above cutoff">Above cutoff</SelectItem>
+              <SelectItem variantSize="sm" value="Below cutoff">Below cutoff</SelectItem>
+            </SelectContent>
           </Select>
         </div>
         <div className="flex flex-col gap-1">
           <label className={typography.label}>Action</label>
-          <Select value={actionFilter} onChange={e => setActionFilter(e.target.value)} variantSize="sm">
-            <option value="">All Actions</option>
-            {["Add", "Keep", "Keep Logic", "Monitor", "No Action", "Review Removal"].map(a => <option key={a} value={a}>{a}</option>)}
+          <Select value={actionFilter || "all"} onValueChange={(val) => setActionFilter(val === "all" ? "" : val)}>
+            <SelectTrigger variantSize="sm" className="bg-white hover:bg-slate-50 transition-colors">
+              <SelectValue placeholder="All Actions" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem variantSize="sm" value="all">All Actions</SelectItem>
+              {["Add", "Keep", "Keep Logic", "Monitor", "No Action", "Review Removal"].map(a => <SelectItem variantSize="sm" key={a} value={a}>{a}</SelectItem>)}
+            </SelectContent>
           </Select>
         </div>
         <div className="flex flex-col gap-1">
           <label className={typography.label}>Covered</label>
-          <Select value={recFilter} onChange={e => setRecFilter(e.target.value)} variantSize="sm">
-            <option value="">All</option>
-            <option value="Yes">Yes</option>
-            <option value="No">No</option>
+          <Select value={recFilter || "all"} onValueChange={(val) => setRecFilter(val === "all" ? "" : val)}>
+            <SelectTrigger variantSize="sm" className="bg-white hover:bg-slate-50 transition-colors">
+              <SelectValue placeholder="All" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem variantSize="sm" value="all">All</SelectItem>
+              <SelectItem variantSize="sm" value="Yes">Yes</SelectItem>
+              <SelectItem variantSize="sm" value="No">No</SelectItem>
+            </SelectContent>
           </Select>
         </div>
         <div className="flex flex-col gap-1">
           <label className={typography.label}>Tier</label>
-          <Select value={tierFilter} onChange={e => setTierFilter(e.target.value)} variantSize="sm">
-            <option value="">All Tiers</option>
-            {tiers.map(t => <option key={t} value={t}>{t}</option>)}
+          <Select value={tierFilter || "all"} onValueChange={(val) => setTierFilter(val === "all" ? "" : val)}>
+            <SelectTrigger variantSize="sm" className="bg-white hover:bg-slate-50 transition-colors">
+              <SelectValue placeholder="All Tiers" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem variantSize="sm" value="all">All Tiers</SelectItem>
+              {tiers.map(t => <SelectItem variantSize="sm" key={t} value={t}>{t}</SelectItem>)}
+            </SelectContent>
           </Select>
         </div>
         <div className="flex flex-col gap-1">
