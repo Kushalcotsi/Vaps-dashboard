@@ -1,5 +1,6 @@
 import React from "react";
 import { GlobalHeader } from "../GlobalHeader";
+import { GlobalFilterBar } from "../GlobalFilterBar";
 
 interface DashboardLayoutProps {
   children: React.ReactNode;
@@ -8,10 +9,11 @@ interface DashboardLayoutProps {
 
 export function DashboardLayout({ children, sidebar }: DashboardLayoutProps) {
   return (
-    <div className="relative h-screen flex flex-col bg-[#FAFAFA] overflow-hidden">
-      <GlobalHeader />
-      <div className="flex flex-1 overflow-hidden">
-        {sidebar}
+    <div className="relative h-screen flex bg-[#FAFAFA] overflow-hidden">
+      {sidebar}
+      <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
+        <GlobalHeader />
+        <GlobalFilterBar />
         <main className="flex-1 overflow-y-auto pb-2">
           {children}
         </main>
@@ -19,3 +21,5 @@ export function DashboardLayout({ children, sidebar }: DashboardLayoutProps) {
     </div>
   );
 }
+
+

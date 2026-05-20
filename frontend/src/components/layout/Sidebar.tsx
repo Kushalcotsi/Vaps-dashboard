@@ -11,6 +11,7 @@ import {
   ChevronLeft
 } from "lucide-react";
 import { Tooltip, TooltipTrigger, TooltipContent, TooltipProvider } from "@/components/ui/Tooltip";
+import { BrandLogo } from "../BrandLogo";
 
 export type SidebarTab = "overview" | "unit" | "market" | "division" | "region" | "raw";
 
@@ -50,22 +51,30 @@ export function Sidebar({ activeTab, onTabChange }: SidebarProps) {
     <TooltipProvider>
       <aside 
         className={cn(
-          "h-full bg-[#00205b] border-r border-white/10 flex flex-col shrink-0 transition-all duration-300 relative",
+          "h-full bg-[#00205b] border-r border-white/10 flex flex-col shrink-0 transition-all duration-300 relative z-30",
           isCollapsed ? "w-[68px]" : "w-[210px]"
         )}
       >
-        {/* Toggle Collapse Button at the top */}
-        <div className={cn("p-3 border-b border-white/10 flex", isCollapsed ? "justify-center" : "justify-end")}>
-          <button
-            onClick={() => setIsCollapsed(!isCollapsed)}
-            className="p-1.5 rounded-lg text-white/60 hover:bg-white/10 hover:text-white transition-all border border-white/10 shadow-sm"
-            title={isCollapsed ? "Expand Sidebar" : "Collapse Sidebar"}
-          >
-            {isCollapsed ? <ChevronRight size={16} /> : <ChevronLeft size={16} />}
-          </button>
+        {/* Floating Toggle Collapse Button centered on border line */}
+        <button
+          onClick={() => setIsCollapsed(!isCollapsed)}
+          className="absolute top-5 -right-3 z-50 w-6 h-6 rounded-full bg-white border border-slate-200 shadow-sm hover:shadow hover:scale-105 flex items-center justify-center text-slate-500 hover:text-slate-800 transition-all cursor-pointer"
+          title={isCollapsed ? "Expand Sidebar" : "Collapse Sidebar"}
+        >
+          {isCollapsed ? <ChevronRight size={12} /> : <ChevronLeft size={12} />}
+        </button>
+
+        {/* Sidebar Brand Header */}
+        <div className="h-16 flex items-center px-4 border-b border-white/10 shrink-0 select-none overflow-hidden">
+          {!isCollapsed ? (
+            <BrandLogo className="h-9 w-auto" logoColor="#ffffff" />
+          ) : (
+            <span className="text-white font-extrabold text-lg tracking-wider mx-auto">W</span>
+          )}
         </div>
 
         <div className="flex-grow overflow-y-auto py-4 px-3 space-y-4">
+
           {navGroups.map((group) => (
             <div key={group.title} className="space-y-1">
               {!isCollapsed && (
