@@ -1,6 +1,7 @@
 "use client"
 
 import React, { useMemo, useState } from 'react';
+import { useLocalStorageState } from "@/hooks/useLocalStorageState";
 import { VapsAttachRate } from '@/types';
 import { Search, Download, Info } from 'lucide-react';
 import { Card, CardHeader } from "./ui/Card";
@@ -17,11 +18,13 @@ import { Skeleton } from './ui/Skeleton';
 interface IndustryAnalysisProps {
   marketRows: VapsAttachRate[];
   isLoading?: boolean;
+  title?: string;
+  titleToggle?: React.ReactNode;
 }
 
-export default function IndustryAnalysisTable({ marketRows, isLoading }: IndustryAnalysisProps) {
-  const [selectedMarket, setSelectedMarket] = useState<string>(''); // Default to empty (All)
-  const [search, setSearch] = useState('');
+export default function IndustryAnalysisTable({ marketRows, isLoading, title, titleToggle }: IndustryAnalysisProps) {
+  const [selectedMarket, setSelectedMarket] = useLocalStorageState<string>('vaps-dashboard:industry-table:selectedMarket', '');
+  const [search, setSearch] = useLocalStorageState<string>('vaps-dashboard:industry-table:search', '');
   const [selectedVaps, setSelectedVaps] = useState<string | null>(null);
   const [selectedColIdx, setSelectedColIdx] = useState<number | null>(null);
 
@@ -48,7 +51,7 @@ export default function IndustryAnalysisTable({ marketRows, isLoading }: Industr
     const exportColumns = [
       { label: "Market Segment", key: "market" },
       { label: "VAPS", key: "vaps" },
-      { label: "VAPS Description", key: "vapsDesc" },
+      { label: "VAPS Description", key: "vapsDesc", fmt: (v: string) => v || "Unmapped" },
       { label: "Recommendation Logic", key: "recommendationKind" },
       { label: "Recommendation Value", key: "recommendationValue" },
       { label: "Covered", key: "coveredText" },
@@ -103,11 +106,10 @@ export default function IndustryAnalysisTable({ marketRows, isLoading }: Industr
   return (
     <Card>
       <CardHeader className="flex flex-col xl:flex-row justify-between items-start xl:items-center gap-4">
-        <h2 className={typography.cardTitle}>Recommendation Sheet Comparison by Industry</h2>
+        <div className="flex flex-wrap items-center gap-3">
+          <h2 className={typography.cardTitle}>{title || "Recommendation Sheet Comparison by Industry"}</h2>
+        </div>
         <div className="flex flex-nowrap items-center gap-3 shrink-0">
-          <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mr-1">
-            {filteredRows.length} Rows
-          </span>
           <div className="min-w-[160px]">
             <Select value={selectedMarket || "all"} onValueChange={(val) => setSelectedMarket(val === "all" ? "" : val)}>
               <SelectTrigger variantSize="sm" className="bg-white hover:bg-slate-50 transition-colors">
@@ -128,6 +130,13 @@ export default function IndustryAnalysisTable({ marketRows, isLoading }: Industr
               variantSize="sm"
             />
           </div>
+
+          {titleToggle}
+
+          <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mx-1">
+            {filteredRows.length} Rows
+          </span>
+
           <Button variant="outline" size="sm" onClick={exportData} className="flex items-center gap-2 whitespace-nowrap">
             <Download size={12} />
             CSV
@@ -178,7 +187,7 @@ export default function IndustryAnalysisTable({ marketRows, isLoading }: Industr
             <TableRow key={row.vaps + idx} isHighlighted={selectedVaps === row.vaps}>
               <TableCell isHighlighted={selectedColIdx === 0} onClick={() => { setSelectedVaps(row.vaps === selectedVaps ? null : row.vaps); setSelectedColIdx(0); }} className="text-slate-500">{row.market}</TableCell>
               <TableCell isHighlighted={selectedColIdx === 1} onClick={() => { setSelectedVaps(row.vaps === selectedVaps ? null : row.vaps); setSelectedColIdx(1); }} isBold className={typography.mono}>{row.vaps}</TableCell>
-              <TableCell isHighlighted={selectedColIdx === 2} onClick={() => { setSelectedVaps(row.vaps === selectedVaps ? null : row.vaps); setSelectedColIdx(2); }} className="text-slate-700 font-semibold leading-normal">{row.vapsDesc}</TableCell>
+              <TableCell isHighlighted={selectedColIdx === 2} onClick={() => { setSelectedVaps(row.vaps === selectedVaps ? null : row.vaps); setSelectedColIdx(2); }} className="text-slate-600 font-medium">{row.vapsDesc || "Unmapped"}</TableCell>
               <TableCell isHighlighted={selectedColIdx === 3} onClick={() => { setSelectedVaps(row.vaps === selectedVaps ? null : row.vaps); setSelectedColIdx(3); }} className={typography.label}>{row.recommendationKind || "Fixed quantity"}</TableCell>
               <TableCell isHighlighted={selectedColIdx === 4} onClick={() => { setSelectedVaps(row.vaps === selectedVaps ? null : row.vaps); setSelectedColIdx(4); }} className="text-xs font-medium text-slate-500 italic">{row.recommendationValue || "0"}</TableCell>
               <TableCell isHighlighted={selectedColIdx === 5} onClick={() => { setSelectedVaps(row.vaps === selectedVaps ? null : row.vaps); setSelectedColIdx(5); }}>{row.coveredText || "No"}</TableCell>
