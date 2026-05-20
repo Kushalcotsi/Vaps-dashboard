@@ -68,40 +68,40 @@ export default function DistributionBars({ title, data, cutoff, subtitle, isLoad
 
   return (
     <Card className="rounded-xl shadow-sm hover:shadow-md transition-shadow duration-300 border border-slate-200/60 bg-white/70 backdrop-blur-xl overflow-hidden flex flex-col h-full">
-      <CardHeader className="flex flex-row justify-between items-start border-b border-slate-100/80 pb-3 px-4 pt-4">
-        <div className="flex flex-col gap-0.5">
-          <h2 className="text-[15px] font-bold text-slate-900 tracking-tight">{title}</h2>
-          <span className="text-[11px] font-medium text-slate-500">{subtitle || defaultSubtitle}</span>
+      <CardHeader className="flex flex-row justify-between items-start border-b border-slate-100/80 pb-2 px-4 pt-3">
+        <div className="flex flex-col gap-0">
+          <h2 className="text-[14px] font-bold text-slate-900 tracking-tight">{title}</h2>
+          <span className="text-[10px] font-medium text-slate-500">{subtitle || defaultSubtitle}</span>
         </div>
-        <Badge variant="outline" className="bg-slate-50/50 text-slate-600 font-semibold border-slate-200/60 px-2 py-0.5 text-[10px] whitespace-nowrap shadow-sm">
+        <Badge variant="outline" className="bg-slate-50/50 text-slate-600 font-semibold border-slate-200/60 px-2 py-0.5 text-[9px] whitespace-nowrap shadow-sm">
           {isLoading ? <Skeleton className="h-2 w-12" /> : `Benchmark: ${(cutoff * 100).toFixed(1)}%`}
         </Badge>
       </CardHeader>
       
-      <CardContent className="flex flex-col gap-1 p-2 flex-1">
+      <CardContent className="flex flex-col gap-0.5 p-1.5 flex-1">
         {isLoading ? (
           Array.from({ length: 5 }).map((_, i) => (
             <div key={i} className="flex flex-col gap-2 p-2">
               <div className="flex justify-between items-start">
                 <div className="flex gap-2">
-                  <Skeleton className="w-8 h-8 rounded-lg" />
-                  <div className="flex flex-col gap-1.5 mt-0.5">
+                  <Skeleton className="w-7 h-7 rounded-md" />
+                  <div className="flex flex-col gap-1 mt-0.5">
                     <Skeleton className="h-3 w-32" />
                     <Skeleton className="h-2 w-20" />
                   </div>
                 </div>
-                <div className="flex flex-col items-end gap-1.5">
+                <div className="flex flex-col items-end gap-1">
                   <Skeleton className="h-4 w-12 rounded-full" />
                   <Skeleton className="h-3 w-8" />
                 </div>
               </div>
-              <Skeleton className="h-1.5 w-full rounded-full mt-0.5" />
+              <Skeleton className="h-1 w-full rounded-full mt-0.5" />
             </div>
           ))
         ) : data.length === 0 ? (
-          <div className="py-10 text-center flex flex-col items-center gap-2">
-            <div className="w-10 h-10 rounded-full bg-slate-50 flex items-center justify-center border border-slate-100 mb-1">
-              <AlertCircle className="w-4 h-4 text-slate-400" />
+          <div className="py-8 text-center flex flex-col items-center gap-2">
+            <div className="w-8 h-8 rounded-full bg-slate-50 flex items-center justify-center border border-slate-100 mb-1">
+              <AlertCircle className="w-3.5 h-3.5 text-slate-400" />
             </div>
             <p className="text-slate-500 text-xs font-medium">No insights available for the current selection.</p>
           </div>
@@ -110,43 +110,43 @@ export default function DistributionBars({ title, data, cutoff, subtitle, isLoad
             <Tooltip key={i}>
               <TooltipTrigger asChild>
                 <div 
-                  className="group flex flex-col gap-2 p-2.5 rounded-lg hover:bg-slate-50/80 transition-all duration-200 border border-transparent hover:border-slate-200/60 hover:shadow-sm cursor-help relative overflow-hidden text-left" 
+                  className="group flex flex-col gap-1.5 p-2 px-2.5 rounded-lg hover:bg-slate-50/80 transition-all duration-200 border border-transparent hover:border-slate-200/60 hover:shadow-sm cursor-help relative overflow-hidden text-left" 
                 >
               <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/40 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000 pointer-events-none" />
               <div className="flex justify-between items-start gap-3">
-                <div className="flex gap-2.5 items-center min-w-0">
+                <div className="flex gap-2 items-center min-w-0">
                   <div className={cn(
-                    "w-8 h-8 rounded-lg flex items-center justify-center shrink-0 border transition-colors shadow-sm",
+                    "w-7 h-7 rounded-md flex items-center justify-center shrink-0 border transition-colors shadow-sm",
                     isMissedOpportunity 
                       ? "bg-amber-50/50 border-amber-100/60 group-hover:bg-amber-100/50 text-amber-500"
                       : "bg-indigo-50/50 border-indigo-100/60 group-hover:bg-indigo-100/50 text-indigo-500"
                   )}>
-                    {isMissedOpportunity ? <TrendingUp className="w-4 h-4" /> : <Package className="w-4 h-4" />}
+                    {isMissedOpportunity ? <TrendingUp className="w-3.5 h-3.5" /> : <Package className="w-3.5 h-3.5" />}
                   </div>
                   <div className="flex flex-col min-w-0 gap-0">
                     <strong className={cn(
-                      "text-[13px] font-semibold truncate leading-tight transition-colors",
+                      "text-[12px] font-semibold truncate leading-tight transition-colors",
                       isMissedOpportunity ? "text-slate-800 group-hover:text-amber-700" : "text-slate-800 group-hover:text-indigo-700"
                     )}>
-                      {row.vapsDesc}
+                      {row.vapsDesc || "Unmapped VAPS"}
                     </strong>
-                    <span className="text-[11px] font-medium text-slate-500 flex items-center gap-1.5 mt-0.5">
-                      <span className="font-mono text-slate-400 text-[9px] px-1 py-0 bg-slate-100 rounded border border-slate-200/60 leading-tight">{row.vaps}</span>
+                    <span className="text-[10px] font-medium text-slate-500 flex items-center gap-1.5 mt-0.5">
+                      <span className="font-mono text-slate-400 text-[8px] px-1 py-0 bg-slate-100 rounded border border-slate-200/60 leading-none">{row.vaps}</span>
                       <span className="w-1 h-1 bg-slate-300 rounded-full" />
                       <span className="truncate">{row.mainGroup}</span>
                     </span>
                   </div>
                 </div>
-                <div className="flex flex-col items-end gap-1 shrink-0 mt-0.5">
+                <div className="flex flex-col items-end gap-0.5 shrink-0 mt-0.5">
                   <ActionBadge decision={row.decision || "UNKNOWN"} />
-                  <span className="text-[15px] font-extrabold text-slate-900 tabular-nums leading-none tracking-tight mt-0.5">
+                  <span className="text-[14px] font-extrabold text-slate-900 tabular-nums leading-none tracking-tight mt-0.5">
                     {(row.attachRate * 100).toFixed(1)}%
                   </span>
                 </div>
               </div>
               
-              <div className="relative pt-1 pb-0.5 mt-0">
-                <div className="h-[6px] w-full bg-slate-100 rounded-full overflow-hidden border border-slate-200/60 shadow-inner">
+              <div className="relative pt-0.5 pb-0 mt-0">
+                <div className="h-[5px] w-full bg-slate-100 rounded-full overflow-hidden border border-slate-200/60 shadow-inner">
                   <div 
                     className={cn(
                         "h-full rounded-full transition-all duration-1000 ease-out shadow-sm",
@@ -178,8 +178,8 @@ export default function DistributionBars({ title, data, cutoff, subtitle, isLoad
       </CardContent>
 
       {!isLoading && data.length > 0 && (
-        <CardFooter className="bg-slate-50/80 border-t border-slate-100/80 px-4 py-2.5 mt-auto">
-          <div className="flex items-center gap-1.5 text-[11px] font-medium text-slate-600 w-full">
+        <CardFooter className="bg-slate-50/80 border-t border-slate-100/80 px-4 py-2 mt-auto">
+          <div className="flex items-center gap-1.5 text-[10px] font-medium text-slate-600 w-full">
             <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse shadow-[0_0_8px_rgba(16,185,129,0.5)]" />
             {isMissedOpportunity 
               ? <span><strong className="text-slate-900">{aboveBenchmarkCount}</strong> of <strong className="text-slate-900">{data.length}</strong> VAPS have strong attach improvement opportunities</span>

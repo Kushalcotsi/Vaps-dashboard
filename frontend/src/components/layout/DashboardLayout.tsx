@@ -1,21 +1,21 @@
 import React from "react";
 import { GlobalHeader } from "../GlobalHeader";
-import { spacing } from "@/design-system/spacing";
-import { cn } from "@/lib/utils";
 
 interface DashboardLayoutProps {
   children: React.ReactNode;
+  sidebar?: React.ReactNode;
 }
 
-export function DashboardLayout({ children }: DashboardLayoutProps) {
+export function DashboardLayout({ children, sidebar }: DashboardLayoutProps) {
   return (
-    <div className="relative min-h-screen flex flex-col bg-background">
+    <div className="relative h-screen flex flex-col bg-[#FAFAFA] overflow-hidden">
       <GlobalHeader />
-      <main className="flex-1 py-4 md:py-6">
-        {children}
-      </main>
-      
-      {/* Footer could be added here if needed */}
+      <div className="flex flex-1 overflow-hidden">
+        {sidebar}
+        <main className="flex-1 overflow-y-auto pb-2">
+          {children}
+        </main>
+      </div>
     </div>
   );
 }

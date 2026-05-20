@@ -12,7 +12,8 @@ import {
 import { VapsAttachRate } from "@/types"
 import { useState, useMemo } from "react"
 import { cn } from "@/lib/utils"
-import { ArrowUpDown, Search, Download, Filter, Info } from "lucide-react"
+import { useLocalStorageState } from "@/hooks/useLocalStorageState"
+import { ArrowUpDown, Search, Download, Filter, Info, RotateCcw } from "lucide-react"
 import { Card, CardHeader, CardContent } from "./ui/Card"
 import { Badge } from "./ui/Badge"
 import { Tooltip, TooltipContent, TooltipTrigger } from "./ui/Tooltip"
@@ -28,21 +29,23 @@ const columnHelper = createColumnHelper<VapsAttachRate>()
 interface RecommendationTableProps {
   data: VapsAttachRate[];
   isLoading?: boolean;
+  title?: string;
+  titleToggle?: React.ReactNode;
 }
 
-export default function RecommendationTable({ data, isLoading }: RecommendationTableProps) {
-  const [sorting, setSorting] = useState<SortingState>([])
-  const [globalFilter, setGlobalFilter] = useState("")
+export default function RecommendationTable({ data, isLoading, title, titleToggle }: RecommendationTableProps) {
+  const [sorting, setSorting] = useLocalStorageState<SortingState>("vaps-dashboard:rec-table:sorting", [])
+  const [globalFilter, setGlobalFilter] = useLocalStorageState<string>("vaps-dashboard:rec-table:search", "")
   const [selectedRowId, setSelectedRowId] = useState<string | null>(null)
   const [selectedColId, setSelectedColId] = useState<string | null>(null)
 
   // Local filters
-  const [marketFilter, setMarketFilter] = useState("")
-  const [statusFilter, setStatusFilter] = useState("")
-  const [actionFilter, setActionFilter] = useState("")
-  const [recFilter, setRecFilter] = useState("")
-  const [tierFilter, setTierFilter] = useState("")
-  const [minAttach, setMinAttach] = useState("0")
+  const [marketFilter, setMarketFilter] = useLocalStorageState<string>("vaps-dashboard:rec-table:marketFilter", "")
+  const [statusFilter, setStatusFilter] = useLocalStorageState<string>("vaps-dashboard:rec-table:statusFilter", "")
+  const [actionFilter, setActionFilter] = useLocalStorageState<string>("vaps-dashboard:rec-table:actionFilter", "")
+  const [recFilter, setRecFilter] = useLocalStorageState<string>("vaps-dashboard:rec-table:recFilter", "")
+  const [tierFilter, setTierFilter] = useLocalStorageState<string>("vaps-dashboard:rec-table:tierFilter", "")
+  const [minAttach, setMinAttach] = useLocalStorageState<string>("vaps-dashboard:rec-table:minAttach", "0")
 
   const markets = useMemo(() => Array.from(new Set(data.map(r => r.market).filter(Boolean) as string[])).sort(), [data])
   const tiers = useMemo(() => Array.from(new Set(data.map(r => r.tier).filter(Boolean) as string[])).sort(), [data])
@@ -66,7 +69,7 @@ export default function RecommendationTable({ data, isLoading }: RecommendationT
     }),
     columnHelper.accessor("vapsDesc", {
       header: "VAPS description",
-      cell: info => <span className="font-semibold text-slate-700 leading-normal block min-w-[200px]">{info.getValue()}</span>,
+      cell: info => <span className="text-xs font-medium text-slate-600 block min-w-[200px]">{info.getValue() || "Unmapped"}</span>,
     }),
     columnHelper.accessor("recommendationKind" as any, {
       header: "Recommendation logic",
@@ -82,7 +85,10 @@ export default function RecommendationTable({ data, isLoading }: RecommendationT
     }),
     columnHelper.accessor("activations", {
       header: ({ column }) => (
-        <button onClick={() => column.toggleSorting()} className="flex items-center gap-1 hover:text-primary transition-colors whitespace-nowrap">
+        <button 
+          onClick={() => column.toggleSorting()} 
+          className="flex items-center gap-1 hover:text-slate-800 transition-colors whitespace-nowrap uppercase tracking-wider text-[9px] font-bold text-slate-500"
+        >
           Unit activations <ArrowUpDown size={10} />
         </button>
       ),
@@ -94,7 +100,10 @@ export default function RecommendationTable({ data, isLoading }: RecommendationT
     }),
     columnHelper.accessor("attachRate", {
       header: ({ column }) => (
-        <button onClick={() => column.toggleSorting()} className="flex items-center gap-1 hover:text-primary transition-colors whitespace-nowrap">
+        <button 
+          onClick={() => column.toggleSorting()} 
+          className="flex items-center gap-1 hover:text-slate-800 transition-colors whitespace-nowrap uppercase tracking-wider text-[9px] font-bold text-slate-500"
+        >
           Attach rate <ArrowUpDown size={10} />
         </button>
       ),
@@ -169,7 +178,7 @@ export default function RecommendationTable({ data, isLoading }: RecommendationT
     const filename = `recommendation_sheet_comparison.csv`;
     const exportColumns = [
       { label: "VAPS", key: "vaps" },
-      { label: "VAPS Description", key: "vapsDesc" },
+      { label: "VAPS Description", key: "vapsDesc", fmt: (v: string) => v || "Unmapped" },
       { label: "Recommendation Logic", key: "recommendationKind" },
       { label: "Recommendation Value", key: "recommendationValue" },
       { label: "Covered", key: "coveredText" },
@@ -188,14 +197,11 @@ export default function RecommendationTable({ data, isLoading }: RecommendationT
   return (
     <Card>
       <CardHeader className="flex flex-col xl:flex-row justify-between items-start xl:items-center gap-4 pb-2">
-        <div className="flex items-center gap-2">
-          <Filter size={18} className="text-slate-400" />
-          <h2 className={typography.cardTitle}>Recommendation Sheet Comparison</h2>
+        <div className="flex flex-wrap items-center gap-3">
+          {/* <Filter size={18} className="text-slate-400" /> */}
+          <h2 className={typography.cardTitle}>{title || "Recommendation Sheet Comparison"}</h2>
         </div>
         <div className="flex flex-nowrap items-center gap-3 shrink-0">
-          <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mr-1">
-            {table.getRowModel().rows.length} Records
-          </span>
           <div className="w-48">
             <Input 
               value={globalFilter ?? ""}
@@ -205,6 +211,13 @@ export default function RecommendationTable({ data, isLoading }: RecommendationT
               variantSize="sm"
             />
           </div>
+
+          {titleToggle}
+
+          <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mx-1">
+            {table.getRowModel().rows.length} Records
+          </span>
+
           <Button variant="outline" size="sm" onClick={exportData} className="flex items-center gap-2 whitespace-nowrap">
             <Download size={12} />
             CSV
@@ -212,9 +225,9 @@ export default function RecommendationTable({ data, isLoading }: RecommendationT
         </div>
       </CardHeader>
 
-      <CardContent className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-3 pt-0 pb-4 border-b border-slate-100">
+      <CardContent className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-3 pt-3 pb-4 border-b border-slate-100">
         <div className="flex flex-col gap-1">
-          <label className={typography.label}>Market</label>
+          <label className="text-[9px] font-bold uppercase tracking-wider text-slate-400">Market</label>
           <Select value={marketFilter || "all"} onValueChange={(val) => setMarketFilter(val === "all" ? "" : val)}>
             <SelectTrigger variantSize="sm" className="bg-white hover:bg-slate-50 transition-colors">
               <SelectValue placeholder="All Markets" />
@@ -226,7 +239,7 @@ export default function RecommendationTable({ data, isLoading }: RecommendationT
           </Select>
         </div>
         <div className="flex flex-col gap-1">
-          <label className={typography.label}>Status</label>
+          <label className="text-[9px] font-bold uppercase tracking-wider text-slate-400">Status</label>
           <Select value={statusFilter || "all"} onValueChange={(val) => setStatusFilter(val === "all" ? "" : val)}>
             <SelectTrigger variantSize="sm" className="bg-white hover:bg-slate-50 transition-colors">
               <SelectValue placeholder="All Statuses" />
@@ -239,7 +252,7 @@ export default function RecommendationTable({ data, isLoading }: RecommendationT
           </Select>
         </div>
         <div className="flex flex-col gap-1">
-          <label className={typography.label}>Action</label>
+          <label className="text-[9px] font-bold uppercase tracking-wider text-slate-400">Action</label>
           <Select value={actionFilter || "all"} onValueChange={(val) => setActionFilter(val === "all" ? "" : val)}>
             <SelectTrigger variantSize="sm" className="bg-white hover:bg-slate-50 transition-colors">
               <SelectValue placeholder="All Actions" />
@@ -251,7 +264,7 @@ export default function RecommendationTable({ data, isLoading }: RecommendationT
           </Select>
         </div>
         <div className="flex flex-col gap-1">
-          <label className={typography.label}>Covered</label>
+          <label className="text-[9px] font-bold uppercase tracking-wider text-slate-400">Covered</label>
           <Select value={recFilter || "all"} onValueChange={(val) => setRecFilter(val === "all" ? "" : val)}>
             <SelectTrigger variantSize="sm" className="bg-white hover:bg-slate-50 transition-colors">
               <SelectValue placeholder="All" />
@@ -264,7 +277,7 @@ export default function RecommendationTable({ data, isLoading }: RecommendationT
           </Select>
         </div>
         <div className="flex flex-col gap-1">
-          <label className={typography.label}>Tier</label>
+          <label className="text-[9px] font-bold uppercase tracking-wider text-slate-400">Tier</label>
           <Select value={tierFilter || "all"} onValueChange={(val) => setTierFilter(val === "all" ? "" : val)}>
             <SelectTrigger variantSize="sm" className="bg-white hover:bg-slate-50 transition-colors">
               <SelectValue placeholder="All Tiers" />
@@ -276,7 +289,7 @@ export default function RecommendationTable({ data, isLoading }: RecommendationT
           </Select>
         </div>
         <div className="flex flex-col gap-1">
-          <label className={typography.label}>Min Attach %</label>
+          <label className="text-[9px] font-bold uppercase tracking-wider text-slate-400">Min Attach %</label>
           <Input 
             type="number" 
             value={minAttach} 
@@ -286,10 +299,10 @@ export default function RecommendationTable({ data, isLoading }: RecommendationT
           />
         </div>
         <div className="flex flex-col gap-1 justify-end">
-           <Button 
-            variant="ghost" 
+          <Button 
+            variant="outline" 
             size="sm" 
-            className="text-[10px] font-bold text-slate-400 hover:text-primary uppercase tracking-widest h-8"
+            className="flex items-center gap-1.5 h-[34px] border-slate-200 hover:border-slate-300 text-slate-500 hover:text-slate-900 transition-all text-[10px] font-bold uppercase tracking-wider"
             onClick={() => {
               setMarketFilter("");
               setStatusFilter("");
@@ -299,9 +312,10 @@ export default function RecommendationTable({ data, isLoading }: RecommendationT
               setMinAttach("0");
               setGlobalFilter("");
             }}
-           >
-             Reset Filters
-           </Button>
+          >
+            <RotateCcw size={11} className="shrink-0" />
+            Reset Filters
+          </Button>
         </div>
       </CardContent>
 

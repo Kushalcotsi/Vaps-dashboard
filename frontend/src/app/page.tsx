@@ -1,6 +1,6 @@
 "use client"
 
-import { useMemo, useState } from "react"
+import { useMemo, useState, useEffect } from "react"
 import { useQuery, keepPreviousData } from "@tanstack/react-query"
 import { fetchDashboardData } from "@/lib/api"
 import { useDashboardStore } from "@/store/useDashboardStore"
@@ -8,19 +8,21 @@ import DistributionBars from "@/components/DistributionBars"
 import ElbowChart from "@/components/ElbowChart"
 import RecommendationTable from "@/components/RecommendationTable"
 import HeatmapTable from "@/components/HeatmapTable"
-import UnitSummaryCard from "@/components/UnitSummaryCard"
 import IndustryAnalysisTable from "@/components/IndustryAnalysisTable"
 import VapsDetailTable from "@/components/VapsDetailTable"
-import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs"
+import UnitSummaryCard from "@/components/UnitSummaryCard"
 import { DashboardLayout } from "@/components/layout/DashboardLayout"
 import { PageContainer } from "@/components/layout/PageContainer"
-import { spacing } from "@/design-system/spacing"
-import { cn } from "@/lib/utils"
+import { Sidebar, SidebarTab } from "@/components/layout/Sidebar"
+import { InlineSegmentedControl } from "@/components/ui/InlineSegmentedControl"
+import { CollapsibleSection } from "@/components/ui/CollapsibleSection"
 import { Loader2 } from "lucide-react"
 
 export default function DashboardPage() {
   const { 
-    selectedUnit, selectedSource, selectedGroup
+    selectedUnit, setSelectedUnit,
+    selectedSource, setSelectedSource,
+    selectedGroup, setSelectedGroup
   } = useDashboardStore()
 
   const { data, isLoading, isFetching, error } = useQuery({
@@ -87,7 +89,7 @@ export default function DashboardPage() {
   const detailColumns = {
     unit: [
       { key: "vaps", label: "VAPS" },
-      { key: "vapsDesc", label: "VAPS description" },
+      { key: "vapsDesc", label: "VAPS description", fmt: (v: string) => v || "Unmapped" },
       { key: "source", label: "Source" },
       { key: "mainGroup", label: "Main group" },
       { key: "tier", label: "Tier" },
@@ -100,7 +102,7 @@ export default function DashboardPage() {
     segment: (type: string) => [
       { key: type, label: type.charAt(0).toUpperCase() + type.slice(1) + " segment" },
       { key: "vaps", label: "VAPS" },
-      { key: "vapsDesc", label: "VAPS description" },
+      { key: "vapsDesc", label: "VAPS description", fmt: (v: string) => v || "Unmapped" },
       { key: "source", label: "Source" },
       { key: "mainGroup", label: "Main group" },
       { key: "tier", label: "Tier" },
@@ -115,7 +117,7 @@ export default function DashboardPage() {
     ]
   };
 
-  const [activeTab, setActiveTab] = useState("overview");
+  const [activeTab, setActiveTab] = useState<SidebarTab>("overview");
   
   // Sub-view states for toggles
   const [unitSubView, setUnitSubView] = useState("recommendation"); // recommendation | industry
@@ -123,228 +125,234 @@ export default function DashboardPage() {
   const [divisionSubView, setDivisionSubView] = useState("heatmap"); // heatmap | table
   const [regionSubView, setRegionSubView] = useState("heatmap"); // heatmap | table
 
+  const [isHydrated, setIsHydrated] = useState(false);
+
+  // 1. Hydrate state from URL on initial mount and browser back/forward (popstate) navigation
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    
+    const hydrateFromUrl = () => {
+      const params = new URLSearchParams(window.location.search);
+      
+      // Tab
+      const urlTab = params.get("tab");
+      setActiveTab((urlTab as SidebarTab) || "overview");
+      
+      // Global filters
+      const urlUnit = params.get("unit");
+      setSelectedUnit(urlUnit === null || urlUnit === "all" ? "all" : urlUnit);
+      
+      const urlSource = params.get("source");
+      setSelectedSource(urlSource || "");
+      
+      const urlGroup = params.get("group");
+      setSelectedGroup(urlGroup || "");
+      
+      // Sub-view toggles
+      setUnitSubView(params.get("unitSubView") || "recommendation");
+      setMarketSubView(params.get("marketSubView") || "heatmap");
+      setDivisionSubView(params.get("divisionSubView") || "heatmap");
+      setRegionSubView(params.get("regionSubView") || "heatmap");
+    };
+
+    hydrateFromUrl();
+    setIsHydrated(true);
+
+    window.addEventListener("popstate", hydrateFromUrl);
+    return () => {
+      window.removeEventListener("popstate", hydrateFromUrl);
+    };
+  }, [setSelectedUnit, setSelectedSource, setSelectedGroup]);
+
+  // 2. Synchronize store/React state changes to URL query parameters
+  useEffect(() => {
+    if (!isHydrated || typeof window === 'undefined') return;
+
+    const params = new URLSearchParams();
+    
+    // Sidebar active tab
+    if (activeTab !== "overview") {
+      params.set("tab", activeTab);
+    }
+    
+    // Global filters
+    if (selectedUnit && selectedUnit !== "all") {
+      params.set("unit", selectedUnit);
+    }
+    
+    if (selectedSource && selectedSource !== "") {
+      params.set("source", selectedSource);
+    }
+    
+    if (selectedGroup && selectedGroup !== "") {
+      params.set("group", selectedGroup);
+    }
+    
+    // Subviews
+    if (unitSubView !== "recommendation") {
+      params.set("unitSubView", unitSubView);
+    }
+    if (marketSubView !== "heatmap") {
+      params.set("marketSubView", marketSubView);
+    }
+    if (divisionSubView !== "heatmap") {
+      params.set("divisionSubView", divisionSubView);
+    }
+    if (regionSubView !== "heatmap") {
+      params.set("regionSubView", regionSubView);
+    }
+
+    const searchStr = params.toString();
+    const newUrl = searchStr ? `${window.location.pathname}?${searchStr}` : window.location.pathname;
+    
+    window.history.replaceState(null, '', newUrl);
+  }, [
+    isHydrated,
+    activeTab,
+    selectedUnit,
+    selectedSource,
+    selectedGroup,
+    unitSubView,
+    marketSubView,
+    divisionSubView,
+    regionSubView
+  ]);
+
   // Show a "Processing" indicator for background fetches
   const isSoftLoading = isFetching && !isLoading;
 
-  const ToggleUI = ({ options, value, onChange }: { options: { id: string, label: string }[], value: string, onChange: (id: string) => void }) => (
-    <div className="flex p-1 bg-slate-100 rounded-lg w-fit mb-2">
-      {options.map((opt) => (
-        <button
-          key={opt.id}
-          onClick={() => onChange(opt.id)}
-          className={cn(
-            "px-4 py-1.5 text-[10px] font-bold uppercase tracking-wider rounded-md transition-all",
-            value === opt.id 
-              ? "bg-white text-primary shadow-sm" 
-              : "text-slate-500 hover:text-slate-700"
-          )}
-        >
-          {opt.label}
-        </button>
-      ))}
+  const renderOverview = () => (
+    <div className="space-y-4 animate-in fade-in duration-300">
+      <UnitSummaryCard summary={dynamicSummary} isLoading={isLoading} />
+
+      <section>
+        <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
+          <DistributionBars 
+            isLoading={isLoading}
+            title="Top 5 Recommended VAPS Attach Rates" 
+            data={filteredUnitRows.filter(r => r.coveredByRecommendationLogic).sort((a,b)=>b.attachRate-a.attachRate).slice(0,5)} 
+            cutoff={data?.summary?.cutoff || 0} 
+          />
+          <DistributionBars 
+            isLoading={isLoading}
+            title="Top 5 Missed Opportunity Rate" 
+            data={filteredUnitRows.filter(r => !r.coveredByRecommendationLogic && r.attachRate >= (data?.summary?.cutoff || 0)).sort((a,b)=>b.attachRate-a.attachRate).slice(0,5)} 
+            cutoff={data?.summary?.cutoff || 0} 
+          />
+        </div>
+      </section>
+
+      <section>
+        <ElbowChart isLoading={isLoading} data={filteredUnitRows} cutoff={data?.summary?.cutoff || 0.05} />
+      </section>
+    </div>
+  );
+
+  const renderUnitAnalysis = () => (
+    <div className="animate-in fade-in duration-300">
+      {unitSubView === "recommendation" ? (
+        <RecommendationTable 
+          isLoading={isLoading} 
+          data={filteredRecommendationRows} 
+          title="VAPS Attach Rate by Unit"
+          titleToggle={
+            <InlineSegmentedControl 
+              size="sm"
+              options={[
+                { id: "recommendation", label: "Recommendation" },
+                { id: "industry", label: "Industry" }
+              ]}
+              value={unitSubView}
+              onChange={setUnitSubView}
+            />
+          }
+        />
+      ) : (
+        <IndustryAnalysisTable 
+          isLoading={isLoading} 
+          marketRows={filteredIndustryRecommendationRows} 
+          title="VAPS Attach Rate by Unit"
+          titleToggle={
+            <InlineSegmentedControl 
+              size="sm"
+              options={[
+                { id: "recommendation", label: "Recommendation" },
+                { id: "industry", label: "Industry" }
+              ]}
+              value={unitSubView}
+              onChange={setUnitSubView}
+            />
+          }
+        />
+      )}
+    </div>
+  );
+
+  const renderSegmentAnalysis = (type: "market" | "division" | "region", subView: string, setSubView: (v: string) => void) => {
+    const titles = {
+      market: "VAPS Attach Rate by Market and Unit",
+      division: "VAPS Attach Rate by Unit and Division",
+      region: "VAPS Attach Rate by Unit and Region"
+    };
+
+    const segmentKey = type.charAt(0).toUpperCase() + type.slice(1);
+    const segmentData = filteredSegments[segmentKey] || [];
+    
+    const titleToggle = (
+      <InlineSegmentedControl 
+        size="sm"
+        options={[
+          { id: "heatmap", label: "Heatmap" },
+          { id: "table", label: "Table" }
+        ]}
+        value={subView}
+        onChange={setSubView}
+      />
+    );
+
+    return (
+      <div className="animate-in fade-in duration-300">
+        {subView === "heatmap" ? (
+          <HeatmapTable 
+            isLoading={isLoading}
+            title={titles[type]} 
+            titleToggle={titleToggle}
+            data={segmentData} 
+            segmentName={type} 
+            cutoff={data?.summary?.cutoff || 0.05} 
+          />
+        ) : (
+          <VapsDetailTable 
+            isLoading={isLoading} 
+            title={titles[type]} 
+            titleToggle={titleToggle}
+            columns={detailColumns.segment(type)} 
+            data={segmentData} 
+          />
+        )}
+      </div>
+    );
+  };
+
+  const renderRawData = () => (
+    <div className="space-y-6 animate-in fade-in duration-300">
+      {/* <h2 className="text-lg font-bold text-slate-800">VAPS Details</h2> */}
+      <VapsDetailTable isLoading={isLoading} title="Unit-Level VAPS Detail" columns={detailColumns.unit} data={filteredUnitRows} />
     </div>
   );
 
   return (
-    <DashboardLayout>
-      <PageContainer className="space-y-4">
+    <DashboardLayout sidebar={<Sidebar activeTab={activeTab} onTabChange={setActiveTab} />}>
+      <PageContainer className="px-8 py-6">
         <div className="relative">
-          {isSoftLoading && (
-            <div className="absolute -top-5 left-1/2 -translate-x-1/2 z-[100] flex items-center gap-3 bg-slate-900/95 backdrop-blur-md px-5 py-2 rounded-full shadow-md border border-slate-700/50 text-white animate-in slide-in-from-top-2 fade-in duration-300">
-              <Loader2 size={16} className="animate-spin text-blue-400" />
-              <span className="text-[11px] font-bold tracking-widest uppercase text-slate-200">
-                Syncing Intelligence...
-              </span>
-            </div>
-          )}
-          <UnitSummaryCard 
-            isLoading={isLoading}
-            summary={dynamicSummary} 
-          />
-        </div>
-
-        {/* Workspace Navigation */}
-        <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-5 mt-4 relative overflow-hidden">
-          {/* Content Loading Overlay (Soft) */}
-          {isSoftLoading && (
-            <div className="absolute inset-0 bg-slate-50/10 backdrop-blur-[1px] z-10 transition-all duration-300 pointer-events-none" />
-          )}
-
-          <Tabs>
-            <TabsList className="bg-slate-100/80 p-1.5 rounded-xl border-none h-auto gap-2 mb-4 flex w-fit mx-auto">
-              {[
-                { id: "overview", label: "Overview" },
-                { id: "unit", label: "VAPS Attach Rate by Unit" },
-                { id: "market", label: "VAPS Attach Rate by Market and Unit" },
-                { id: "division", label: "VAPS Attach Rate by Unit and Division" },
-                { id: "region", label: "VAPS Attach Rate by Unit and Region" },
-                { id: "raw", label: "VAPS Details" },
-              ].map((tab) => (
-                <TabsTrigger 
-                  key={tab.id}
-                  active={activeTab === tab.id} 
-                  onClick={() => setActiveTab(tab.id)}
-                  className={cn(
-                    "py-2.5 px-5 rounded-lg border-none text-[10px] font-bold tracking-tight transition-all duration-200 whitespace-nowrap",
-                    activeTab === tab.id 
-                      ? "bg-white text-primary shadow-md scale-[1.02]" 
-                      : "bg-transparent text-slate-500 hover:text-slate-700 hover:bg-slate-200/50"
-                  )}
-                >
-                  {tab.label}
-                </TabsTrigger>
-              ))}
-            </TabsList>
-
-            {/* Tab 1: Overview */}
-            <TabsContent active={activeTab === "overview"}>
-              <div className="space-y-4 mt-1">
-                <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
-                  <DistributionBars 
-                    isLoading={isLoading}
-                    title="Top 5 Recommended VAPS Attach Rates" 
-                    data={filteredUnitRows.filter(r => r.coveredByRecommendationLogic).sort((a,b)=>b.attachRate-a.attachRate).slice(0,5)} 
-                    cutoff={data?.summary?.cutoff || 0} 
-                  />
-                  <DistributionBars 
-                    isLoading={isLoading}
-                    title="Top 5 Missed Opportunity Rate" 
-                    data={filteredUnitRows.filter(r => !r.coveredByRecommendationLogic && r.attachRate >= (data?.summary?.cutoff || 0)).sort((a,b)=>b.attachRate-a.attachRate).slice(0,5)} 
-                    cutoff={data?.summary?.cutoff || 0} 
-                  />
-                </div>
-                <ElbowChart isLoading={isLoading} data={filteredUnitRows} cutoff={data?.summary?.cutoff || 0.05} />
-              </div>
-            </TabsContent>
-
-            {/* Tab 2: VAPS Attach Rate by Unit */}
-            <TabsContent active={activeTab === "unit"}>
-              <div className="mt-1">
-                <ToggleUI 
-                  options={[
-                    { id: "recommendation", label: "Recommendation Sheet Comparison" },
-                    { id: "industry", label: "Industry Comparison" }
-                  ]}
-                  value={unitSubView}
-                  onChange={setUnitSubView}
-                />
-                
-                {unitSubView === "recommendation" ? (
-                  <RecommendationTable isLoading={isLoading} data={filteredRecommendationRows} />
-                ) : (
-                  <IndustryAnalysisTable isLoading={isLoading} marketRows={filteredIndustryRecommendationRows} />
-                )}
-              </div>
-            </TabsContent>
-
-            {/* Tab 3: VAPS Attach Rate by Market and Unit */}
-            <TabsContent active={activeTab === "market"}>
-              <div className="mt-1">
-                <ToggleUI 
-                  options={[
-                    { id: "heatmap", label: "Market Heatmap" },
-                    { id: "table", label: "Market Segment Table" }
-                  ]}
-                  value={marketSubView}
-                  onChange={setMarketSubView}
-                />
-
-                {marketSubView === "heatmap" ? (
-                  <HeatmapTable 
-                    isLoading={isLoading}
-                    title="Market Segment Heatmap" 
-                    data={filteredSegments["Market"] || []} 
-                    segmentName="market"
-                    cutoff={data?.summary?.cutoff || 0.05}
-                  />
-                ) : (
-                  <VapsDetailTable 
-                    isLoading={isLoading}
-                    title="Market Segment VAPS Detail" 
-                    data={filteredSegments["Market"] || []} 
-                    columns={detailColumns.segment("market")} 
-                  />
-                )}
-              </div>
-            </TabsContent>
-
-            {/* Tab 4: VAPS Attach Rate by Unit and Division */}
-            <TabsContent active={activeTab === "division"}>
-              <div className="mt-1">
-                <ToggleUI 
-                  options={[
-                    { id: "heatmap", label: "Division Heatmap" },
-                    { id: "table", label: "Division Segment Table" }
-                  ]}
-                  value={divisionSubView}
-                  onChange={setDivisionSubView}
-                />
-
-                {divisionSubView === "heatmap" ? (
-                  <HeatmapTable 
-                    isLoading={isLoading}
-                    title="Division Segment Heatmap" 
-                    data={filteredSegments["Division"] || []} 
-                    segmentName="division"
-                    cutoff={data?.summary?.cutoff || 0.05}
-                  />
-                ) : (
-                  <VapsDetailTable 
-                    isLoading={isLoading}
-                    title="Division Segment VAPS Detail" 
-                    data={filteredSegments["Division"] || []} 
-                    columns={detailColumns.segment("division")} 
-                  />
-                )}
-              </div>
-            </TabsContent>
-
-            {/* Tab 5: VAPS Attach Rate by Unit and Region */}
-            <TabsContent active={activeTab === "region"}>
-              <div className="mt-1">
-                <ToggleUI 
-                  options={[
-                    { id: "heatmap", label: "Region Heatmap" },
-                    { id: "table", label: "Region Segment Table" }
-                  ]}
-                  value={regionSubView}
-                  onChange={setRegionSubView}
-                />
-
-                {regionSubView === "heatmap" ? (
-                  <HeatmapTable 
-                    isLoading={isLoading}
-                    title="Region Segment Heatmap" 
-                    data={filteredSegments["Region"] || []} 
-                    segmentName="region"
-                    cutoff={data?.summary?.cutoff || 0.05}
-                  />
-                ) : (
-                  <VapsDetailTable 
-                    isLoading={isLoading}
-                    title="Region Segment VAPS Detail" 
-                    data={filteredSegments["Region"] || []} 
-                    columns={detailColumns.segment("region")} 
-                  />
-                )}
-              </div>
-            </TabsContent>
-
-            {/* Tab 6: Raw VAPS Details */}
-            <TabsContent active={activeTab === "raw"}>
-              <div className="mt-1">
-                <VapsDetailTable 
-                  isLoading={isLoading}
-                  title="Unit-Level VAPS Detail" 
-                  data={filteredUnitRows} 
-                  columns={detailColumns.unit} 
-                />
-              </div>
-            </TabsContent>
-            
-          </Tabs>
+          {activeTab === "overview" && renderOverview()}
+          {activeTab === "unit" && renderUnitAnalysis()}
+          {activeTab === "market" && renderSegmentAnalysis("market", marketSubView, setMarketSubView)}
+          {activeTab === "division" && renderSegmentAnalysis("division", divisionSubView, setDivisionSubView)}
+          {activeTab === "region" && renderSegmentAnalysis("region", regionSubView, setRegionSubView)}
+          {activeTab === "raw" && renderRawData()}
         </div>
       </PageContainer>
     </DashboardLayout>
-  )
+  );
 }

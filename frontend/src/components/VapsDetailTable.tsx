@@ -1,6 +1,7 @@
 "use client"
 
 import React, { useMemo, useState } from 'react';
+import { useLocalStorageState } from "@/hooks/useLocalStorageState";
 import { VapsAttachRate } from "@/types";
 import { Search, Download, ArrowUpDown } from "lucide-react";
 import { Card, CardHeader } from "./ui/Card";
@@ -25,11 +26,13 @@ interface VapsDetailTableProps {
   columns: ColumnDef[];
   downloadId?: string;
   isLoading?: boolean;
+  titleToggle?: React.ReactNode;
 }
 
-export default function VapsDetailTable({ title, data, columns, downloadId, isLoading }: VapsDetailTableProps) {
-  const [filter, setFilter] = useState("");
-  const [sortConfig, setSortConfig] = useState<{ key: string; direction: 'asc' | 'desc' } | null>(null);
+export default function VapsDetailTable({ title, data, columns, downloadId, isLoading, titleToggle }: VapsDetailTableProps) {
+  const storageKeyPrefix = `vaps-dashboard:detail-table:${title.replace(/\s+/g, '-').toLowerCase()}`;
+  const [filter, setFilter] = useLocalStorageState<string>(`${storageKeyPrefix}:search`, "");
+  const [sortConfig, setSortConfig] = useLocalStorageState<{ key: string; direction: 'asc' | 'desc' } | null>(`${storageKeyPrefix}:sorting`, null);
   const [selectedRowIdx, setSelectedRowIdx] = useState<number | null>(null);
   const [selectedColKey, setSelectedColKey] = useState<string | null>(null);
 
@@ -71,7 +74,8 @@ export default function VapsDetailTable({ title, data, columns, downloadId, isLo
     const csvHeaders = columns.map(c => c.label).join(",");
     const csvRows = filteredAndSortedData.map(r => 
       columns.map(c => {
-        const val = (r as any)[c.key];
+        const rawVal = (r as any)[c.key];
+        const val = c.fmt ? c.fmt(rawVal) : rawVal;
         return typeof val === 'string' ? `"${val.replace(/"/g, '""')}"` : val;
       }).join(",")
     );
@@ -86,11 +90,10 @@ export default function VapsDetailTable({ title, data, columns, downloadId, isLo
   return (
     <Card>
       <CardHeader className="flex flex-col xl:flex-row justify-between items-start xl:items-center gap-4">
-        <h2 className={typography.cardTitle}>{title}</h2>
+        <div className="flex flex-wrap items-center gap-3">
+          <h2 className={typography.cardTitle}>{title}</h2>
+        </div>
         <div className="flex flex-nowrap items-center gap-3 shrink-0">
-          <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mr-1">
-            {isLoading ? "..." : `${filteredAndSortedData.length} VAPS`}
-          </span>
           <div className="w-48">
             <Input 
               value={filter}
@@ -100,6 +103,13 @@ export default function VapsDetailTable({ title, data, columns, downloadId, isLo
               variantSize="sm"
             />
           </div>
+          
+          {titleToggle}
+
+          <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mx-1">
+            {isLoading ? "..." : `${filteredAndSortedData.length} VAPS`}
+          </span>
+
           <Button 
             variant="outline" 
             size="sm" 
@@ -160,8 +170,7 @@ export default function VapsDetailTable({ title, data, columns, downloadId, isLo
                     }}
                     isBold={col.isNum && col.key === 'attachRate'}
                     className={cn(
-                      col.key === 'vaps' ? typography.mono : '',
-                      col.key === 'vapsDesc' && "font-semibold text-slate-700 leading-normal"
+                      col.key === 'vaps' ? typography.mono : ''
                     )}
                   >
                     {col.fmt ? col.fmt(val) : (val ?? "")}

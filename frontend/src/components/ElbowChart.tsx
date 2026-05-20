@@ -35,7 +35,7 @@ export default function ElbowChart({ data, cutoff, isLoading }: ElbowChartProps)
       .filter(r => r.attachRate > 0)
       .sort((a, b) => b.attachRate - a.attachRate)
       .map((r, index) => ({
-        name: r.vapsDesc,
+        name: r.vapsDesc || `Unmapped (${r.vaps})`,
         rate: r.attachRate * 100,
         index: index
       }));

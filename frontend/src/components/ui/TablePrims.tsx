@@ -55,7 +55,7 @@ export function TableHead({
       onClick={onClick}
       style={style}
       className={cn(
-        "relative border-b border-slate-200 px-4 py-3 bg-slate-50 text-left transition-colors leading-relaxed align-bottom overflow-hidden",
+        "relative border-b border-slate-200 px-4 py-3 bg-slate-50 text-left transition-colors leading-relaxed align-middle overflow-hidden",
         typography.tableHeader,
         isNum && "text-right",
         // Column head highlight - z-10
