@@ -223,32 +223,46 @@ export default function DashboardPage() {
   // Show a "Processing" indicator for background fetches
   const isSoftLoading = isFetching && !isLoading;
 
-  const renderOverview = () => (
-    <div className="space-y-4 animate-in fade-in duration-300">
-      <UnitSummaryCard summary={dynamicSummary} isLoading={isLoading} />
+  const renderOverview = () => {
+    const handleScrollToElbow = () => {
+      const element = document.getElementById("elbow-chart-section");
+      if (element) {
+        element.scrollIntoView({ behavior: "smooth", block: "center" });
+      }
+    };
 
-      <section>
-        <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
-          <DistributionBars 
-            isLoading={isLoading}
-            title="Top 5 Recommended VAPS Attach Rates" 
-            data={filteredUnitRows.filter(r => r.coveredByRecommendationLogic).sort((a,b)=>b.attachRate-a.attachRate).slice(0,5)} 
-            cutoff={data?.summary?.cutoff || 0} 
-          />
-          <DistributionBars 
-            isLoading={isLoading}
-            title="Top 5 Missed Opportunity Rate" 
-            data={filteredUnitRows.filter(r => !r.coveredByRecommendationLogic && r.attachRate >= (data?.summary?.cutoff || 0)).sort((a,b)=>b.attachRate-a.attachRate).slice(0,5)} 
-            cutoff={data?.summary?.cutoff || 0} 
-          />
-        </div>
-      </section>
+    return (
+      <div className="space-y-4 animate-in fade-in duration-300">
+        <UnitSummaryCard 
+          summary={dynamicSummary} 
+          isLoading={isLoading} 
+          onCutoffClick={handleScrollToElbow} 
+        />
 
-      <section>
-        <ElbowChart isLoading={isLoading} data={filteredUnitRows} cutoff={data?.summary?.cutoff || 0.05} />
-      </section>
-    </div>
-  );
+        <section>
+          <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
+            <DistributionBars 
+              isLoading={isLoading}
+              title="Top 5 Recommended VAPS Attach Rates" 
+              data={filteredUnitRows.filter(r => r.coveredByRecommendationLogic).sort((a,b)=>b.attachRate-a.attachRate).slice(0,5)} 
+              cutoff={data?.summary?.cutoff || 0} 
+            />
+            <DistributionBars 
+              isLoading={isLoading}
+              title="Top 5 Missed Opportunity Rate" 
+              data={filteredUnitRows.filter(r => !r.coveredByRecommendationLogic && r.attachRate >= (data?.summary?.cutoff || 0)).sort((a,b)=>b.attachRate-a.attachRate).slice(0,5)} 
+              cutoff={data?.summary?.cutoff || 0} 
+            />
+          </div>
+        </section>
+
+        <section id="elbow-chart-section">
+          <ElbowChart isLoading={isLoading} data={filteredUnitRows} cutoff={data?.summary?.cutoff || 0.05} />
+        </section>
+      </div>
+    );
+  };
+
 
   const renderUnitAnalysis = () => (
     <div className="animate-in fade-in duration-300 space-y-3">
