@@ -16,9 +16,11 @@ interface UnitSummaryProps {
     unitL3: string;
   } | null;
   isLoading?: boolean;
+  onCutoffClick?: () => void;
 }
 
-export default function UnitSummaryCard({ summary, isLoading }: UnitSummaryProps) {
+export default function UnitSummaryCard({ summary, isLoading, onCutoffClick }: UnitSummaryProps) {
+
   const fmtInt = (val: number) => val.toLocaleString();
   const fmtPct = (val: number) => `${(val * 100).toFixed(1)}%`;
 
@@ -94,7 +96,16 @@ export default function UnitSummaryCard({ summary, isLoading }: UnitSummaryProps
               </div>
             </div>
             
-            <div className="bg-white/5 backdrop-blur-sm rounded-lg py-2 px-3 border border-white/10 flex flex-col items-center justify-center min-w-[120px]">
+            <div 
+              onClick={onCutoffClick}
+              title="Click to view Elbow Curve graph"
+              className={cn(
+                "rounded-lg py-2 px-3 border flex flex-col items-center justify-center min-w-[120px] transition-all duration-200",
+                onCutoffClick 
+                  ? "bg-white/5 border-white/10 hover:bg-white/15 hover:border-white/20 active:scale-95 cursor-pointer"
+                  : "bg-white/5 border-white/10"
+              )}
+            >
               <span className="text-[9px] font-black text-blue-400 uppercase tracking-widest mb-0.5">Elbow Cutoff</span>
               <span className="text-2xl font-black tabular-nums">{summary ? fmtPct(summary.cutoff) : "---"}</span>
             </div>

@@ -131,7 +131,7 @@ export default function DistributionBars({ title, data, cutoff, subtitle, isLoad
                       {row.vapsDesc || "Unmapped VAPS"}
                     </strong>
                     <span className="text-[10px] font-medium text-slate-500 flex items-center gap-1.5 mt-0.5">
-                      <span className="font-mono text-slate-400 text-[8px] px-1 py-0 bg-slate-100 rounded border border-slate-200/60 leading-none">{row.vaps}</span>
+                      <span className="font-mono text-slate-600 text-[9px] font-semibold px-1.5 py-0.5 bg-slate-100 rounded border border-slate-200/60 leading-none">{row.vaps}</span>
                       <span className="w-1 h-1 bg-slate-300 rounded-full" />
                       <span className="truncate">{row.mainGroup}</span>
                     </span>
