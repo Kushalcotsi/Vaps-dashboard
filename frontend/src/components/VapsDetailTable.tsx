@@ -89,11 +89,13 @@ export default function VapsDetailTable({ title, data, columns, downloadId, isLo
 
   return (
     <Card>
-      <CardHeader className="flex flex-col xl:flex-row justify-between items-start xl:items-center gap-4">
-        <div className="flex flex-wrap items-center gap-3">
-          <h2 className={typography.cardTitle}>{title}</h2>
-        </div>
-        <div className="flex flex-nowrap items-center gap-3 shrink-0">
+      <CardHeader className="flex flex-col xl:flex-row justify-between items-start xl:items-center gap-3 py-2 md:py-2.5 px-4 md:px-6">
+        {title && (
+          <div className="flex flex-wrap items-center gap-3">
+            <h2 className={typography.cardTitle}>{title}</h2>
+          </div>
+        )}
+        <div className="flex flex-nowrap items-center gap-3 shrink-0 ml-auto">
           <div className="w-48">
             <Input 
               value={filter}
@@ -104,8 +106,6 @@ export default function VapsDetailTable({ title, data, columns, downloadId, isLo
             />
           </div>
           
-          {titleToggle}
-
           <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mx-1">
             {isLoading ? "..." : `${filteredAndSortedData.length} VAPS`}
           </span>
@@ -121,6 +121,8 @@ export default function VapsDetailTable({ title, data, columns, downloadId, isLo
           </Button>
         </div>
       </CardHeader>
+
+
 
       <Table>
         <TableHeader>

@@ -16,7 +16,9 @@ import { PageContainer } from "@/components/layout/PageContainer"
 import { Sidebar, SidebarTab } from "@/components/layout/Sidebar"
 import { InlineSegmentedControl } from "@/components/ui/InlineSegmentedControl"
 import { CollapsibleSection } from "@/components/ui/CollapsibleSection"
-import { Loader2 } from "lucide-react"
+import { Loader2, Info } from "lucide-react"
+import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/Tooltip"
+
 
 export default function DashboardPage() {
   const { 
@@ -249,40 +251,33 @@ export default function DashboardPage() {
   );
 
   const renderUnitAnalysis = () => (
-    <div className="animate-in fade-in duration-300">
+    <div className="animate-in fade-in duration-300 space-y-3">
+      <div className="flex flex-col gap-1 pb-0">
+        <h2 className="text-base font-bold text-slate-800 tracking-tight">VAPS Attach Rate by Unit</h2>
+        <div>
+          <InlineSegmentedControl 
+            size="sm"
+            options={[
+              { id: "recommendation", label: "Recommendation" },
+              { id: "industry", label: "Industry" }
+            ]}
+            value={unitSubView}
+            onChange={setUnitSubView}
+          />
+        </div>
+      </div>
+
       {unitSubView === "recommendation" ? (
         <RecommendationTable 
           isLoading={isLoading} 
           data={filteredRecommendationRows} 
-          title="VAPS Attach Rate by Unit"
-          titleToggle={
-            <InlineSegmentedControl 
-              size="sm"
-              options={[
-                { id: "recommendation", label: "Recommendation" },
-                { id: "industry", label: "Industry" }
-              ]}
-              value={unitSubView}
-              onChange={setUnitSubView}
-            />
-          }
+          title=""
         />
       ) : (
         <IndustryAnalysisTable 
           isLoading={isLoading} 
           marketRows={filteredIndustryRecommendationRows} 
-          title="VAPS Attach Rate by Unit"
-          titleToggle={
-            <InlineSegmentedControl 
-              size="sm"
-              options={[
-                { id: "recommendation", label: "Recommendation" },
-                { id: "industry", label: "Industry" }
-              ]}
-              value={unitSubView}
-              onChange={setUnitSubView}
-            />
-          }
+          title=""
         />
       )}
     </div>
@@ -298,25 +293,43 @@ export default function DashboardPage() {
     const segmentKey = type.charAt(0).toUpperCase() + type.slice(1);
     const segmentData = filteredSegments[segmentKey] || [];
     
-    const titleToggle = (
-      <InlineSegmentedControl 
-        size="sm"
-        options={[
-          { id: "heatmap", label: "Heatmap" },
-          { id: "table", label: "Table" }
-        ]}
-        value={subView}
-        onChange={setSubView}
-      />
-    );
+    // Calculate maxRate for heatmap tooltip if heatmap is selected
+    const maxRate = segmentData.length > 0 ? Math.max(...segmentData.map(r => r.attachRate || 0), 0) : 0;
+    const fmtPct = (val?: number) => (val === null || val === undefined) ? "0.0%" : `${(val * 100).toFixed(1)}%`;
 
     return (
-      <div className="animate-in fade-in duration-300">
+      <div className="animate-in fade-in duration-300 space-y-3">
+        <div className="flex flex-col gap-1 pb-0">
+          <div className="flex items-center gap-2">
+            <h2 className="text-base font-bold text-slate-800 tracking-tight">{titles[type]}</h2>
+            {subView === "heatmap" && (
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Info className="w-4 h-4 text-slate-400 hover:text-primary transition-colors cursor-help" />
+                </TooltipTrigger>
+                <TooltipContent side="right" className="max-w-xs whitespace-pre-wrap text-xs">
+                  {`Segment heatmap logic\n\nColoring: intensity matches attach rate relative to the maximum observed (${fmtPct(maxRate)}).\nSignals: industry signal logic is applied at the segment level.\n\nClick a cell to highlight related data across the workspace.`}
+                </TooltipContent>
+              </Tooltip>
+            )}
+          </div>
+          <div>
+            <InlineSegmentedControl 
+              size="sm"
+              options={[
+                { id: "heatmap", label: "Heatmap" },
+                { id: "table", label: "Table" }
+              ]}
+              value={subView}
+              onChange={setSubView}
+            />
+          </div>
+        </div>
+
         {subView === "heatmap" ? (
           <HeatmapTable 
             isLoading={isLoading}
-            title={titles[type]} 
-            titleToggle={titleToggle}
+            title="" 
             data={segmentData} 
             segmentName={type} 
             cutoff={data?.summary?.cutoff || 0.05} 
@@ -324,8 +337,7 @@ export default function DashboardPage() {
         ) : (
           <VapsDetailTable 
             isLoading={isLoading} 
-            title={titles[type]} 
-            titleToggle={titleToggle}
+            title="" 
             columns={detailColumns.segment(type)} 
             data={segmentData} 
           />
@@ -335,11 +347,15 @@ export default function DashboardPage() {
   };
 
   const renderRawData = () => (
-    <div className="space-y-6 animate-in fade-in duration-300">
-      {/* <h2 className="text-lg font-bold text-slate-800">VAPS Details</h2> */}
-      <VapsDetailTable isLoading={isLoading} title="Unit-Level VAPS Detail" columns={detailColumns.unit} data={filteredUnitRows} />
+    <div className="space-y-3 animate-in fade-in duration-300">
+      <div className="flex flex-col gap-1 pb-0">
+        <h2 className="text-base font-bold text-slate-800 tracking-tight">Unit-Level VAPS Detail</h2>
+      </div>
+      <VapsDetailTable isLoading={isLoading} title="" columns={detailColumns.unit} data={filteredUnitRows} />
     </div>
   );
+
+
 
   return (
     <DashboardLayout sidebar={<Sidebar activeTab={activeTab} onTabChange={setActiveTab} />}>

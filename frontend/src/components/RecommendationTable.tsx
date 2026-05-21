@@ -196,12 +196,14 @@ export default function RecommendationTable({ data, isLoading, title, titleToggl
 
   return (
     <Card>
-      <CardHeader className="flex flex-col xl:flex-row justify-between items-start xl:items-center gap-4 pb-2">
-        <div className="flex flex-wrap items-center gap-3">
-          {/* <Filter size={18} className="text-slate-400" /> */}
-          <h2 className={typography.cardTitle}>{title || "Recommendation Sheet Comparison"}</h2>
-        </div>
-        <div className="flex flex-nowrap items-center gap-3 shrink-0">
+      <CardHeader className="flex flex-col xl:flex-row justify-between items-start xl:items-center gap-3 py-2 md:py-2.5 px-4 md:px-6">
+        {title && (
+          <div className="flex flex-wrap items-center gap-3">
+            {/* <Filter size={18} className="text-slate-400" /> */}
+            <h2 className={typography.cardTitle}>{title}</h2>
+          </div>
+        )}
+        <div className="flex flex-nowrap items-center gap-3 shrink-0 ml-auto">
           <div className="w-48">
             <Input 
               value={globalFilter ?? ""}
@@ -211,8 +213,6 @@ export default function RecommendationTable({ data, isLoading, title, titleToggl
               variantSize="sm"
             />
           </div>
-
-          {titleToggle}
 
           <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mx-1">
             {table.getRowModel().rows.length} Records
@@ -225,8 +225,10 @@ export default function RecommendationTable({ data, isLoading, title, titleToggl
         </div>
       </CardHeader>
 
-      <CardContent className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-3 pt-3 pb-4 border-b border-slate-100">
+
+      <CardContent className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-2 py-2.5 px-4 md:px-6 border-b border-slate-100">
         <div className="flex flex-col gap-1">
+
           <label className="text-[9px] font-bold uppercase tracking-wider text-slate-400">Market</label>
           <Select value={marketFilter || "all"} onValueChange={(val) => setMarketFilter(val === "all" ? "" : val)}>
             <SelectTrigger variantSize="sm" className="bg-white hover:bg-slate-50 transition-colors">

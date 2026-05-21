@@ -145,21 +145,23 @@ export default function HeatmapTable({ title, data, segmentName, cutoff, isLoadi
 
   return (
     <Card>
-      <CardHeader className="flex flex-col xl:flex-row justify-between items-start xl:items-center gap-4">
-        <div className="flex flex-wrap items-center gap-3">
-          <div className="flex items-center gap-2">
-            <h2 className={typography.cardTitle}>{title}</h2>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Info className="w-4 h-4 text-slate-400 hover:text-primary transition-colors cursor-help" />
-              </TooltipTrigger>
-              <TooltipContent side="right" className="max-w-xs whitespace-pre-wrap text-xs">
-                {`Segment heatmap logic\n\nColoring: intensity matches attach rate relative to the maximum observed (${fmtPct(maxRate)}).\nSignals: industry signal logic is applied at the segment level.\n\nClick a cell to highlight related data across the workspace.`}
-              </TooltipContent>
-            </Tooltip>
+      <CardHeader className="flex flex-col xl:flex-row justify-between items-start xl:items-center gap-3 py-2 md:py-2.5 px-4 md:px-6">
+        {title && (
+          <div className="flex flex-wrap items-center gap-3">
+            <div className="flex items-center gap-2">
+              <h2 className={typography.cardTitle}>{title}</h2>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Info className="w-4 h-4 text-slate-400 hover:text-primary transition-colors cursor-help" />
+                </TooltipTrigger>
+                <TooltipContent side="right" className="max-w-xs whitespace-pre-wrap text-xs">
+                  {`Segment heatmap logic\n\nColoring: intensity matches attach rate relative to the maximum observed (${fmtPct(maxRate)}).\nSignals: industry signal logic is applied at the segment level.\n\nClick a cell to highlight related data across the workspace.`}
+                </TooltipContent>
+              </Tooltip>
+            </div>
           </div>
-        </div>
-        <div className="flex flex-nowrap items-center gap-3 shrink-0">
+        )}
+        <div className="flex flex-nowrap items-center gap-3 shrink-0 ml-auto">
           {isRegionView && (
             <div className="w-40">
               <Select value={divisionFilter || "all"} onValueChange={(val) => setDivisionFilter(val === "all" ? "" : val)}>
@@ -184,8 +186,6 @@ export default function HeatmapTable({ title, data, segmentName, cutoff, isLoadi
             />
           </div>
 
-          {titleToggle}
-
           <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mx-1">
             {filteredRows.length} VAPS
           </span>
@@ -196,6 +196,8 @@ export default function HeatmapTable({ title, data, segmentName, cutoff, isLoadi
           </Button>
         </div>
       </CardHeader>
+
+
 
       <Table className="table-auto min-w-full">
         <TableHeader>
