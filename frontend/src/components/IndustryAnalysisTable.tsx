@@ -105,11 +105,13 @@ export default function IndustryAnalysisTable({ marketRows, isLoading, title, ti
 
   return (
     <Card>
-      <CardHeader className="flex flex-col xl:flex-row justify-between items-start xl:items-center gap-4">
-        <div className="flex flex-wrap items-center gap-3">
-          <h2 className={typography.cardTitle}>{title || "Recommendation Sheet Comparison by Industry"}</h2>
-        </div>
-        <div className="flex flex-nowrap items-center gap-3 shrink-0">
+      <CardHeader className="flex flex-col xl:flex-row justify-between items-start xl:items-center gap-3 py-2 md:py-2.5 px-4 md:px-6">
+        {title && (
+          <div className="flex flex-wrap items-center gap-3">
+            <h2 className={typography.cardTitle}>{title}</h2>
+          </div>
+        )}
+        <div className="flex flex-nowrap items-center gap-3 shrink-0 ml-auto">
           <div className="min-w-[160px]">
             <Select value={selectedMarket || "all"} onValueChange={(val) => setSelectedMarket(val === "all" ? "" : val)}>
               <SelectTrigger variantSize="sm" className="bg-white hover:bg-slate-50 transition-colors">
@@ -131,8 +133,6 @@ export default function IndustryAnalysisTable({ marketRows, isLoading, title, ti
             />
           </div>
 
-          {titleToggle}
-
           <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mx-1">
             {filteredRows.length} Rows
           </span>
@@ -143,6 +143,8 @@ export default function IndustryAnalysisTable({ marketRows, isLoading, title, ti
           </Button>
         </div>
       </CardHeader>
+
+
 
       <Table>
         <TableHeader>
