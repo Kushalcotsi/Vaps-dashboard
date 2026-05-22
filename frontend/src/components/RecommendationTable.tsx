@@ -87,7 +87,7 @@ export default function RecommendationTable({ data, isLoading, title, titleToggl
       header: ({ column }) => (
         <button 
           onClick={() => column.toggleSorting()} 
-          className="flex items-center gap-1 hover:text-slate-800 transition-colors whitespace-nowrap uppercase tracking-wider text-[9px] font-bold text-slate-500"
+          className="flex items-center gap-1 hover:text-slate-800 transition-colors whitespace-nowrap uppercase tracking-wider text-[11px] font-bold text-slate-500"
         >
           Unit activations <ArrowUpDown size={10} />
         </button>
@@ -102,7 +102,7 @@ export default function RecommendationTable({ data, isLoading, title, titleToggl
       header: ({ column }) => (
         <button 
           onClick={() => column.toggleSorting()} 
-          className="flex items-center gap-1 hover:text-slate-800 transition-colors whitespace-nowrap uppercase tracking-wider text-[9px] font-bold text-slate-500"
+          className="flex items-center gap-1 hover:text-slate-800 transition-colors whitespace-nowrap uppercase tracking-wider text-[11px] font-bold text-slate-500"
         >
           Attach rate <ArrowUpDown size={10} />
         </button>
@@ -214,7 +214,7 @@ export default function RecommendationTable({ data, isLoading, title, titleToggl
             />
           </div>
 
-          <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mx-1">
+          <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider mx-1">
             {table.getRowModel().rows.length} Records
           </span>
 
@@ -229,7 +229,7 @@ export default function RecommendationTable({ data, isLoading, title, titleToggl
       <CardContent className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-2 py-2 px-3 md:px-4 border-b border-slate-100">
         <div className="flex flex-col gap-1">
 
-          <label className="text-[9px] font-bold uppercase tracking-wider text-slate-400">Market</label>
+          <label className="text-[11px] font-bold uppercase tracking-wider text-slate-500">Market</label>
           <Select value={marketFilter || "all"} onValueChange={(val) => setMarketFilter(val === "all" ? "" : val)}>
             <SelectTrigger variantSize="sm" className="bg-white hover:bg-slate-50 transition-colors">
               <SelectValue placeholder="All Markets" />
@@ -241,7 +241,7 @@ export default function RecommendationTable({ data, isLoading, title, titleToggl
           </Select>
         </div>
         <div className="flex flex-col gap-1">
-          <label className="text-[9px] font-bold uppercase tracking-wider text-slate-400">Status</label>
+          <label className="text-[11px] font-bold uppercase tracking-wider text-slate-500">Status</label>
           <Select value={statusFilter || "all"} onValueChange={(val) => setStatusFilter(val === "all" ? "" : val)}>
             <SelectTrigger variantSize="sm" className="bg-white hover:bg-slate-50 transition-colors">
               <SelectValue placeholder="All Statuses" />
@@ -254,7 +254,7 @@ export default function RecommendationTable({ data, isLoading, title, titleToggl
           </Select>
         </div>
         <div className="flex flex-col gap-1">
-          <label className="text-[9px] font-bold uppercase tracking-wider text-slate-400">Action</label>
+          <label className="text-[11px] font-bold uppercase tracking-wider text-slate-500">Action</label>
           <Select value={actionFilter || "all"} onValueChange={(val) => setActionFilter(val === "all" ? "" : val)}>
             <SelectTrigger variantSize="sm" className="bg-white hover:bg-slate-50 transition-colors">
               <SelectValue placeholder="All Actions" />
@@ -266,7 +266,7 @@ export default function RecommendationTable({ data, isLoading, title, titleToggl
           </Select>
         </div>
         <div className="flex flex-col gap-1">
-          <label className="text-[9px] font-bold uppercase tracking-wider text-slate-400">Covered</label>
+          <label className="text-[11px] font-bold uppercase tracking-wider text-slate-500">Covered</label>
           <Select value={recFilter || "all"} onValueChange={(val) => setRecFilter(val === "all" ? "" : val)}>
             <SelectTrigger variantSize="sm" className="bg-white hover:bg-slate-50 transition-colors">
               <SelectValue placeholder="All" />
@@ -279,7 +279,7 @@ export default function RecommendationTable({ data, isLoading, title, titleToggl
           </Select>
         </div>
         <div className="flex flex-col gap-1">
-          <label className="text-[9px] font-bold uppercase tracking-wider text-slate-400">Tier</label>
+          <label className="text-[11px] font-bold uppercase tracking-wider text-slate-500">Tier</label>
           <Select value={tierFilter || "all"} onValueChange={(val) => setTierFilter(val === "all" ? "" : val)}>
             <SelectTrigger variantSize="sm" className="bg-white hover:bg-slate-50 transition-colors">
               <SelectValue placeholder="All Tiers" />
@@ -291,7 +291,7 @@ export default function RecommendationTable({ data, isLoading, title, titleToggl
           </Select>
         </div>
         <div className="flex flex-col gap-1">
-          <label className="text-[9px] font-bold uppercase tracking-wider text-slate-400">Min Attach %</label>
+          <label className="text-[11px] font-bold uppercase tracking-wider text-slate-500">Min Attach %</label>
           <Input 
             type="number" 
             value={minAttach} 

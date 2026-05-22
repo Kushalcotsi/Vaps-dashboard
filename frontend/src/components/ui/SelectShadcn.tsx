@@ -19,7 +19,7 @@ const SelectTrigger = React.forwardRef<
   SelectTriggerProps
 >(({ className, children, variantSize = "md", ...props }, ref) => {
   const sizes = {
-    sm: "h-6 py-1 px-2 text-[10px] rounded-md",
+    sm: "h-6 py-1 px-2 text-[11px] rounded-md font-medium",
     md: "h-7 px-2 py-1 text-xs rounded-md",
     lg: "h-9 px-3 py-1.5 text-sm rounded-md"
   };
@@ -82,7 +82,7 @@ const SelectItem = React.forwardRef<
   SelectItemProps
 >(({ className, children, variantSize = "md", ...props }, ref) => {
   const sizes = {
-    sm: "py-0.5 text-[10px]",
+    sm: "py-0.5 text-[11px] font-medium",
     md: "py-1 text-xs",
     lg: "py-1.5 text-sm"
   };
