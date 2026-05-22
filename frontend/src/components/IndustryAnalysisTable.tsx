@@ -133,7 +133,7 @@ export default function IndustryAnalysisTable({ marketRows, isLoading, title, ti
             />
           </div>
 
-          <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mx-1">
+          <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider mx-1">
             {filteredRows.length} Rows
           </span>
 

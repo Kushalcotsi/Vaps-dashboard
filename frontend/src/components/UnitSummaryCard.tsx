@@ -86,11 +86,11 @@ export default function UnitSummaryCard({ summary, isLoading, onCutoffClick }: U
               <p className="text-slate-400 text-xs font-medium max-w-2xl">{summary?.unitDescription || "Unit description not available"}</p>
               <div className="flex flex-wrap gap-x-5 gap-y-1 pt-0.5">
                 <div className="flex items-center gap-2">
-                  <span className="text-[9px] font-bold text-slate-500 uppercase tracking-wider">Solution L2</span>
+                  <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Solution L2</span>
                   <span className="text-xs font-semibold text-slate-300">{summary?.unitL2 || "---"}</span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <span className="text-[9px] font-bold text-slate-500 uppercase tracking-wider">Product L3</span>
+                  <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Product L3</span>
                   <span className="text-xs font-semibold text-slate-300">{summary?.unitL3 || "---"}</span>
                 </div>
               </div>
@@ -106,7 +106,7 @@ export default function UnitSummaryCard({ summary, isLoading, onCutoffClick }: U
                   : "bg-white/5 border-white/10"
               )}
             >
-              <span className="text-[9px] font-black text-blue-400 uppercase tracking-widest mb-0.5">Elbow Cutoff</span>
+              <span className="text-[10px] font-black text-blue-400 uppercase tracking-widest mb-0.5">Elbow Cutoff</span>
               <span className="text-2xl font-black tabular-nums">{summary ? fmtPct(summary.cutoff) : "---"}</span>
             </div>
           </div>
@@ -127,14 +127,14 @@ export default function UnitSummaryCard({ summary, isLoading, onCutoffClick }: U
                     <div className={cn("p-1.5 rounded-lg", kpi.color)}>
                       <kpi.icon size={14} />
                     </div>
-                    <span className="text-[9px] font-bold text-slate-500 uppercase tracking-widest leading-tight">
+                    <span className="text-[11px] font-bold text-slate-500 uppercase tracking-widest leading-tight">
                       {kpi.label}
                     </span>
                   </div>
                   <div className="flex items-baseline gap-1">
                     <span className="text-lg font-black text-slate-900 tabular-nums">{kpi.value}</span>
                   </div>
-                  <p className="mt-1 text-[9px] text-slate-400 leading-normal font-medium italic">
+                  <p className="mt-1 text-[10px] text-slate-500 leading-normal font-medium italic">
                     {kpi.description}
                   </p>
                 </div>

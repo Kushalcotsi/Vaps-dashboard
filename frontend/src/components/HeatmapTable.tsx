@@ -186,7 +186,7 @@ export default function HeatmapTable({ title, data, segmentName, cutoff, isLoadi
             />
           </div>
 
-          <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mx-1">
+          <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider mx-1">
             {filteredRows.length} VAPS
           </span>
           
@@ -283,10 +283,10 @@ export default function HeatmapTable({ title, data, segmentName, cutoff, isLoadi
                       <Tooltip>
                         <TooltipTrigger asChild>
                           <div className="w-full min-h-[32px] flex flex-col items-center justify-center gap-0.5 group/cell p-1 relative z-20">
-                            <span className={cn("text-[11px] font-bold tabular-nums", isDark ? "text-white" : "text-slate-900")}>
+                            <span className={cn("text-xs font-bold tabular-nums", isDark ? "text-white" : "text-slate-900")}>
                               {cell ? fmtPct(cell.attachRate) : "0.0%"}
                             </span>
-                            <span className={cn("text-[8px] font-bold uppercase tracking-wider text-center leading-tight px-0.5", isDark ? "text-teal-50" : "text-slate-500")}>
+                            <span className={cn("text-[10px] font-bold uppercase tracking-wider text-center leading-tight px-0.5", isDark ? "text-teal-50" : "text-slate-500")}>
                               {cell?.industrySignal || "No Signal"}
                             </span>
                           </div>
