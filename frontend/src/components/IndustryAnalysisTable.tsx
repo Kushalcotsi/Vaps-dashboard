@@ -83,29 +83,29 @@ export default function IndustryAnalysisTable({ marketRows, isLoading, title, ti
   };
 
   const columns = [
-    { label: "Market segment", minW: "120px" },
-    { label: "VAPS", minW: "80px" },
-    { label: "VAPS description", minW: "200px" },
-    { label: "Recommendation logic", minW: "130px" },
-    { label: "Recommendation value", minW: "100px" },
-    { label: "Covered", minW: "70px" },
-    { label: "Activations", isNum: true, minW: "90px" },
-    { label: "Associated", isNum: true, minW: "90px" },
-    { label: "Industry attach rate", isNum: true, minW: "110px" },
-    { label: "Unit attach rate", isNum: true, minW: "110px" },
-    { label: "Leverage", isNum: true, minW: "80px" },
-    { label: "Opportunity score", isNum: true, minW: "100px" },
+    { label: "Market segment", minW: "100px" },
+    { label: "VAPS", minW: "60px" },
+    { label: "VAPS description", minW: "160px" },
+    { label: "Recommendation logic", minW: "110px" },
+    { label: "Recommendation value", minW: "90px" },
+    { label: "Covered", minW: "60px" },
+    { label: "Activations", isNum: true, minW: "80px" },
+    { label: "Associated", isNum: true, minW: "80px" },
+    { label: "Industry attach rate", isNum: true, minW: "90px" },
+    { label: "Unit attach rate", isNum: true, minW: "90px" },
+    { label: "Leverage", isNum: true, minW: "70px" },
+    { label: "Opportunity score", isNum: true, minW: "90px" },
     { 
       label: "Industry signal", 
-      minW: "140px",
+      minW: "120px",
       info: "Industry signal logic\n\nBenchmark: selected unit elbow cutoff.\nLeverage: industry attach rate / unit attach rate.\nOpportunity score: max(0, industry attach rate - unit cutoff) x industry activations.\n\nStrong Industry Opportunity: above benchmark and over-indexes versus the unit average.\nGood General Fit: above benchmark and broadly consistent with the unit average.\nNiche Industry Signal: strong over-indexing, but smaller opportunity volume.\nMonitor: observed attachment, but below benchmark.\nNo Signal: no observed attachment in that industry."
     },
-    { label: "Interpretation", minW: "240px" }
+    { label: "Interpretation", minW: "180px" }
   ];
 
   return (
     <Card>
-      <CardHeader className="flex flex-col xl:flex-row justify-between items-start xl:items-center gap-3 py-2 md:py-2.5 px-4 md:px-6">
+      <CardHeader className="flex flex-col xl:flex-row justify-between items-start xl:items-center gap-3 py-1.5 md:py-2 px-3 md:px-4">
         {title && (
           <div className="flex flex-wrap items-center gap-3">
             <h2 className={typography.cardTitle}>{title}</h2>

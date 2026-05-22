@@ -29,23 +29,23 @@ export function GlobalFilterBar() {
   const isFiltered = (selectedUnit && selectedUnit !== "all") || selectedSource || selectedGroup;
 
   return (
-    <div className="w-full border-b border-slate-200 bg-white py-2 px-8 flex items-center justify-between shrink-0 shadow-sm z-40">
+    <div className="w-full border-b border-slate-200 bg-white py-2 px-4 flex items-center justify-between shrink-0 shadow-sm z-40">
       {/* Left: Global Filters Label */}
       <div className="flex items-center gap-2 text-slate-500 shrink-0 select-none">
         {/* <Filter className="h-4 w-4" /> */}
-        <span className="text-xs font-bold uppercase tracking-wider">Viewing</span>
+        <span className="text-sm font-semibold text-slate-700">Viewing</span>
       </div>
 
       {/* Middle: Premium Select Dropdowns */}
       <div className="flex flex-1 items-center justify-start gap-6 ml-8 max-w-5xl">
         {/* TARGET UNIT */}
         <div className="flex flex-col gap-1 w-72">
-          <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider leading-none">Target Unit</span>
+          <span className="text-xs font-medium text-slate-500 leading-none mb-0.5">Target Unit</span>
           <Select 
             value={selectedUnit || "all"} 
             onValueChange={(val) => setSelectedUnit(val === "all" ? "all" : val)}
           >
-            <SelectTrigger className="h-9 px-3 rounded-lg border border-slate-200 bg-white hover:bg-slate-50 hover:border-slate-300 transition-all shadow-sm text-xs font-semibold text-slate-700">
+            <SelectTrigger className="h-7 px-2 rounded-lg border border-slate-200 bg-white hover:bg-slate-50 hover:border-slate-300 transition-all shadow-sm text-xs font-semibold text-slate-700">
               <SelectValue placeholder="All Units" />
             </SelectTrigger>
             <SelectContent>
@@ -61,12 +61,12 @@ export function GlobalFilterBar() {
 
         {/* VAPS SOURCE */}
         <div className="flex flex-col gap-1 w-56">
-          <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider leading-none">Vaps Source</span>
+          <span className="text-xs font-medium text-slate-500 leading-none mb-0.5">Vaps Source</span>
           <Select 
             value={selectedSource || "all"} 
             onValueChange={(val) => setSelectedSource(val === "all" ? "" : val)}
           >
-            <SelectTrigger className="h-9 px-3 rounded-lg border border-slate-200 bg-white hover:bg-slate-50 hover:border-slate-300 transition-all shadow-sm text-xs font-semibold text-slate-700">
+            <SelectTrigger className="h-7 px-2 rounded-lg border border-slate-200 bg-white hover:bg-slate-50 hover:border-slate-300 transition-all shadow-sm text-xs font-semibold text-slate-700">
               <SelectValue placeholder="All Sources" />
             </SelectTrigger>
             <SelectContent>
@@ -82,12 +82,12 @@ export function GlobalFilterBar() {
 
         {/* MAIN GROUP */}
         <div className="flex flex-col gap-1 w-56">
-          <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider leading-none">Main Group</span>
+          <span className="text-xs font-medium text-slate-500 leading-none mb-0.5">Main Group</span>
           <Select 
             value={selectedGroup || "all"} 
             onValueChange={(val) => setSelectedGroup(val === "all" ? "" : val)}
           >
-            <SelectTrigger className="h-9 px-3 rounded-lg border border-slate-200 bg-white hover:bg-slate-50 hover:border-slate-300 transition-all shadow-sm text-xs font-semibold text-slate-700">
+            <SelectTrigger className="h-7 px-2 rounded-lg border border-slate-200 bg-white hover:bg-slate-50 hover:border-slate-300 transition-all shadow-sm text-xs font-semibold text-slate-700">
               <SelectValue placeholder="All Groups" />
             </SelectTrigger>
             <SelectContent>

@@ -8,9 +8,9 @@ interface InputProps extends Omit<React.InputHTMLAttributes<HTMLInputElement>, '
 
 export function Input({ className, icon, variantSize = "md", ...props }: InputProps) {
   const sizes = {
-    sm: "py-1.5 text-xs",
-    md: "py-2 text-sm",
-    lg: "py-3 text-base"
+    sm: "py-1 text-xs",
+    md: "py-1.5 text-xs",
+    lg: "py-2 text-sm"
   };
 
   return (
@@ -39,9 +39,9 @@ interface SelectProps extends Omit<React.SelectHTMLAttributes<HTMLSelectElement>
 
 export function Select({ className, children, variantSize = "md", ...props }: SelectProps) {
   const sizes = {
-    sm: "py-1.5 text-xs px-2",
-    md: "py-2 text-sm px-3",
-    lg: "py-3 text-base px-4"
+    sm: "py-1 text-xs px-2",
+    md: "py-1.5 text-xs px-2.5",
+    lg: "py-2 text-sm px-3"
   };
 
   return (

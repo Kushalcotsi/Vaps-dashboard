@@ -22,7 +22,7 @@ export function Card({ children, className }: CardProps) {
 
 export function CardHeader({ children, className }: CardProps) {
   return (
-    <div className={cn("p-4 md:p-6 border-b border-slate-100 bg-slate-50/30", className)}>
+    <div className={cn("p-2 md:p-3 border-b border-slate-100 bg-slate-50/30", className)}>
       {children}
     </div>
   );
@@ -38,7 +38,7 @@ export function CardContent({ children, className }: CardProps) {
 
 export function CardFooter({ children, className }: CardProps) {
   return (
-    <div className={cn("p-4 md:p-6", className)}>
+    <div className={cn("p-2 md:p-3", className)}>
       {children}
     </div>
   );
