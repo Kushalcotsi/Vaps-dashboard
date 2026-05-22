@@ -55,7 +55,7 @@ export function TableHead({
       onClick={onClick}
       style={style}
       className={cn(
-        "relative border-b border-slate-200 px-4 py-3 bg-slate-50 text-left transition-colors leading-relaxed align-middle overflow-hidden",
+        "relative border-b border-slate-200 px-2 py-1.5 bg-slate-50 text-left transition-colors leading-none align-middle overflow-hidden",
         typography.tableHeader,
         isNum && "text-right",
         // Column head highlight - z-10
@@ -95,7 +95,7 @@ export function TableCell({
       colSpan={colSpan}
       style={style}
       className={cn(
-        "relative px-4 py-2.5 border-b border-slate-100 transition-colors cursor-pointer align-middle min-h-[40px] overflow-hidden",
+        "relative px-2 py-1 border-b border-slate-100 transition-colors cursor-pointer align-middle min-h-[28px] overflow-hidden",
         isBold ? typography.tableCellBold : typography.tableCell,
         isNum && "text-right tabular-nums",
         // Cell/Column highlight overlay - z-10

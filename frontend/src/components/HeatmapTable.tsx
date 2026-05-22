@@ -202,13 +202,13 @@ export default function HeatmapTable({ title, data, segmentName, cutoff, isLoadi
       <Table className="table-auto min-w-full">
         <TableHeader>
           <TableRow>
-            <TableHead className="sticky left-0 z-50 min-w-[260px] border-r bg-slate-50 shadow-[2px_0_5px_-2px_rgba(0,0,0,0.1)]">
+            <TableHead className="sticky left-0 z-50 min-w-[200px] border-r bg-slate-50 shadow-[2px_0_5px_-2px_rgba(0,0,0,0.1)]">
               VAPS ID & Description
             </TableHead>
             {isLoading ? (
               Array.from({ length: 5 }).map((_, i) => (
-                <TableHead key={i} className="text-center min-w-[130px] border-r last:border-r-0">
-                  <Skeleton className="h-4 w-20 mx-auto" />
+                <TableHead key={i} className="text-center min-w-[90px] border-r last:border-r-0">
+                  <Skeleton className="h-4 w-16 mx-auto" />
                 </TableHead>
               ))
             ) : (
@@ -216,7 +216,7 @@ export default function HeatmapTable({ title, data, segmentName, cutoff, isLoadi
                 <TableHead 
                   key={col} 
                   isHighlighted={selectedSegment === col}
-                  className="text-center min-w-[130px] border-r last:border-r-0 px-2"
+                  className="text-center min-w-[90px] border-r last:border-r-0 px-1"
                 >
                   {col}
                 </TableHead>
@@ -235,8 +235,8 @@ export default function HeatmapTable({ title, data, segmentName, cutoff, isLoadi
                    </div>
                 </TableCell>
                 {Array.from({ length: 5 }).map((_, j) => (
-                   <TableCell key={j} className="p-4 border-r">
-                    <Skeleton className="h-10 w-full rounded" />
+                   <TableCell key={j} className="p-1 border-r">
+                    <Skeleton className="h-8 w-full rounded" />
                   </TableCell>
                 ))}
               </TableRow>
@@ -247,7 +247,7 @@ export default function HeatmapTable({ title, data, segmentName, cutoff, isLoadi
                 <TableCell 
                   onClick={() => setSelectedVaps(vaps === selectedVaps ? null : vaps)}
                   className={cn(
-                    "sticky left-0 z-30 border-r border-slate-200 transition-all cursor-pointer shadow-[2px_0_5px_-2px_rgba(0,0,0,0.1)] h-auto py-5",
+                    "sticky left-0 z-30 border-r border-slate-200 transition-all cursor-pointer shadow-[2px_0_5px_-2px_rgba(0,0,0,0.1)] h-auto py-2",
                     selectedVaps === vaps 
                       ? "bg-[#f1f5f9] z-40" 
                       : "bg-white group-hover:bg-[#f8fafc]"
@@ -282,8 +282,8 @@ export default function HeatmapTable({ title, data, segmentName, cutoff, isLoadi
                     >
                       <Tooltip>
                         <TooltipTrigger asChild>
-                          <div className="w-full min-h-[50px] flex flex-col items-center justify-center gap-0.5 group/cell p-2 relative z-20">
-                            <span className={cn("text-xs font-bold tabular-nums", isDark ? "text-white" : "text-slate-900")}>
+                          <div className="w-full min-h-[32px] flex flex-col items-center justify-center gap-0.5 group/cell p-1 relative z-20">
+                            <span className={cn("text-[11px] font-bold tabular-nums", isDark ? "text-white" : "text-slate-900")}>
                               {cell ? fmtPct(cell.attachRate) : "0.0%"}
                             </span>
                             <span className={cn("text-[8px] font-bold uppercase tracking-wider text-center leading-tight px-0.5", isDark ? "text-teal-50" : "text-slate-500")}>

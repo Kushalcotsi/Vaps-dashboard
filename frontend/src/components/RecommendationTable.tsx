@@ -196,7 +196,7 @@ export default function RecommendationTable({ data, isLoading, title, titleToggl
 
   return (
     <Card>
-      <CardHeader className="flex flex-col xl:flex-row justify-between items-start xl:items-center gap-3 py-2 md:py-2.5 px-4 md:px-6">
+      <CardHeader className="flex flex-col xl:flex-row justify-between items-start xl:items-center gap-3 py-1.5 md:py-2 px-3 md:px-4">
         {title && (
           <div className="flex flex-wrap items-center gap-3">
             {/* <Filter size={18} className="text-slate-400" /> */}
@@ -226,7 +226,7 @@ export default function RecommendationTable({ data, isLoading, title, titleToggl
       </CardHeader>
 
 
-      <CardContent className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-2 py-2.5 px-4 md:px-6 border-b border-slate-100">
+      <CardContent className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-2 py-2 px-3 md:px-4 border-b border-slate-100">
         <div className="flex flex-col gap-1">
 
           <label className="text-[9px] font-bold uppercase tracking-wider text-slate-400">Market</label>
@@ -300,11 +300,10 @@ export default function RecommendationTable({ data, isLoading, title, titleToggl
             min="0" max="100" step="0.1"
           />
         </div>
-        <div className="flex flex-col gap-1 justify-end">
-          <Button 
-            variant="outline" 
-            size="sm" 
-            className="flex items-center gap-1.5 h-[34px] border-slate-200 hover:border-slate-300 text-slate-500 hover:text-slate-900 transition-all text-[10px] font-bold uppercase tracking-wider"
+        <div className="flex flex-col gap-1 justify-end pb-0.5">
+          <button 
+            title="Reset Filters"
+            className="flex items-center justify-center p-1.5 rounded-md text-slate-400 hover:text-slate-800 hover:bg-slate-100 transition-all cursor-pointer"
             onClick={() => {
               setMarketFilter("");
               setStatusFilter("");
@@ -315,9 +314,8 @@ export default function RecommendationTable({ data, isLoading, title, titleToggl
               setGlobalFilter("");
             }}
           >
-            <RotateCcw size={11} className="shrink-0" />
-            Reset Filters
-          </Button>
+            <RotateCcw size={14} className="shrink-0" />
+          </button>
         </div>
       </CardContent>
 

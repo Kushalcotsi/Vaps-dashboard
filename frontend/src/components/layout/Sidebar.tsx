@@ -58,7 +58,7 @@ export function Sidebar({ activeTab, onTabChange }: SidebarProps) {
         {/* Floating Toggle Collapse Button centered on border line */}
         <button
           onClick={() => setIsCollapsed(!isCollapsed)}
-          className="absolute top-[52px] -right-3 z-50 w-6 h-6 rounded-full bg-white border border-slate-200 shadow-sm hover:shadow hover:scale-105 flex items-center justify-center text-[#00205b] hover:text-[#003399] hover:bg-slate-50 transition-all cursor-pointer"
+          className="absolute top-[44px] -right-3 z-50 w-6 h-6 rounded-full bg-white border border-slate-200 shadow-sm hover:shadow hover:scale-105 flex items-center justify-center text-[#00205b] hover:text-[#003399] hover:bg-slate-50 transition-all cursor-pointer"
           title={isCollapsed ? "Expand Sidebar" : "Collapse Sidebar"}
         >
           {isCollapsed ? <ChevronRight size={12} strokeWidth={3} /> : <ChevronLeft size={12} strokeWidth={3} />}
@@ -66,7 +66,7 @@ export function Sidebar({ activeTab, onTabChange }: SidebarProps) {
 
         {/* Sidebar Brand Header */}
         <div className={cn(
-          "h-16 flex items-center border-b border-white/10 shrink-0 select-none overflow-hidden justify-center",
+          "h-14 flex items-center border-b border-white/10 shrink-0 select-none overflow-hidden justify-center",
           isCollapsed ? "px-2" : "px-4"
         )}>
           {!isCollapsed ? (

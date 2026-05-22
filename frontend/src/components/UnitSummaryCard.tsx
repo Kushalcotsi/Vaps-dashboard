@@ -66,7 +66,7 @@ export default function UnitSummaryCard({ summary, isLoading, onCutoffClick }: U
 
   return (
     <Card className="overflow-hidden border border-slate-200 shadow-sm">
-      <div className="bg-gradient-to-r from-[#00205b] to-[#00205b] px-6 py-4 text-white flex flex-col gap-4">
+      <div className="bg-gradient-to-r from-[#00205b] to-[#00205b] px-4 py-3 text-white flex flex-col gap-3">
         {/* Unit Details Section */}
         {isLoading ? (
           <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
@@ -113,7 +113,7 @@ export default function UnitSummaryCard({ summary, isLoading, onCutoffClick }: U
         )}
       </div>
       
-      <CardContent className="px-6 py-4">
+      <CardContent className="px-4 py-3">
         {isLoading ? (
           <div className="grid grid-cols-1 md:grid-cols-5 gap-3">
             {Array.from({ length: 5 }).map((_, i) => <Skeleton key={i} className="h-[100px] w-full" />)}
@@ -122,7 +122,7 @@ export default function UnitSummaryCard({ summary, isLoading, onCutoffClick }: U
           <div className="grid grid-cols-1 md:grid-cols-5 gap-3">
             {kpis.map((kpi) => (
               <div key={kpi.label} className="group relative">
-                <div className="p-3 rounded-lg border border-slate-100 bg-white hover:shadow-lg hover:border-blue-100 transition-all duration-300 h-full">
+                <div className="p-2.5 rounded-lg border border-slate-100 bg-white hover:shadow-lg hover:border-blue-100 transition-all duration-300 h-full">
                   <div className="flex items-center gap-2 mb-2">
                     <div className={cn("p-1.5 rounded-lg", kpi.color)}>
                       <kpi.icon size={14} />
