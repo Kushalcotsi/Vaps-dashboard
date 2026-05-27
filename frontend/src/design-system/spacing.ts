@@ -1,5 +1,5 @@
 export const spacing = {
-  container: "max-w-screen-2xl mx-auto px-4 sm:px-6 lg:px-8",
+  container: "px-4 sm:px-6 lg:px-8",
   section: "space-y-3",
   card: "p-3 md:p-4",
   input: "px-2 py-1",
