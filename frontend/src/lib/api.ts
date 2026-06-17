@@ -1,7 +1,13 @@
 import axios from 'axios';
 import { Unit, DashboardData } from '@/types';
 
-const API_BASE_URL = 'http://localhost:8000/api/v1';
+// Use environment variable if set, otherwise automatically detect if we're on localhost or production
+const isLocal = typeof window !== 'undefined' && window.location.hostname === 'localhost';
+const defaultApiUrl = isLocal 
+  ? 'http://localhost:8000/api/v1' 
+  : 'https://guided-selling.ai-box1.willscot.com/api/v1';
+
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || defaultApiUrl;
 
 export const fetchUnits = async (): Promise<Unit[]> => {
   const { data } = await axios.get(`${API_BASE_URL}/units`);
