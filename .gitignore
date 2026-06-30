@@ -1,0 +1,30 @@
+# Environments
+.env
+.env.*
+!.env.example
+
+# Secrets and Keys
+rsa_key.*
+*.pem
+*.p8
+*.pub
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+venv/
+env/
+.venv/
+
+# Node
+node_modules/
+.next/
+
+# Temporary / OS Files
+.DS_Store
+*.save
+*.backup
+check_cols.py
+test_simple.py
+test_snowflake_ec2.py
