@@ -236,11 +236,11 @@ class SnowflakeRepository(BaseRepository):
 
     def get_division_attach_rates(self) -> List[VapsAttachRate]:
         query = f"SELECT * FROM {settings.SNOWFLAKE_DATABASE}.{settings.SNOWFLAKE_SCHEMA}.gs_unit_vaps_attach_rate_division"
-        return self._execute_query(query, "division", ("DIVISION", "DIVISION_NAME"))
+        return self._execute_query(query, "division", ("division", "DIVISION", "DIVISION_NAME"))
 
     def get_region_attach_rates(self) -> List[VapsAttachRate]:
         query = f"SELECT * FROM {settings.SNOWFLAKE_DATABASE}.{settings.SNOWFLAKE_SCHEMA}.gs_unit_vaps_attach_rate_region"
-        return self._execute_query(query, "region", ("REGION", "REGION_DESCRIPTION"))
+        return self._execute_query(query, "region", ("region", "REGION", "REGION_DESCRIPTION"))
 
     def get_all_segments_data(self) -> Dict[str, List[VapsAttachRate]]:
         # For the segments tab, we need the full data. 
@@ -286,10 +286,12 @@ class SnowflakeRepository(BaseRepository):
                 (f"SELECT DISTINCT MARKET FROM {settings.SNOWFLAKE_DATABASE}.{settings.SNOWFLAKE_SCHEMA}.gs_unit_market_segment_vaps_attach_rate WHERE MARKET IS NOT NULL",)
             ],
             "divisions": [
+                (f'SELECT DISTINCT "division" FROM {settings.SNOWFLAKE_DATABASE}.{settings.SNOWFLAKE_SCHEMA}.gs_unit_vaps_attach_rate_division WHERE "division" IS NOT NULL',),
                 (f"SELECT DISTINCT DIVISION FROM {settings.SNOWFLAKE_DATABASE}.{settings.SNOWFLAKE_SCHEMA}.gs_unit_vaps_attach_rate_division WHERE DIVISION IS NOT NULL",),
                 (f"SELECT DISTINCT DIVISION_NAME FROM {settings.SNOWFLAKE_DATABASE}.{settings.SNOWFLAKE_SCHEMA}.gs_unit_vaps_attach_rate_division WHERE DIVISION_NAME IS NOT NULL",)
             ],
             "regions": [
+                (f'SELECT DISTINCT "region" FROM {settings.SNOWFLAKE_DATABASE}.{settings.SNOWFLAKE_SCHEMA}.gs_unit_vaps_attach_rate_region WHERE "region" IS NOT NULL',),
                 (f"SELECT DISTINCT REGION FROM {settings.SNOWFLAKE_DATABASE}.{settings.SNOWFLAKE_SCHEMA}.gs_unit_vaps_attach_rate_region WHERE REGION IS NOT NULL",),
                 (f"SELECT DISTINCT REGION_DESCRIPTION FROM {settings.SNOWFLAKE_DATABASE}.{settings.SNOWFLAKE_SCHEMA}.gs_unit_vaps_attach_rate_region WHERE REGION_DESCRIPTION IS NOT NULL",)
             ]
