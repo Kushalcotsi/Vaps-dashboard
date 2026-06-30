@@ -4,6 +4,7 @@ import snowflake.connector
 from snowflake.connector.cursor import SnowflakeCursor
 import re
 import threading
+from functools import lru_cache
 from app.repositories.base import BaseRepository
 from app.models.dashboard import VapsAttachRate, RecommendationEntry
 from app.core.config import settings
@@ -226,18 +227,22 @@ class SnowflakeRepository(BaseRepository):
             raise e
         return rows
 
+    @lru_cache(maxsize=1)
     def get_unit_attach_rates(self) -> List[VapsAttachRate]:
         query = f"SELECT * FROM {settings.SNOWFLAKE_DATABASE}.{settings.SNOWFLAKE_SCHEMA}.gs_unit_vaps_attach_rate"
         return self._execute_query(query)
 
+    @lru_cache(maxsize=1)
     def get_market_attach_rates(self) -> List[VapsAttachRate]:
         query = f"SELECT * FROM {settings.SNOWFLAKE_DATABASE}.{settings.SNOWFLAKE_SCHEMA}.gs_unit_market_segment_vaps_attach_rate"
         return self._execute_query(query, "market", "MARKET_SEGMENT_DESCRIPTION")
 
+    @lru_cache(maxsize=1)
     def get_division_attach_rates(self) -> List[VapsAttachRate]:
         query = f"SELECT * FROM {settings.SNOWFLAKE_DATABASE}.{settings.SNOWFLAKE_SCHEMA}.gs_unit_vaps_attach_rate_division"
         return self._execute_query(query, "division", ("division", "DIVISION", "DIVISION_NAME"))
 
+    @lru_cache(maxsize=1)
     def get_region_attach_rates(self) -> List[VapsAttachRate]:
         query = f"SELECT * FROM {settings.SNOWFLAKE_DATABASE}.{settings.SNOWFLAKE_SCHEMA}.gs_unit_vaps_attach_rate_region"
         return self._execute_query(query, "region", ("region", "REGION", "REGION_DESCRIPTION"))
@@ -264,6 +269,7 @@ class SnowflakeRepository(BaseRepository):
 
         return segments
 
+    @lru_cache(maxsize=1)
     def get_metadata(self) -> Dict:
         """
         Optimized metadata fetch using DISTINCT queries.

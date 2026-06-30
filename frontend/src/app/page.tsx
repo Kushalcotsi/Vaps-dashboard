@@ -222,6 +222,7 @@ export default function DashboardPage() {
 
   // Show a "Processing" indicator for background fetches
   const isSoftLoading = isFetching && !isLoading;
+  const showLoading = isLoading || isFetching;
 
   const renderOverview = () => {
     const handleScrollToElbow = () => {
@@ -235,20 +236,20 @@ export default function DashboardPage() {
       <div className="space-y-4 animate-in fade-in duration-300">
         <UnitSummaryCard 
           summary={dynamicSummary} 
-          isLoading={isLoading} 
+          isLoading={showLoading} 
           onCutoffClick={handleScrollToElbow} 
         />
 
         <section>
           <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
             <DistributionBars 
-              isLoading={isLoading}
+              isLoading={showLoading}
               title="Top 5 Recommended VAPS Attach Rates" 
               data={filteredUnitRows.filter(r => r.coveredByRecommendationLogic).sort((a,b)=>b.attachRate-a.attachRate).slice(0,5)} 
               cutoff={data?.summary?.cutoff || 0} 
             />
             <DistributionBars 
-              isLoading={isLoading}
+              isLoading={showLoading}
               title="Top 5 Missed Opportunity Rate" 
               data={filteredUnitRows.filter(r => !r.coveredByRecommendationLogic && r.attachRate >= (data?.summary?.cutoff || 0)).sort((a,b)=>b.attachRate-a.attachRate).slice(0,5)} 
               cutoff={data?.summary?.cutoff || 0} 
@@ -257,7 +258,7 @@ export default function DashboardPage() {
         </section>
 
         <section id="elbow-chart-section">
-          <ElbowChart isLoading={isLoading} data={filteredUnitRows} cutoff={data?.summary?.cutoff || 0.05} />
+          <ElbowChart isLoading={showLoading} data={filteredUnitRows} cutoff={data?.summary?.cutoff || 0.05} />
         </section>
       </div>
     );
@@ -283,13 +284,13 @@ export default function DashboardPage() {
 
       {unitSubView === "recommendation" ? (
         <RecommendationTable 
-          isLoading={isLoading} 
+          isLoading={showLoading} 
           data={filteredRecommendationRows} 
           title=""
         />
       ) : (
         <IndustryAnalysisTable 
-          isLoading={isLoading} 
+          isLoading={showLoading} 
           marketRows={filteredIndustryRecommendationRows} 
           title=""
         />
@@ -342,7 +343,7 @@ export default function DashboardPage() {
 
         {subView === "heatmap" ? (
           <HeatmapTable 
-            isLoading={isLoading}
+            isLoading={showLoading}
             title="" 
             data={segmentData} 
             segmentName={type} 
@@ -350,7 +351,7 @@ export default function DashboardPage() {
           />
         ) : (
           <VapsDetailTable 
-            isLoading={isLoading} 
+            isLoading={showLoading} 
             title="" 
             columns={detailColumns.segment(type)} 
             data={segmentData} 
@@ -365,7 +366,7 @@ export default function DashboardPage() {
       <div className="flex flex-col gap-1 pb-0">
         <h2 className="text-base font-bold text-slate-800 tracking-tight">Unit-Level VAPS Detail</h2>
       </div>
-      <VapsDetailTable isLoading={isLoading} title="" columns={detailColumns.unit} data={filteredUnitRows} />
+      <VapsDetailTable isLoading={showLoading} title="" columns={detailColumns.unit} data={filteredUnitRows} />
     </div>
   );
 
