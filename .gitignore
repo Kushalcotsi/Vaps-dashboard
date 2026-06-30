@@ -4,10 +4,7 @@
 !.env.example
 
 # Secrets and Keys
-rsa_key.*
-*.pem
-*.p8
-*.pub
+# rsa keys are kept in repo for ec2 deployment
 
 # Python
 __pycache__/
@@ -25,6 +22,5 @@ node_modules/
 .DS_Store
 *.save
 *.backup
-check_cols.py
 test_simple.py
 test_snowflake_ec2.py
