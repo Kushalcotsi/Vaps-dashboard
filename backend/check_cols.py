@@ -6,9 +6,10 @@ from cryptography.hazmat.primitives import serialization
 load_dotenv()
 
 with open("rsa_key.p8", "rb") as key_file:
+    passphrase = os.getenv("SNOWFLAKE_PRIVATE_KEY_PASSPHRASE")
     p_key = serialization.load_pem_private_key(
         key_file.read(),
-        password=os.getenv("SNOWFLAKE_PRIVATE_KEY_PASSPHRASE").encode()
+        password=passphrase.encode() if passphrase else None
     )
 pkb = p_key.private_bytes(
     encoding=serialization.Encoding.DER,
