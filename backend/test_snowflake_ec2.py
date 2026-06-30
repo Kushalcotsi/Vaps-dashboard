@@ -44,12 +44,16 @@ def test_connection():
     print("--------------------------------------------------")
     
     conn_args = {
-        "user": settings.SNOWFLAKE_USER,
-        "account": settings.SNOWFLAKE_ACCOUNT,
+        "user": settings.SNOWFLAKE_USER.upper(),
+        "account": "hz83093.us-east-1",
+        "authenticator": settings.SNOWFLAKE_AUTHENTICATOR,
+        "private_key_file": settings.SNOWFLAKE_PRIVATE_KEY_PATH,
+        "private_key_file_pwd":settings.SNOWFLAKE_PRIVATE_KEY_PASSPHRASE, 
+        "host": "hz83093.us-east-1.snowflakecomputing.com",
         "warehouse": settings.SNOWFLAKE_WAREHOUSE,
         "database": settings.SNOWFLAKE_DATABASE,
-        "schema": settings.SNOWFLAKE_SCHEMA,
-        "role": settings.SNOWFLAKE_ROLE,
+#        "schema": settings.SNOWFLAKE_SCHEMA,
+#        "role": settings.SNOWFLAKE_ROLE,
         "login_timeout": 15,
         "network_timeout": 15,
         "socket_timeout": 15
@@ -60,7 +64,7 @@ def test_connection():
     if authenticator == "externalbrowser":
         print("Using authenticator: externalbrowser (WARNING: This will hang in a headless environment!)")
         conn_args["authenticator"] = "externalbrowser"
-    elif authenticator == "keypair" or settings.SNOWFLAKE_PRIVATE_KEY_PATH:
+    elif authenticator == "SNOWFLAKE_JWT" or settings.SNOWFLAKE_PRIVATE_KEY_PATH:
         print(f"Using authenticator: keypair (loading from {settings.SNOWFLAKE_PRIVATE_KEY_PATH})...")
         try:
             from cryptography.hazmat.primitives import serialization
@@ -72,7 +76,7 @@ def test_connection():
                 format=serialization.PrivateFormat.PKCS8,
                 encryption_algorithm=serialization.NoEncryption()
             )
-            conn_args["private_key"] = private_key_bytes
+#            conn_args["private_key"] = private_key_bytes
         except Exception as e:
             print(f"❌ Error loading private key: {e}")
             return
@@ -85,6 +89,7 @@ def test_connection():
     # 3. Attempt Connection
     try:
         print("Attempting to connect to Snowflake...")
+        print(conn_args)
         conn = snowflake.connector.connect(**conn_args)
         print("✅ SUCCESS! Snowflake connection established successfully.")
         
