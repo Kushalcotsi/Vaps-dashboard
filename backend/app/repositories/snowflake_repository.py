@@ -48,6 +48,7 @@ class SnowflakeRepository(BaseRepository):
                 "socket_timeout": settings.SNOWFLAKE_CONNECTION_TIMEOUT
             }
             
+            
             authenticator = (settings.SNOWFLAKE_AUTHENTICATOR or "snowflake").lower()
             
             if authenticator == "externalbrowser":
@@ -187,7 +188,15 @@ class SnowflakeRepository(BaseRepository):
 
                     segment_val = ""
                     if segment_col:
-                        segment_val = self._text(row.get(segment_col) or row.get(segment_col.upper()))
+                        # Handle multiple possible column names (e.g. DIVISION or DIVISION_NAME)
+                        if isinstance(segment_col, tuple):
+                            for col in segment_col:
+                                val = row.get(col) or row.get(col.upper())
+                                if val:
+                                    segment_val = self._text(val)
+                                    break
+                        else:
+                            segment_val = self._text(row.get(segment_col) or row.get(segment_col.upper()))
 
                     attach_rate_val = row.get("Vaps_Attach_Rate") or row.get("VAPS_ATTACH_RATE")
                     attach_rate = float(attach_rate_val) / 100.0 if attach_rate_val is not None else 0.0
@@ -227,11 +236,11 @@ class SnowflakeRepository(BaseRepository):
 
     def get_division_attach_rates(self) -> List[VapsAttachRate]:
         query = f"SELECT * FROM {settings.SNOWFLAKE_DATABASE}.{settings.SNOWFLAKE_SCHEMA}.gs_unit_vaps_attach_rate_division"
-        return self._execute_query(query, "division", "DIVISION")
+        return self._execute_query(query, "division", ("DIVISION", "DIVISION_NAME"))
 
     def get_region_attach_rates(self) -> List[VapsAttachRate]:
         query = f"SELECT * FROM {settings.SNOWFLAKE_DATABASE}.{settings.SNOWFLAKE_SCHEMA}.gs_unit_vaps_attach_rate_region"
-        return self._execute_query(query, "region", "REGION")
+        return self._execute_query(query, "region", ("REGION", "REGION_DESCRIPTION"))
 
     def get_all_segments_data(self) -> Dict[str, List[VapsAttachRate]]:
         # For the segments tab, we need the full data. 
@@ -270,23 +279,40 @@ class SnowflakeRepository(BaseRepository):
         }
         
         queries = {
-            "sources": f"SELECT DISTINCT VAPS_SOURCE FROM {settings.SNOWFLAKE_DATABASE}.{settings.SNOWFLAKE_SCHEMA}.gs_unit_vaps_attach_rate WHERE VAPS_SOURCE IS NOT NULL",
-            "groups": f"SELECT DISTINCT VAPS_MAIN_GROUP FROM {settings.SNOWFLAKE_DATABASE}.{settings.SNOWFLAKE_SCHEMA}.gs_unit_vaps_attach_rate WHERE VAPS_MAIN_GROUP IS NOT NULL",
-            "markets": f"SELECT DISTINCT MARKET_SEGMENT_DESCRIPTION FROM {settings.SNOWFLAKE_DATABASE}.{settings.SNOWFLAKE_SCHEMA}.gs_unit_market_segment_vaps_attach_rate WHERE MARKET_SEGMENT_DESCRIPTION IS NOT NULL",
-            "divisions": f"SELECT DISTINCT DIVISION FROM {settings.SNOWFLAKE_DATABASE}.{settings.SNOWFLAKE_SCHEMA}.gs_unit_vaps_attach_rate_division WHERE DIVISION IS NOT NULL",
-            "regions": f"SELECT DISTINCT REGION FROM {settings.SNOWFLAKE_DATABASE}.{settings.SNOWFLAKE_SCHEMA}.gs_unit_vaps_attach_rate_region WHERE REGION IS NOT NULL"
+            "sources": [(f"SELECT DISTINCT VAPS_SOURCE FROM {settings.SNOWFLAKE_DATABASE}.{settings.SNOWFLAKE_SCHEMA}.gs_unit_vaps_attach_rate WHERE VAPS_SOURCE IS NOT NULL",)],
+            "groups": [(f"SELECT DISTINCT VAPS_MAIN_GROUP FROM {settings.SNOWFLAKE_DATABASE}.{settings.SNOWFLAKE_SCHEMA}.gs_unit_vaps_attach_rate WHERE VAPS_MAIN_GROUP IS NOT NULL",)],
+            "markets": [
+                (f"SELECT DISTINCT MARKET_SEGMENT_DESCRIPTION FROM {settings.SNOWFLAKE_DATABASE}.{settings.SNOWFLAKE_SCHEMA}.gs_unit_market_segment_vaps_attach_rate WHERE MARKET_SEGMENT_DESCRIPTION IS NOT NULL",),
+                (f"SELECT DISTINCT MARKET FROM {settings.SNOWFLAKE_DATABASE}.{settings.SNOWFLAKE_SCHEMA}.gs_unit_market_segment_vaps_attach_rate WHERE MARKET IS NOT NULL",)
+            ],
+            "divisions": [
+                (f"SELECT DISTINCT DIVISION FROM {settings.SNOWFLAKE_DATABASE}.{settings.SNOWFLAKE_SCHEMA}.gs_unit_vaps_attach_rate_division WHERE DIVISION IS NOT NULL",),
+                (f"SELECT DISTINCT DIVISION_NAME FROM {settings.SNOWFLAKE_DATABASE}.{settings.SNOWFLAKE_SCHEMA}.gs_unit_vaps_attach_rate_division WHERE DIVISION_NAME IS NOT NULL",)
+            ],
+            "regions": [
+                (f"SELECT DISTINCT REGION FROM {settings.SNOWFLAKE_DATABASE}.{settings.SNOWFLAKE_SCHEMA}.gs_unit_vaps_attach_rate_region WHERE REGION IS NOT NULL",),
+                (f"SELECT DISTINCT REGION_DESCRIPTION FROM {settings.SNOWFLAKE_DATABASE}.{settings.SNOWFLAKE_SCHEMA}.gs_unit_vaps_attach_rate_region WHERE REGION_DESCRIPTION IS NOT NULL",)
+            ]
         }
 
         try:
             conn = self._get_connection()
             with conn.cursor() as cur:
-                for key, sql in queries.items():
-                    try:
-                        print(f"Fetching Snowflake Metadata for {key}...")
-                        cur.execute(sql)
-                        metadata[key] = sorted([str(r[0]) for r in cur.fetchall() if r[0]])
-                    except Exception as e:
-                        print(f"⚠️ Metadata for {key} skipped: {str(e)}")
+                for key, sql_list in queries.items():
+                    success = False
+                    for sql_tuple in sql_list:
+                        sql = sql_tuple[0]
+                        try:
+                            print(f"Fetching Snowflake Metadata for {key} with query: {sql[:50]}...")
+                            cur.execute(sql)
+                            metadata[key] = sorted([str(r[0]) for r in cur.fetchall() if r[0]])
+                            success = True
+                            break # It worked, stop trying fallbacks
+                        except Exception as e:
+                            print(f"⚠️ Query failed for {key}, trying fallback if available: {str(e)}")
+                    
+                    if not success:
+                        print(f"❌ All metadata queries failed for {key}.")
                         metadata[key] = []
         except Exception as e:
             print(f"❌ Critical error in get_metadata: {str(e)}")
