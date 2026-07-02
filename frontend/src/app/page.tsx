@@ -4,6 +4,7 @@ import { useMemo, useState, useEffect } from "react"
 import { useQuery, keepPreviousData } from "@tanstack/react-query"
 import { fetchDashboardData } from "@/lib/api"
 import { useDashboardStore } from "@/store/useDashboardStore"
+import { UNIT_TYPES } from "@/lib/mockProductCodes"
 import DistributionBars from "@/components/DistributionBars"
 import ElbowChart from "@/components/ElbowChart"
 import RecommendationTable from "@/components/RecommendationTable"
@@ -22,14 +23,27 @@ import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/Tooltip
 
 export default function DashboardPage() {
   const { 
+    unitType,
     selectedUnit, setSelectedUnit,
     selectedSource, setSelectedSource,
     selectedGroup, setSelectedGroup
   } = useDashboardStore()
 
   const { data, isLoading, isFetching, error } = useQuery({
-    queryKey: ["dashboard", selectedUnit],
-    queryFn: () => fetchDashboardData(selectedUnit),
+    queryKey: ["dashboard", selectedUnit, unitType],
+    queryFn: () => {
+      if (unitType !== 'Glo') {
+        // Return mock empty data structure for Demo UI
+        return Promise.resolve({
+          unitRows: [],
+          recommendationRows: [],
+          industryRecommendationRows: [],
+          segments: { Market: [], Division: [], Region: [] },
+          summary: { cutoff: 0.05, activations: 0, associated: 0, unitName: `${unitType} Mock`, unitDescription: `Demo data for ${unitType}`, unitL2: "", unitL3: "" }
+        });
+      }
+      return fetchDashboardData(selectedUnit);
+    },
     enabled: !!selectedUnit,
     staleTime: 30000, // Keep data fresh for 30s
     placeholderData: keepPreviousData,
@@ -141,6 +155,11 @@ export default function DashboardPage() {
       setActiveTab((urlTab as SidebarTab) || "overview");
       
       // Global filters
+      const urlUnitType = params.get("unitType");
+      if (urlUnitType && UNIT_TYPES.includes(urlUnitType)) {
+        useDashboardStore.getState().setUnitType(urlUnitType);
+      }
+
       const urlUnit = params.get("unit");
       setSelectedUnit(urlUnit === null || urlUnit === "all" ? "all" : urlUnit);
       
@@ -178,6 +197,10 @@ export default function DashboardPage() {
     }
     
     // Global filters
+    if (unitType && unitType !== "Glo") {
+      params.set("unitType", unitType);
+    }
+
     if (selectedUnit && selectedUnit !== "all") {
       params.set("unit", selectedUnit);
     }
@@ -211,6 +234,7 @@ export default function DashboardPage() {
   }, [
     isHydrated,
     activeTab,
+    unitType,
     selectedUnit,
     selectedSource,
     selectedGroup,
