@@ -27,7 +27,7 @@ class CSVRepository(BaseRepository):
         
         # Files and their segment keys
         segment_configs = {
-            "Market": ("unit_market_segment_vaps_attach_rate.csv", "market"),
+            "Market": ("GS_UNIT_MARKET_SEGMENT_VAPS_ATTACHED_RATE_NEW.csv", "market"),
             "Division": ("attach_rate_unit_division.csv", "division"),
             "Region": ("attach_rate_unit_region.csv", "region"),
             "Unit": ("unit_segment_vaps_attach_rate.csv", None)

@@ -54,7 +54,7 @@ def fix_view():
         views_to_fix = [
             "AI_AGENT_LOGS.TEST.GS_SALES_ACTIVATION_VIEW",
             "AI_AGENT_LOGS.TEST.gs_unit_vaps_attach_rate",
-            "AI_AGENT_LOGS.TEST.gs_unit_market_segment_vaps_attach_rate",
+            "AI_AGENT_LOGS.TEST.GS_UNIT_MARKET_SEGMENT_VAPS_ATTACHED_RATE_NEW",
             "AI_AGENT_LOGS.TEST.gs_unit_vaps_attach_rate_division",
             "AI_AGENT_LOGS.TEST.gs_unit_vaps_attach_rate_region"
         ]
