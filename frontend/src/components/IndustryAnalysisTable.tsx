@@ -185,6 +185,12 @@ export default function IndustryAnalysisTable({ marketRows, isLoading, title, ti
                 ))}
               </TableRow>
             ))
+          ) : filteredRows.length === 0 ? (
+            <TableRow>
+              <TableCell colSpan={columns.length} className="h-32 text-center text-slate-400 italic bg-white/50">
+                Data unavailable for the selected unit
+              </TableCell>
+            </TableRow>
           ) : filteredRows.map((row, idx) => (
             <TableRow key={row.vaps + idx} isHighlighted={selectedVaps === row.vaps}>
               <TableCell isHighlighted={selectedColIdx === 0} onClick={() => { setSelectedVaps(row.vaps === selectedVaps ? null : row.vaps); setSelectedColIdx(0); }} className="text-slate-500">{row.market}</TableCell>

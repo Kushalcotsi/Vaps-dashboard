@@ -241,6 +241,12 @@ export default function HeatmapTable({ title, data, segmentName, cutoff, isLoadi
                 ))}
               </TableRow>
             ))
+          ) : filteredRows.length === 0 ? (
+            <TableRow>
+              <TableCell colSpan={pivoted.columns.length + 1} className="h-32 text-center text-slate-400 italic bg-white/50">
+                Data unavailable for the selected unit
+              </TableCell>
+            </TableRow>
           ) : (
             filteredRows.map(([vaps, row]) => (
               <TableRow key={vaps} isHighlighted={selectedVaps === vaps}>

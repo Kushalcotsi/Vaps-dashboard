@@ -157,6 +157,12 @@ export default function VapsDetailTable({ title, data, columns, downloadId, isLo
                 ))}
               </TableRow>
             ))
+          ) : filteredAndSortedData.length === 0 ? (
+            <TableRow>
+              <TableCell colSpan={columns.length} className="h-32 text-center text-slate-400 italic bg-white/50">
+                Data unavailable for the selected unit
+              </TableCell>
+            </TableRow>
           ) : filteredAndSortedData.map((row, idx) => (
             <TableRow key={idx} isHighlighted={selectedRowIdx === idx}>
               {columns.map(col => {
