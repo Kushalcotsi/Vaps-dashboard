@@ -98,7 +98,9 @@ class SnowflakeRepository(BaseRepository):
 
     # Reusing recommendation loading logic since this is from a static file for now
     def _text(self, val) -> str:
-        return str(val or "").strip()
+        if val is None:
+            return ""
+        return str(val).strip()
 
     def _parse_vaps_header(self, value: object) -> Tuple[str, str]:
         header = " ".join(str(value or "").replace("\r", "\n").split())
