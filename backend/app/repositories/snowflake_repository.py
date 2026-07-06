@@ -234,7 +234,7 @@ class SnowflakeRepository(BaseRepository):
 
     @lru_cache(maxsize=1)
     def get_market_attach_rates(self) -> List[VapsAttachRate]:
-        query = f"SELECT * FROM {settings.SNOWFLAKE_DATABASE}.{settings.SNOWFLAKE_SCHEMA}.gs_unit_market_segment_vaps_attach_rate"
+        query = f"SELECT * FROM {settings.SNOWFLAKE_DATABASE}.{settings.SNOWFLAKE_SCHEMA}.GS_UNIT_MARKET_SEGMENT_VAPS_ATTACHED_RATE_NEW"
         return self._execute_query(query, "market", "MARKET_SEGMENT_DESCRIPTION")
 
     @lru_cache(maxsize=1)
@@ -288,8 +288,8 @@ class SnowflakeRepository(BaseRepository):
             "sources": [(f"SELECT DISTINCT VAPS_SOURCE FROM {settings.SNOWFLAKE_DATABASE}.{settings.SNOWFLAKE_SCHEMA}.gs_unit_vaps_attach_rate WHERE VAPS_SOURCE IS NOT NULL",)],
             "groups": [(f"SELECT DISTINCT VAPS_MAIN_GROUP FROM {settings.SNOWFLAKE_DATABASE}.{settings.SNOWFLAKE_SCHEMA}.gs_unit_vaps_attach_rate WHERE VAPS_MAIN_GROUP IS NOT NULL",)],
             "markets": [
-                (f"SELECT DISTINCT MARKET_SEGMENT_DESCRIPTION FROM {settings.SNOWFLAKE_DATABASE}.{settings.SNOWFLAKE_SCHEMA}.gs_unit_market_segment_vaps_attach_rate WHERE MARKET_SEGMENT_DESCRIPTION IS NOT NULL",),
-                (f"SELECT DISTINCT MARKET FROM {settings.SNOWFLAKE_DATABASE}.{settings.SNOWFLAKE_SCHEMA}.gs_unit_market_segment_vaps_attach_rate WHERE MARKET IS NOT NULL",)
+                (f"SELECT DISTINCT MARKET_SEGMENT_DESCRIPTION FROM {settings.SNOWFLAKE_DATABASE}.{settings.SNOWFLAKE_SCHEMA}.GS_UNIT_MARKET_SEGMENT_VAPS_ATTACHED_RATE_NEW WHERE MARKET_SEGMENT_DESCRIPTION IS NOT NULL",),
+                (f"SELECT DISTINCT MARKET FROM {settings.SNOWFLAKE_DATABASE}.{settings.SNOWFLAKE_SCHEMA}.GS_UNIT_MARKET_SEGMENT_VAPS_ATTACHED_RATE_NEW WHERE MARKET IS NOT NULL",)
             ],
             "divisions": [
                 (f'SELECT DISTINCT "division" FROM {settings.SNOWFLAKE_DATABASE}.{settings.SNOWFLAKE_SCHEMA}.gs_unit_vaps_attach_rate_division WHERE "division" IS NOT NULL',),

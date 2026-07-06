@@ -71,7 +71,7 @@ export function GlobalFilterBar() {
             </SelectTrigger>
             <SelectContent>
               <SelectItem variantSize="sm" value="all">All Product Codes</SelectItem>
-              {useDashboardStore.getState().unitType === 'Glo' ? (
+              {['Glo', 'Flex', 'Brm'].includes(useDashboardStore.getState().unitType) ? (
                 units?.map((unit) => (
                   <SelectItem variantSize="sm" key={unit.code} value={unit.code}>
                     {unit.code}
