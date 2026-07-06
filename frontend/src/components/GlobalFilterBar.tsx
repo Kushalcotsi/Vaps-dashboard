@@ -71,19 +71,11 @@ export function GlobalFilterBar() {
             </SelectTrigger>
             <SelectContent>
               <SelectItem variantSize="sm" value="all">All Product Codes</SelectItem>
-              {['Glo', 'Flex', 'Brm'].includes(useDashboardStore.getState().unitType) ? (
-                units?.map((unit) => (
-                  <SelectItem variantSize="sm" key={unit.code} value={unit.code}>
-                    {unit.code}
-                  </SelectItem>
-                ))
-              ) : (
-                MOCK_PRODUCT_CODES[useDashboardStore.getState().unitType]?.map((code) => (
-                  <SelectItem variantSize="sm" key={code} value={code}>
-                    {code}
-                  </SelectItem>
-                ))
-              )}
+              {MOCK_PRODUCT_CODES[useDashboardStore.getState().unitType]?.map((code) => (
+                <SelectItem variantSize="sm" key={code} value={code}>
+                  {code}
+                </SelectItem>
+              ))}
             </SelectContent>
           </Select>
         </div>

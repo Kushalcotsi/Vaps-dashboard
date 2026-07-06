@@ -1,7 +1,11 @@
 export const UNIT_TYPES = ["Glo", "Cold", "Flex", "Brm", "Container", "Trailer"];
 
 export const MOCK_PRODUCT_CODES: Record<string, string[]> = {
-  Glo: [], // Handled dynamically from the backend
+  Glo: [
+    "20W", "40W", "10W", "18W", "25W", "30W", "HQ208", "HQ408", "20X", "40U", 
+    "MO248", "MO328", "MO3610", "MO4410", "MO4412", "MO5010", "MO5012", "MO5014", 
+    "MO6012", "MO7414"
+  ],
   Cold: [
     "10CR3", "10CR1HC", "20CR1HC", "20CR3", "20CR1HC COMBO", "30CR1HC", "40CR3HC", 
     "40CR3HCR", "28TRD", "28TRH", "28TRE", "36TRMH", "36TRMD", "48TRMH", "53TRMD", 
