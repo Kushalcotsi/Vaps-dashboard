@@ -10,6 +10,7 @@ import { UNIT_TYPES, MOCK_PRODUCT_CODES } from "@/lib/mockProductCodes";
 
 export function GlobalFilterBar() {
   const { 
+    unitType, setUnitType,
     selectedUnit, setSelectedUnit, 
     selectedSource, setSelectedSource, 
     selectedGroup, setSelectedGroup
@@ -43,8 +44,8 @@ export function GlobalFilterBar() {
         <div className="flex flex-col gap-1 w-32 shrink-0">
           <span className="text-[11px] font-medium text-slate-500 leading-none mb-0.5">Unit Type</span>
           <Select 
-            value={useDashboardStore.getState().unitType || "Glo"} 
-            onValueChange={(val) => useDashboardStore.getState().setUnitType(val)}
+            value={unitType || "Glo"} 
+            onValueChange={(val) => setUnitType(val)}
           >
             <SelectTrigger className="h-7 px-2 rounded-lg border border-slate-200 bg-white hover:bg-slate-50 hover:border-slate-300 transition-all shadow-sm text-xs font-semibold text-slate-700">
               <SelectValue placeholder="Glo" />
@@ -60,7 +61,7 @@ export function GlobalFilterBar() {
         {/* PRODUCT CODE (SF) */}
         <div className="flex flex-col gap-1 w-56 shrink-0">
           <span className="text-[11px] font-medium text-slate-500 leading-none mb-0.5 whitespace-nowrap">
-            {useDashboardStore.getState().unitType} - Product Code (SF)
+            {unitType} - Product Code (SF)
           </span>
           <Select 
             value={selectedUnit || "all"} 
@@ -71,7 +72,7 @@ export function GlobalFilterBar() {
             </SelectTrigger>
             <SelectContent>
               <SelectItem variantSize="sm" value="all">All Product Codes</SelectItem>
-              {MOCK_PRODUCT_CODES[useDashboardStore.getState().unitType]?.map((code) => (
+              {MOCK_PRODUCT_CODES[unitType]?.map((code) => (
                 <SelectItem variantSize="sm" key={code} value={code}>
                   {code}
                 </SelectItem>
