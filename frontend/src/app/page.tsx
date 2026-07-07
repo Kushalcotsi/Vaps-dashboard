@@ -32,7 +32,7 @@ export default function DashboardPage() {
   const { data, isLoading, isFetching, error } = useQuery({
     queryKey: ["dashboard", selectedUnit, unitType],
     queryFn: () => {
-      if (!['Glo', 'Flex', 'Brm'].includes(unitType)) {
+      if (!['Glo', 'Flex', 'Brm', 'Trailer'].includes(unitType)) {
         // Return mock empty data structure for Demo UI
         return Promise.resolve({
           unitRows: [],
