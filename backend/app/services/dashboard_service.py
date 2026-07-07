@@ -4,7 +4,7 @@ from app.models.dashboard import VapsAttachRate, RecommendationEntry
 from app.repositories.base import BaseRepository
 
 class DashboardService:
-    MIN_BASKETS = 25
+    MIN_BASKETS = 0
     
     def __init__(self, repo: BaseRepository):
         self.repo = repo
