@@ -53,10 +53,10 @@ def fix_view():
         # But the main one is GS_SALES_ACTIVATION_VIEW. Let's fix that one first.
         views_to_fix = [
             "AI_AGENT_LOGS.TEST.GS_SALES_ACTIVATION_VIEW",
-            "AI_AGENT_LOGS.TEST.gs_unit_vaps_attach_rate",
-            "AI_AGENT_LOGS.TEST.GS_UNIT_MARKET_SEGMENT_VAPS_ATTACHED_RATE_NEW",
-            "AI_AGENT_LOGS.TEST.gs_unit_vaps_attach_rate_division",
-            "AI_AGENT_LOGS.TEST.gs_unit_vaps_attach_rate_region"
+            "AI_AGENT_LOGS.TEST.gs_unit_vaps_attach_rate_new",
+            "AI_AGENT_LOGS.TEST.gs_unit_market_segment_vaps_attach_rate_new",
+            "AI_AGENT_LOGS.TEST.gs_unit_vaps_attach_rate_division_new",
+            "AI_AGENT_LOGS.TEST.gs_unit_vaps_attach_rate_region_new"
         ]
         
         for view_name in views_to_fix:

@@ -231,22 +231,22 @@ class SnowflakeRepository(BaseRepository):
 
     @lru_cache(maxsize=1)
     def get_unit_attach_rates(self) -> List[VapsAttachRate]:
-        query = f"SELECT * FROM {settings.SNOWFLAKE_DATABASE}.{settings.SNOWFLAKE_SCHEMA}.gs_unit_vaps_attach_rate"
+        query = f"SELECT * FROM {settings.SNOWFLAKE_DATABASE}.{settings.SNOWFLAKE_SCHEMA}.gs_unit_vaps_attach_rate_new"
         return self._execute_query(query)
 
     @lru_cache(maxsize=1)
     def get_market_attach_rates(self) -> List[VapsAttachRate]:
-        query = f"SELECT * FROM {settings.SNOWFLAKE_DATABASE}.{settings.SNOWFLAKE_SCHEMA}.GS_UNIT_MARKET_SEGMENT_VAPS_ATTACHED_RATE_NEW"
+        query = f"SELECT * FROM {settings.SNOWFLAKE_DATABASE}.{settings.SNOWFLAKE_SCHEMA}.gs_unit_market_segment_vaps_attach_rate_new"
         return self._execute_query(query, "market", "MARKET_SEGMENT_DESCRIPTION")
 
     @lru_cache(maxsize=1)
     def get_division_attach_rates(self) -> List[VapsAttachRate]:
-        query = f"SELECT * FROM {settings.SNOWFLAKE_DATABASE}.{settings.SNOWFLAKE_SCHEMA}.gs_unit_vaps_attach_rate_division"
+        query = f"SELECT * FROM {settings.SNOWFLAKE_DATABASE}.{settings.SNOWFLAKE_SCHEMA}.gs_unit_vaps_attach_rate_division_new"
         return self._execute_query(query, "division", ("division", "DIVISION", "DIVISION_NAME"))
 
     @lru_cache(maxsize=1)
     def get_region_attach_rates(self) -> List[VapsAttachRate]:
-        query = f"SELECT * FROM {settings.SNOWFLAKE_DATABASE}.{settings.SNOWFLAKE_SCHEMA}.gs_unit_vaps_attach_rate_region"
+        query = f"SELECT * FROM {settings.SNOWFLAKE_DATABASE}.{settings.SNOWFLAKE_SCHEMA}.gs_unit_vaps_attach_rate_region_new"
         return self._execute_query(query, "region", ("region", "REGION", "REGION_DESCRIPTION"))
 
     def get_all_segments_data(self) -> Dict[str, List[VapsAttachRate]]:
@@ -287,21 +287,21 @@ class SnowflakeRepository(BaseRepository):
         }
         
         queries = {
-            "sources": [(f"SELECT DISTINCT VAPS_SOURCE FROM {settings.SNOWFLAKE_DATABASE}.{settings.SNOWFLAKE_SCHEMA}.gs_unit_vaps_attach_rate WHERE VAPS_SOURCE IS NOT NULL",)],
-            "groups": [(f"SELECT DISTINCT VAPS_MAIN_GROUP FROM {settings.SNOWFLAKE_DATABASE}.{settings.SNOWFLAKE_SCHEMA}.gs_unit_vaps_attach_rate WHERE VAPS_MAIN_GROUP IS NOT NULL",)],
+            "sources": [(f"SELECT DISTINCT VAPS_SOURCE FROM {settings.SNOWFLAKE_DATABASE}.{settings.SNOWFLAKE_SCHEMA}.gs_unit_vaps_attach_rate_new WHERE VAPS_SOURCE IS NOT NULL",)],
+            "groups": [(f"SELECT DISTINCT VAPS_MAIN_GROUP FROM {settings.SNOWFLAKE_DATABASE}.{settings.SNOWFLAKE_SCHEMA}.gs_unit_vaps_attach_rate_new WHERE VAPS_MAIN_GROUP IS NOT NULL",)],
             "markets": [
-                (f"SELECT DISTINCT MARKET_SEGMENT_DESCRIPTION FROM {settings.SNOWFLAKE_DATABASE}.{settings.SNOWFLAKE_SCHEMA}.GS_UNIT_MARKET_SEGMENT_VAPS_ATTACHED_RATE_NEW WHERE MARKET_SEGMENT_DESCRIPTION IS NOT NULL",),
-                (f"SELECT DISTINCT MARKET FROM {settings.SNOWFLAKE_DATABASE}.{settings.SNOWFLAKE_SCHEMA}.GS_UNIT_MARKET_SEGMENT_VAPS_ATTACHED_RATE_NEW WHERE MARKET IS NOT NULL",)
+                (f"SELECT DISTINCT MARKET_SEGMENT_DESCRIPTION FROM {settings.SNOWFLAKE_DATABASE}.{settings.SNOWFLAKE_SCHEMA}.gs_unit_market_segment_vaps_attach_rate_new WHERE MARKET_SEGMENT_DESCRIPTION IS NOT NULL",),
+                (f"SELECT DISTINCT MARKET FROM {settings.SNOWFLAKE_DATABASE}.{settings.SNOWFLAKE_SCHEMA}.gs_unit_market_segment_vaps_attach_rate_new WHERE MARKET IS NOT NULL",)
             ],
             "divisions": [
-                (f'SELECT DISTINCT "division" FROM {settings.SNOWFLAKE_DATABASE}.{settings.SNOWFLAKE_SCHEMA}.gs_unit_vaps_attach_rate_division WHERE "division" IS NOT NULL',),
-                (f"SELECT DISTINCT DIVISION FROM {settings.SNOWFLAKE_DATABASE}.{settings.SNOWFLAKE_SCHEMA}.gs_unit_vaps_attach_rate_division WHERE DIVISION IS NOT NULL",),
-                (f"SELECT DISTINCT DIVISION_NAME FROM {settings.SNOWFLAKE_DATABASE}.{settings.SNOWFLAKE_SCHEMA}.gs_unit_vaps_attach_rate_division WHERE DIVISION_NAME IS NOT NULL",)
+                (f'SELECT DISTINCT "division" FROM {settings.SNOWFLAKE_DATABASE}.{settings.SNOWFLAKE_SCHEMA}.gs_unit_vaps_attach_rate_division_new WHERE "division" IS NOT NULL',),
+                (f"SELECT DISTINCT DIVISION FROM {settings.SNOWFLAKE_DATABASE}.{settings.SNOWFLAKE_SCHEMA}.gs_unit_vaps_attach_rate_division_new WHERE DIVISION IS NOT NULL",),
+                (f"SELECT DISTINCT DIVISION_NAME FROM {settings.SNOWFLAKE_DATABASE}.{settings.SNOWFLAKE_SCHEMA}.gs_unit_vaps_attach_rate_division_new WHERE DIVISION_NAME IS NOT NULL",)
             ],
             "regions": [
-                (f'SELECT DISTINCT "region" FROM {settings.SNOWFLAKE_DATABASE}.{settings.SNOWFLAKE_SCHEMA}.gs_unit_vaps_attach_rate_region WHERE "region" IS NOT NULL',),
-                (f"SELECT DISTINCT REGION FROM {settings.SNOWFLAKE_DATABASE}.{settings.SNOWFLAKE_SCHEMA}.gs_unit_vaps_attach_rate_region WHERE REGION IS NOT NULL",),
-                (f"SELECT DISTINCT REGION_DESCRIPTION FROM {settings.SNOWFLAKE_DATABASE}.{settings.SNOWFLAKE_SCHEMA}.gs_unit_vaps_attach_rate_region WHERE REGION_DESCRIPTION IS NOT NULL",)
+                (f'SELECT DISTINCT "region" FROM {settings.SNOWFLAKE_DATABASE}.{settings.SNOWFLAKE_SCHEMA}.gs_unit_vaps_attach_rate_region_new WHERE "region" IS NOT NULL',),
+                (f"SELECT DISTINCT REGION FROM {settings.SNOWFLAKE_DATABASE}.{settings.SNOWFLAKE_SCHEMA}.gs_unit_vaps_attach_rate_region_new WHERE REGION IS NOT NULL",),
+                (f"SELECT DISTINCT REGION_DESCRIPTION FROM {settings.SNOWFLAKE_DATABASE}.{settings.SNOWFLAKE_SCHEMA}.gs_unit_vaps_attach_rate_region_new WHERE REGION_DESCRIPTION IS NOT NULL",)
             ]
         }
 
