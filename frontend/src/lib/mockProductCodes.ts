@@ -41,5 +41,9 @@ export const MOCK_PRODUCT_CODES: Record<string, string[]> = {
     "40ZF", "20X", "40U", "12PV", "23PV", "SV348", "SV3610", "27VT", "45VT", 
     "53TRDRY", "53CT3"
   ],
-  Trailer: []
+  Trailer: [
+    "20W", "40W", "10W", "18W", "25W", "30W", "HQ208", "HQ408", "20X", "40U", 
+    "MO248", "MO328", "MO3610", "MO4410", "MO4412", "MO5010", "MO5012", "MO5014", 
+    "MO6012", "MO7414"
+  ]
 };
