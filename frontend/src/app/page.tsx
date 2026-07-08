@@ -32,16 +32,6 @@ export default function DashboardPage() {
   const { data, isLoading, isFetching, error } = useQuery({
     queryKey: ["dashboard", selectedUnit, unitType],
     queryFn: () => {
-      if (!['Glo', 'Flex', 'Brm', 'Trailer'].includes(unitType)) {
-        // Return mock empty data structure for Demo UI
-        return Promise.resolve({
-          unitRows: [],
-          recommendationRows: [],
-          industryRecommendationRows: [],
-          segments: { Market: [], Division: [], Region: [] },
-          summary: { cutoff: 0.05, activations: 0, associated: 0, unitName: `${unitType} Mock`, unitDescription: `Demo data for ${unitType}`, unitL2: "", unitL3: "" }
-        });
-      }
       return fetchDashboardData(selectedUnit);
     },
     enabled: !!selectedUnit,
