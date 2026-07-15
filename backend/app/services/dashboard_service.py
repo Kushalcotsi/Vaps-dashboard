@@ -130,16 +130,21 @@ class DashboardService:
             
         # 4. Process Recommendation Rows (Strictly from Sheet)
         all_recommendations = self.repo.get_recommendation_entries()
-        unit_recs = [rec for (uid, vid), rec in all_recommendations.items() if uid == unit_id]
+        
+        if unit_id.lower() == 'all':
+            valid_units = {r.unit for r in unit_rows}
+            unit_recs = [rec for (uid, vid), rec in all_recommendations.items() if uid in valid_units]
+        else:
+            unit_recs = [rec for (uid, vid), rec in all_recommendations.items() if uid == unit_id]
         
         # Sort by sequence to match reference
-        unit_recs.sort(key=lambda x: x.sequence)
+        unit_recs.sort(key=lambda x: (x.unit, x.sequence))
         
         recommendation_rows = []
-        attach_by_vaps = {r.vaps: r for r in unit_rows}
+        attach_by_vaps = {(r.unit, r.vaps): r for r in unit_rows}
         
         for rec in unit_recs:
-            attach = attach_by_vaps.get(rec.vaps)
+            attach = attach_by_vaps.get((rec.unit, rec.vaps))
             
             # Create a parity object starting from RecommendationEntry
             row_data = VapsAttachRate(
@@ -173,12 +178,17 @@ class DashboardService:
         segments_data = self.repo.get_all_segments_data()
         processed_segments = {}
         
-        unit_attach_by_vaps = {r.vaps: r.attachRate for r in unit_rows}
+        unit_attach_by_vaps = {(r.unit, r.vaps): r.attachRate for r in unit_rows}
         
         for segment_name, rows in segments_data.items():
-            segment_rows = [r for r in rows if r.unit == unit_id and r.activations >= self.MIN_BASKETS]
+            if unit_id.lower() == 'all':
+                valid_units = {r.unit for r in unit_rows}
+                segment_rows = [r for r in rows if r.unit in valid_units and r.activations >= self.MIN_BASKETS]
+            else:
+                segment_rows = [r for r in rows if r.unit == unit_id and r.activations >= self.MIN_BASKETS]
+                
             for r in segment_rows:
-                unit_rate = unit_attach_by_vaps.get(r.vaps, 0.0)
+                unit_rate = unit_attach_by_vaps.get((r.unit, r.vaps), 0.0)
                 sig = self.get_industry_signal(r, cutoff, unit_rate)
                 r.industrySignal = sig["signal"]
                 r.industrySignalReason = sig["reason"]
@@ -194,11 +204,11 @@ class DashboardService:
         unique_markets = sorted(list(set(r.market for r in market_rows if r.market)))
         
         # Helper to find market-specific metrics
-        market_metrics_map = {(r.vaps, r.market): r for r in market_rows}
+        market_metrics_map = {(r.unit, r.vaps, r.market): r for r in market_rows}
         
         for market in unique_markets:
             for rec_row in recommendation_rows:
-                market_row = market_metrics_map.get((rec_row.vaps, market))
+                market_row = market_metrics_map.get((rec_row.unit, rec_row.vaps, market))
                 
                 # Create a new instance for this specific market comparison
                 row_data = rec_row.copy()

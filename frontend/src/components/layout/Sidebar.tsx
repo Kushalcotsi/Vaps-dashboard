@@ -33,10 +33,10 @@ export function Sidebar({ activeTab, onTabChange }: SidebarProps) {
     {
       title: " Vaps Attach Rate By",
       items: [
-        { id: "unit" as SidebarTab, label: "Unit", icon: BarChart3 },
-        { id: "market" as SidebarTab, label: "Market and Unit", icon: PieChart },
-        { id: "division" as SidebarTab, label: "Unit and Division", icon: Map },
-        { id: "region" as SidebarTab, label: "Unit and Region", icon: Globe },
+        { id: "unit" as SidebarTab, label: "Vaps", icon: BarChart3 },
+        { id: "market" as SidebarTab, label: "Market and Vaps", icon: PieChart },
+        { id: "division" as SidebarTab, label: "Vaps and Division", icon: Map },
+        { id: "region" as SidebarTab, label: "Vaps and Region", icon: Globe },
       ]
     },
     {
