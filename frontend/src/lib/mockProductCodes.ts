@@ -33,11 +33,11 @@ export const MOCK_PRODUCT_CODES: Record<string, string[]> = {
     "BR408TR", "BR4012TR", "BR2012GH", "BR4012RR"
   ],
   Container: [
-    "10S", "10ZI", "10ZK", "10ZS", "15S", "15ZI", "15ZK", "15ZS", "20WS", "20ZI", 
-    "20ZK", "20ZS", "25S", "25ZI", "25ZK", "25ZS", "40WS", "40ZI", "40ZK", "40ZS", 
-    "40S6", "40ZIT", "40ZKT", "40ZST", "18ZI", "25ZJ", "20FPH", "20K6", "40F", 
-    "40ZF", "20X", "40U", "12PV", "23PV", "SV348", "SV3610", "27VT", "45VT", 
-    "53TRDRY", "53CT3"
+    "40WS", "20WS", "40ZS", "20ZS", "40ZK", "40S6", "25ZJ", "10S", "20ZK", 
+    "10ZS", "25ZK", "20ZI", "15ZS", "15S", "18ZI", "40ZST", "25S", "15ZI", 
+    "40ZI", "10ZI", "25ZS", "25ZI", "45VT", "40ZKT", "40ZIT", "20FPH", 
+    "53TRDRY", "SV348", "40F", "40ZF", "10ZK", "20K6", "15ZK", "27VT", 
+    "12PV", "23PV", "53CT3"
   ],
   Trailer: [
     "MO248", "MO328", "MO3610", "MO4410", "MO4412", "MO5010", "MO5012", "MO5014", 
