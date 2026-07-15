@@ -4,7 +4,7 @@ import { useMemo, useState, useEffect } from "react"
 import { useQuery, keepPreviousData } from "@tanstack/react-query"
 import { fetchDashboardData } from "@/lib/api"
 import { useDashboardStore } from "@/store/useDashboardStore"
-import { UNIT_TYPES } from "@/lib/mockProductCodes"
+import { UNIT_TYPES, MOCK_PRODUCT_CODES } from "@/lib/mockProductCodes"
 import DistributionBars from "@/components/DistributionBars"
 import ElbowChart from "@/components/ElbowChart"
 import RecommendationTable from "@/components/RecommendationTable"
@@ -39,41 +39,38 @@ export default function DashboardPage() {
     placeholderData: keepPreviousData,
   })
 
+  const matchesFilters = (r: any) => {
+    const validCodes = MOCK_PRODUCT_CODES[unitType] || [];
+    // If 'all' is selected, we MUST filter by the current Unit Type category
+    const matchesType = selectedUnit !== "all" || validCodes.includes(r.unit);
+    const matchesSource = !selectedSource || r.source === selectedSource;
+    const matchesGroup = !selectedGroup || r.mainGroup === selectedGroup;
+    return matchesType && matchesSource && matchesGroup;
+  };
+
   const filteredUnitRows = useMemo(() => {
     if (!data?.unitRows) return [];
-    return data.unitRows.filter(r => 
-      (!selectedSource || r.source === selectedSource) &&
-      (!selectedGroup || r.mainGroup === selectedGroup)
-    );
-  }, [data, selectedSource, selectedGroup]);
+    return data.unitRows.filter(matchesFilters);
+  }, [data, selectedSource, selectedGroup, selectedUnit, unitType]);
 
   const filteredRecommendationRows = useMemo(() => {
     if (!data?.recommendationRows) return [];
-    return data.recommendationRows.filter(r => 
-      (!selectedSource || r.source === selectedSource) &&
-      (!selectedGroup || r.mainGroup === selectedGroup)
-    );
-  }, [data, selectedSource, selectedGroup]);
+    return data.recommendationRows.filter(matchesFilters);
+  }, [data, selectedSource, selectedGroup, selectedUnit, unitType]);
 
   const filteredIndustryRecommendationRows = useMemo(() => {
     if (!data?.industryRecommendationRows) return [];
-    return data.industryRecommendationRows.filter(r => 
-      (!selectedSource || r.source === selectedSource) &&
-      (!selectedGroup || r.mainGroup === selectedGroup)
-    );
-  }, [data, selectedSource, selectedGroup]);
+    return data.industryRecommendationRows.filter(matchesFilters);
+  }, [data, selectedSource, selectedGroup, selectedUnit, unitType]);
 
   const filteredSegments = useMemo(() => {
     if (!data?.segments) return {};
     const result: Record<string, any[]> = {};
     Object.entries(data.segments).forEach(([name, rows]) => {
-      result[name] = (rows as any[]).filter(r => 
-        (!selectedSource || r.source === selectedSource) &&
-        (!selectedGroup || r.mainGroup === selectedGroup)
-      );
+      result[name] = (rows as any[]).filter(matchesFilters);
     });
     return result;
-  }, [data, selectedSource, selectedGroup]);
+  }, [data, selectedSource, selectedGroup, selectedUnit, unitType]);
 
   const dynamicSummary = useMemo(() => {
     if (!data?.summary) return null;
