@@ -1,4 +1,4 @@
-export const UNIT_TYPES = ["Glo", "Cold", "Flex", "Brm", "Container", "Trailer", "Complexes", "Redi Plex"];
+export const UNIT_TYPES = ["Glo", "Cold", "Flex", "Brm", "Container", "Trailer", "Complexes", "Redi Plex", "Sales Offices"];
 
 export const MOCK_PRODUCT_CODES: Record<string, string[]> = {
   Glo: [
@@ -70,5 +70,9 @@ export const MOCK_PRODUCT_CODES: Record<string, string[]> = {
     "RP6024", "RP6036", "RP6048", "RP6060", "RP6072", "RP6084", "RP6096", "RP60108", 
     "RP60120", "RP60132", "RP60144", "RP60156", "RP60168", "RP60180", "RP64192", 
     "RP60216", "RP64240", "RP64264"
+  ],
+  "Sales Offices": [
+    "SO4812", "SO5460", "SO6012", "SO328", "SO6436", "SO6448", "SO6472", "SO6496", 
+    "SO4824", "SO6024", "SO6028", "SO6036"
   ]
 };
