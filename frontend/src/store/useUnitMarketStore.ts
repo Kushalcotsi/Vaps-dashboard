@@ -10,7 +10,7 @@ interface UnitMarketState {
 }
 
 export const useUnitMarketStore = create<UnitMarketState>((set) => ({
-  unitType: 'Glo',
+  unitType: 'All',
   selectedUnit: 'all', 
   selectedMarket: 'all',
   setUnitType: (unitType) => set({ unitType }),

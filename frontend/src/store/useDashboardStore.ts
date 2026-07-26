@@ -14,7 +14,7 @@ interface DashboardState {
 }
 
 export const useDashboardStore = create<DashboardState>((set) => ({
-  unitType: 'Glo',
+  unitType: 'All',
   selectedUnit: 'all', 
   selectedSource: '',
   selectedGroup: '',

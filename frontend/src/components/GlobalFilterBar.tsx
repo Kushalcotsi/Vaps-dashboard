@@ -84,14 +84,14 @@ export function GlobalFilterBar() {
             <div className="flex flex-col gap-1 w-32 shrink-0">
               <span className="text-[11px] font-medium text-slate-500 leading-none mb-0.5">Unit Type</span>
               <Select 
-                value={unitType || "Glo"} 
+                value={unitType || "All"} 
                 onValueChange={(val) => {
                   setUnitType(val);
                   setSelectedUnit("all");
                 }}
               >
                 <SelectTrigger className="h-7 px-2 rounded-lg border border-slate-200 bg-white hover:bg-slate-50 hover:border-slate-300 transition-all shadow-sm text-xs font-semibold text-slate-700">
-                  <SelectValue placeholder="Glo" />
+                  <SelectValue placeholder="All" />
                 </SelectTrigger>
                 <SelectContent>
                   {UNIT_TYPES.map(type => (
@@ -183,14 +183,14 @@ export function GlobalFilterBar() {
             <div className="flex flex-col gap-1 w-32 shrink-0">
               <span className="text-[11px] font-medium text-slate-500 leading-none mb-0.5">Unit Type</span>
               <Select 
-                value={umUnitType || "Glo"} 
+                value={umUnitType || "All"} 
                 onValueChange={(val) => {
                   setUmUnitType(val);
                   setUmSelectedUnit("all");
                 }}
               >
                 <SelectTrigger className="h-7 px-2 rounded-lg border border-slate-200 bg-white hover:bg-slate-50 hover:border-slate-300 transition-all shadow-sm text-xs font-semibold text-slate-700">
-                  <SelectValue placeholder="Glo" />
+                  <SelectValue placeholder="All" />
                 </SelectTrigger>
                 <SelectContent>
                   {UNIT_TYPES.map(type => (
