@@ -53,3 +53,51 @@ export interface DashboardData {
     unitL3: string;
   };
 }
+
+export interface UnitMarketSegmentRate {
+  unit: string;
+  market: string;
+  year: number;
+  quarter: number;
+  unitMarketActivations: number;
+  unitActivations: number;
+  marketActivations: number;
+  marketContributionToProduct: number;
+  productShareInMarket: number;
+  productName: string;
+  unitDescription: string;
+  unitDetailedDescription: string;
+  unitL1Purpose: string;
+  unitL2CoreSolution: string;
+  unitL3Products: string;
+  
+  latestActivations: number;
+  historicalActivations: number;
+  periodsObserved: number;
+  
+  historicalProductShareInMarket: number;
+  historicalMarketContributionToProduct: number;
+  
+  blendedProductShareInMarket: number;
+  blendedMarketContributionToProduct: number;
+  
+  momentumScore: number;
+  trendScore: number;
+  supportScore: number;
+  
+  confidenceLevel: string;
+  recommendationScore: number;
+  recommendationLabel: string;
+  reviewReason: string;
+}
+
+export interface UnitMarketDashboardData {
+  latestRecommendations: UnitMarketSegmentRate[];
+  highConfidenceRecommendations: UnitMarketSegmentRate[];
+  lowConfidenceReviewItems: UnitMarketSegmentRate[];
+  summary: {
+    total_recommendations: number;
+    high_confidence_count: number;
+    low_confidence_count: number;
+  };
+}
