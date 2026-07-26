@@ -2,12 +2,12 @@
  * Utility to export data to CSV, matching the reference implementation's formatting.
  */
 
-export function exportToCsv(filename: string, columns: { label: string, key: string, fmt?: (v: any) => string }[], rows: any[]) {
+export function exportToCsv(filename: string, columns: { label: string, key: string, fmt?: (v: any, row?: any) => string }[], rows: any[]) {
   const headers = columns.map(col => csvValue(col.label)).join(",");
   const body = rows.map(row => 
     columns.map(col => {
       const val = row[col.key];
-      return csvValue(col.fmt ? col.fmt(val) : val);
+      return csvValue(col.fmt ? col.fmt(val, row) : val);
     }).join(",")
   ).join("\n");
 

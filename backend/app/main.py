@@ -2,7 +2,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.gzip import GZipMiddleware
 from app.core.config import settings
-from app.api.endpoints import dashboard
+from app.api.endpoints import dashboard, unit_market
 
 app = FastAPI(
     title="Guided Selling VAPS API",
@@ -12,6 +12,7 @@ app = FastAPI(
 
 # Register routers
 app.include_router(dashboard.router, prefix="/api/v1")
+app.include_router(unit_market.router, prefix="/api/v1/unit-market")
 
 # Set up Compression
 app.add_middleware(GZipMiddleware, minimum_size=1000)

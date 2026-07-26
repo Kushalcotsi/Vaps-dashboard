@@ -2,16 +2,21 @@
 
 import { useMemo, useState, useEffect } from "react"
 import { useQuery, keepPreviousData } from "@tanstack/react-query"
-import { fetchDashboardData } from "@/lib/api"
+import { fetchDashboardData, fetchUnitMarketDashboardData } from "@/lib/api"
 import { useDashboardStore } from "@/store/useDashboardStore"
-import { UNIT_TYPES, MOCK_PRODUCT_CODES } from "@/lib/mockProductCodes"
+import { useUnitMarketStore } from "@/store/useUnitMarketStore"
+import { UNIT_TYPES, MOCK_PRODUCT_CODES, getDynamicProductCodes } from "@/lib/mockProductCodes"
 import DistributionBars from "@/components/DistributionBars"
 import ElbowChart from "@/components/ElbowChart"
 import RecommendationTable from "@/components/RecommendationTable"
 import HeatmapTable from "@/components/HeatmapTable"
 import IndustryAnalysisTable from "@/components/IndustryAnalysisTable"
 import VapsDetailTable from "@/components/VapsDetailTable"
+import UnitMarketTable from "@/components/UnitMarketTable"
+import UnitMarketHeatmapTable from "@/components/UnitMarketHeatmapTable"
 import UnitSummaryCard from "@/components/UnitSummaryCard"
+import UnitMarketSummaryCard from "@/components/UnitMarketSummaryCard"
+import UnitMarketDistributionBars from "@/components/UnitMarketDistributionBars"
 import { DashboardLayout } from "@/components/layout/DashboardLayout"
 import { PageContainer } from "@/components/layout/PageContainer"
 import { Sidebar, SidebarTab } from "@/components/layout/Sidebar"
@@ -26,23 +31,51 @@ export default function DashboardPage() {
     unitType,
     selectedUnit, setSelectedUnit,
     selectedSource, setSelectedSource,
-    selectedGroup, setSelectedGroup
+    selectedGroup, setSelectedGroup,
+    activeTab, setActiveTab
   } = useDashboardStore()
+
+  const {
+    unitType: umUnitType,
+    selectedUnit: umSelectedUnit,
+    selectedMarket: umSelectedMarket,
+  } = useUnitMarketStore()
+
+  const isUM = activeTab.startsWith("um_");
 
   const { data, isLoading, isFetching, error } = useQuery({
     queryKey: ["dashboard", selectedUnit, unitType],
     queryFn: () => {
       return fetchDashboardData(selectedUnit);
     },
-    enabled: !!selectedUnit,
+    enabled: !!selectedUnit && !isUM,
     staleTime: 30000, // Keep data fresh for 30s
     placeholderData: keepPreviousData,
   })
 
+  const { data: umData, isLoading: umIsLoading, isFetching: umIsFetching } = useQuery({
+    queryKey: ["um_dashboard", umSelectedUnit, umSelectedMarket],
+    queryFn: () => {
+      return fetchUnitMarketDashboardData(umSelectedUnit, umSelectedMarket);
+    },
+    enabled: !!umSelectedUnit && isUM,
+    staleTime: 30000,
+    placeholderData: keepPreviousData,
+  })
+
+  const filteredUmRecommendations = useMemo(() => {
+    if (!umData?.latestRecommendations) return [];
+    if (umSelectedUnit !== "all") return umData.latestRecommendations;
+    const availableCodes = new Set<string>(umData.latestRecommendations.map((r: any) => r.unit));
+    const { validCodesForType } = getDynamicProductCodes(umUnitType, availableCodes);
+    return umData.latestRecommendations.filter((r: any) => validCodesForType.includes(r.unit));
+  }, [umData?.latestRecommendations, umUnitType, umSelectedUnit]);
+
   const matchesFilters = (r: any) => {
-    const validCodes = MOCK_PRODUCT_CODES[unitType] || [];
-    // If 'all' is selected, we MUST filter by the current Unit Type category
-    const matchesType = selectedUnit !== "all" || validCodes.includes(r.unit);
+    const availableCodes = new Set<string>((data?.unitRows || []).map((row: any) => row.unit));
+    const { validCodesForType } = getDynamicProductCodes(unitType, availableCodes);
+    // If 'all' is selected, we MUST filter by the current Unit Type category (including any extra dynamic Snowflake codes!)
+    const matchesType = selectedUnit !== "all" || validCodesForType.includes(r.unit);
     const matchesSource = !selectedSource || r.source === selectedSource;
     const matchesGroup = !selectedGroup || r.mainGroup === selectedGroup;
     return matchesType && matchesSource && matchesGroup;
@@ -119,14 +152,13 @@ export default function DashboardPage() {
       { key: "industrySignal", label: `${type.charAt(0).toUpperCase() + type.slice(1)} signal` },
     ]
   };
-
-  const [activeTab, setActiveTab] = useState<SidebarTab>("overview");
   
   // Sub-view states for toggles
   const [unitSubView, setUnitSubView] = useState("recommendation"); // recommendation | industry
   const [marketSubView, setMarketSubView] = useState("heatmap"); // heatmap | table
   const [divisionSubView, setDivisionSubView] = useState("heatmap"); // heatmap | table
   const [regionSubView, setRegionSubView] = useState("heatmap"); // heatmap | table
+  const [umRecommendationsSubView, setUmRecommendationsSubView] = useState("heatmap"); // heatmap | table
 
   const [isHydrated, setIsHydrated] = useState(false);
 
@@ -161,6 +193,7 @@ export default function DashboardPage() {
       setMarketSubView(params.get("marketSubView") || "heatmap");
       setDivisionSubView(params.get("divisionSubView") || "heatmap");
       setRegionSubView(params.get("regionSubView") || "heatmap");
+      setUmRecommendationsSubView(params.get("umRecommendationsSubView") || "heatmap");
     };
 
     hydrateFromUrl();
@@ -213,6 +246,9 @@ export default function DashboardPage() {
     if (regionSubView !== "heatmap") {
       params.set("regionSubView", regionSubView);
     }
+    if (umRecommendationsSubView !== "heatmap") {
+      params.set("umRecommendationsSubView", umRecommendationsSubView);
+    }
 
     const searchStr = params.toString();
     const newUrl = searchStr ? `${window.location.pathname}?${searchStr}` : window.location.pathname;
@@ -228,12 +264,13 @@ export default function DashboardPage() {
     unitSubView,
     marketSubView,
     divisionSubView,
-    regionSubView
+    regionSubView,
+    umRecommendationsSubView
   ]);
 
   // Show a "Processing" indicator for background fetches
-  const isSoftLoading = isFetching && !isLoading;
-  const showLoading = isLoading || isFetching;
+  const isSoftLoading = isUM ? (umIsFetching && !umIsLoading) : (isFetching && !isLoading);
+  const showLoading = isUM ? (umIsLoading || umIsFetching) : (isLoading || isFetching);
 
   const renderOverview = () => {
     const handleScrollToElbow = () => {
@@ -381,10 +418,90 @@ export default function DashboardPage() {
     </div>
   );
 
+  const renderUmOverview = () => {
+    const recs = filteredUmRecommendations;
+    const topCore = recs
+      .filter((r: any) => r.recommendationLabel === "Core Recommendation")
+      .sort((a: any, b: any) => b.recommendationScore - a.recommendationScore)
+      .slice(0, 5);
+      
+    const topEmerging = recs
+      .filter((r: any) => r.recommendationLabel === "Emerging Opportunity" || r.recommendationLabel === "White Space Opportunity")
+      .sort((a: any, b: any) => b.recommendationScore - a.recommendationScore)
+      .slice(0, 5);
 
+    const umDisplayData = umData ? {
+      ...umData,
+      latestRecommendations: filteredUmRecommendations
+    } : null;
+
+    return (
+      <div className="space-y-4 animate-in fade-in duration-300">
+        <UnitMarketSummaryCard 
+          data={umDisplayData} 
+          selectedUnit={umSelectedUnit} 
+          selectedMarket={umSelectedMarket} 
+          isLoading={showLoading} 
+        />
+
+        <section>
+          <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
+            <UnitMarketDistributionBars 
+              isLoading={showLoading}
+              title="Top 5 Core Recommendations" 
+              type="core"
+              data={topCore} 
+            />
+            <UnitMarketDistributionBars 
+              isLoading={showLoading}
+              title="Top 5 Emerging Opportunities" 
+              type="emerging"
+              data={topEmerging} 
+            />
+          </div>
+        </section>
+      </div>
+    );
+  };
+
+  const renderUmRecommendations = () => (
+    <div className="animate-in fade-in duration-300 space-y-3">
+      <div className="flex flex-col gap-1 pb-0">
+        <div className="flex items-center gap-2">
+          <h2 className="text-base font-bold text-slate-800 tracking-tight">Unit Market Segment Recommendations</h2>
+        </div>
+        <div>
+          <InlineSegmentedControl 
+            size="sm"
+            options={[
+              { id: "heatmap", label: "Heat Map" },
+              { id: "table", label: "Table View" }
+            ]}
+            value={umRecommendationsSubView}
+            onChange={setUmRecommendationsSubView}
+          />
+        </div>
+      </div>
+      
+      {umRecommendationsSubView === "heatmap" ? (
+        <UnitMarketHeatmapTable isLoading={showLoading} data={filteredUmRecommendations} title="" />
+      ) : (
+        <UnitMarketTable isLoading={showLoading} data={filteredUmRecommendations} title="" />
+      )}
+    </div>
+  );
+
+  const renderUmRawData = () => (
+    <div className="space-y-3 animate-in fade-in duration-300">
+      <div className="flex flex-col gap-1 pb-0">
+        <h2 className="text-base font-bold text-slate-800 tracking-tight">Market Segment Details (All)</h2>
+      </div>
+      <UnitMarketTable isLoading={showLoading} data={filteredUmRecommendations} title="" />
+    </div>
+  );
 
   return (
-    <DashboardLayout sidebar={<Sidebar activeTab={activeTab} onTabChange={setActiveTab} />}>
+    <DashboardLayout sidebar={<Sidebar activeTab={activeTab as SidebarTab} onTabChange={setActiveTab as any} />}>
       <PageContainer className="px-8 py-6">
         <div className="relative">
           {activeTab === "overview" && renderOverview()}
@@ -393,6 +510,9 @@ export default function DashboardPage() {
           {activeTab === "division" && renderSegmentAnalysis("division", divisionSubView, setDivisionSubView)}
           {activeTab === "region" && renderSegmentAnalysis("region", regionSubView, setRegionSubView)}
           {activeTab === "raw" && renderRawData()}
+          {activeTab === "um_overview" && renderUmOverview()}
+          {activeTab === "um_recommendations" && renderUmRecommendations()}
+          {activeTab === "um_raw" && renderUmRawData()}
         </div>
       </PageContainer>
     </DashboardLayout>

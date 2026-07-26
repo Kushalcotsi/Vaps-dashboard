@@ -13,7 +13,7 @@ import {
 import { Tooltip, TooltipTrigger, TooltipContent, TooltipProvider } from "@/components/ui/Tooltip";
 import { BrandLogo } from "../BrandLogo";
 
-export type SidebarTab = "overview" | "unit" | "market" | "division" | "region" | "raw";
+export type SidebarTab = "overview" | "unit" | "market" | "division" | "region" | "raw" | "um_overview" | "um_recommendations" | "um_raw";
 
 interface SidebarProps {
   activeTab: SidebarTab;
@@ -27,11 +27,11 @@ export function Sidebar({ activeTab, onTabChange }: SidebarProps) {
     {
       title: "Summary",
       items: [
-        { id: "overview" as SidebarTab, label: "Overview", icon: LayoutDashboard },
+        { id: "overview" as SidebarTab, label: "VAPS Overview", icon: LayoutDashboard },
       ]
     },
     {
-      title: " Vaps Attach Rate By",
+      title: "Vaps Attach Rate By",
       items: [
         { id: "unit" as SidebarTab, label: "Vaps", icon: BarChart3 },
         { id: "market" as SidebarTab, label: "Market and Vaps", icon: PieChart },
@@ -43,6 +43,14 @@ export function Sidebar({ activeTab, onTabChange }: SidebarProps) {
       title: "Data Explorer",
       items: [
         { id: "raw" as SidebarTab, label: "VAPS Details", icon: Database },
+      ]
+    },
+    {
+      title: "Unit Market Segment",
+      items: [
+        { id: "um_overview" as SidebarTab, label: "Segment Overview", icon: LayoutDashboard },
+        { id: "um_recommendations" as SidebarTab, label: "Recommendations", icon: BarChart3 },
+        { id: "um_raw" as SidebarTab, label: "Market Segment Details", icon: Database },
       ]
     }
   ];
