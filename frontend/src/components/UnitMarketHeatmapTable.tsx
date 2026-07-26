@@ -25,10 +25,7 @@ export default function UnitMarketHeatmapTable({ title, data, isLoading }: UnitM
   const [selectedRow, setSelectedRow] = useState<string | null>(null);
   
   const getUnitLabel = (r: UnitMarketSegmentRate) => {
-    const code = r.unit || "";
-    const name = r.productName || "";
-    if (name && code && !name.includes(code)) return `${name} (${code})`;
-    return name || code || "Unknown Product";
+    return r.unit || "Unknown";
   };
 
   const getHeatClass = (label?: string, confidence?: string) => {
@@ -41,11 +38,26 @@ export default function UnitMarketHeatmapTable({ title, data, isLoading }: UnitM
   };
 
   const pivoted = useMemo(() => {
-    // Columns are Units
+    // Columns are Units (concise code like MO6012, 20W, etc.)
     // Rows are Markets
     
     const unitSet = new Set<string>();
-    data.forEach(r => unitSet.add(getUnitLabel(r)));
+    const unitNames = new Map<string, string>();
+    const unitMaxScore = new Map<string, number>();
+    const marketMaxScore = new Map<string, number>();
+
+    data.forEach(r => {
+      const u = getUnitLabel(r);
+      unitSet.add(u);
+      if (r.productName && !unitNames.has(u)) {
+        unitNames.set(u, r.productName);
+      }
+      const score = r.recommendationScore || 0;
+      unitMaxScore.set(u, Math.max(unitMaxScore.get(u) || 0, score));
+
+      const m = r.market || "Global";
+      marketMaxScore.set(m, Math.max(marketMaxScore.get(m) || 0, score));
+    });
     
     const rows = new Map<string, { cells: Map<string, UnitMarketSegmentRate> }>();
     
@@ -59,9 +71,22 @@ export default function UnitMarketHeatmapTable({ title, data, isLoading }: UnitM
       rows.get(marketValue)!.cells.set(unitValue, r);
     });
 
+    const sortedColumns = Array.from(unitSet).sort((a, b) => {
+      const scoreDiff = (unitMaxScore.get(b) || 0) - (unitMaxScore.get(a) || 0);
+      if (scoreDiff !== 0) return scoreDiff;
+      return a.localeCompare(b);
+    });
+
+    const sortedRows = Array.from(rows.entries()).sort((a, b) => {
+      const scoreDiff = (marketMaxScore.get(b[0]) || 0) - (marketMaxScore.get(a[0]) || 0);
+      if (scoreDiff !== 0) return scoreDiff;
+      return a[0].localeCompare(b[0]);
+    });
+
     return { 
-      columns: Array.from(unitSet).sort(), 
-      rows: Array.from(rows.entries()).sort((a, b) => a[0].localeCompare(b[0]))
+      columns: sortedColumns,
+      unitNames,
+      rows: sortedRows
     };
   }, [data]);
 
@@ -180,8 +205,8 @@ export default function UnitMarketHeatmapTable({ title, data, isLoading }: UnitM
                 <TableHead 
                   key={col} 
                   isHighlighted={selectedCol === col}
-                  className="text-center min-w-[90px] border-r last:border-r-0 px-1"
-                  title={col}
+                  className="text-center min-w-[90px] border-r last:border-r-0 px-1 font-bold"
+                  title={pivoted.unitNames.get(col) || col}
                 >
                   {col}
                 </TableHead>

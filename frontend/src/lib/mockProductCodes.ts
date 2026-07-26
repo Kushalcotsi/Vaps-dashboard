@@ -1,4 +1,4 @@
-export const UNIT_TYPES = ["Glo", "Cold", "Flex", "Brm", "Container", "Trailer", "Complexes", "Redi Plex", "Sales Offices"];
+export const UNIT_TYPES = ["All", "Glo", "Cold", "Flex", "Brm", "Container", "Trailer", "Complexes", "Redi Plex", "Sales Offices"];
 
 export const MOCK_PRODUCT_CODES: Record<string, string[]> = {
   Glo: [
@@ -82,6 +82,17 @@ export function getDynamicProductCodes(unitType: string, availableCodes: Set<str
   withoutData: string[];
   validCodesForType: string[];
 } {
+  if (unitType === "All" || !unitType || unitType === "all") {
+    const allCodes = availableCodes.size > 0 
+      ? Array.from(availableCodes).sort()
+      : Array.from(new Set(Object.values(MOCK_PRODUCT_CODES).flat())).sort();
+    return {
+      withData: allCodes,
+      withoutData: [],
+      validCodesForType: allCodes,
+    };
+  }
+
   const hardcodedForType = MOCK_PRODUCT_CODES[unitType] || [];
   
   // Find all hardcoded codes across all unit types
