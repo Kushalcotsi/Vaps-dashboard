@@ -175,6 +175,12 @@ class SnowflakeRepository(BaseRepository):
         return entries
 
     def _execute_query(self, query: str, segment_key: Optional[str] = None, segment_col: Optional[str] = None) -> List[VapsAttachRate]:
+        from app.core.cache_utils import get_disk_cache, set_disk_cache
+        cache_key = f"snowflake_vaps_{segment_key or 'unit'}"
+        cached_rows = get_disk_cache(cache_key)
+        if cached_rows is not None:
+            return cached_rows
+
         rows = []
         try:
             conn = self._get_connection()
@@ -227,6 +233,8 @@ class SnowflakeRepository(BaseRepository):
         except Exception as e:
             print(f"❌ SNOWFLAKE ERROR in _execute_query: {str(e)}")
             raise e
+        if rows:
+            set_disk_cache(cache_key, rows)
         return rows
 
     @lru_cache(maxsize=1)
