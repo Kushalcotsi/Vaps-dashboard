@@ -52,8 +52,8 @@ class UnitMarketService:
         for r in all_latest:
             if r.unit not in units:
                 units[r.unit] = r.productName
-            if r.market:
-                markets.add(r.market)
+            if r.market and str(r.market).strip().lower() not in ("all", "all markets", "all market"):
+                markets.add(str(r.market).strip())
                 
         return {
             "units": [{"code": k, "name": v} for k, v in sorted(units.items())],

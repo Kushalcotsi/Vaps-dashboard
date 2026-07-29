@@ -54,18 +54,31 @@ ALIASES: dict[str, list[str]] = {
     ],
     "unit_market_activations": [
         "unit_market_activations",
+        "latest_unit_market_activations",
         "product_market_activations",
         "product_segment_activations",
     ],
-    "unit_activations": ["unit_activations", "product_activations", "total_unit_activations"],
-    "market_activations": ["market_activations", "segment_activations", "total_market_activations"],
+    "unit_activations": [
+        "unit_activations",
+        "latest_unit_activations",
+        "product_activations",
+        "total_unit_activations",
+    ],
+    "market_activations": [
+        "market_activations",
+        "latest_market_activations",
+        "segment_activations",
+        "total_market_activations",
+    ],
     "market_contribution_to_product": [
         "market_contribution_to_product",
+        "latest_market_contribution_to_product",
         "contribution_to_product",
         "market_contribution",
     ],
     "product_share_in_market": [
         "product_share_in_market",
+        "latest_product_share_in_market",
         "share_in_market",
         "market_share",
     ],
