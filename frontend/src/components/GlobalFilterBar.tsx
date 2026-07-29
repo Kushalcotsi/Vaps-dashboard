@@ -147,11 +147,13 @@ export function GlobalFilterBar() {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem variantSize="sm" value="all">All Sources</SelectItem>
-                  {sources.map((s) => (
-                    <SelectItem variantSize="sm" key={s} value={s}>
-                      {s}
-                    </SelectItem>
-                  ))}
+                  {sources
+                    .filter((s) => s && String(s).trim().toLowerCase() !== "all" && String(s).trim().toLowerCase() !== "all sources")
+                    .map((s) => (
+                      <SelectItem variantSize="sm" key={s} value={s}>
+                        {s}
+                      </SelectItem>
+                    ))}
                 </SelectContent>
               </Select>
             </div>
@@ -168,11 +170,13 @@ export function GlobalFilterBar() {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem variantSize="sm" value="all">All Groups</SelectItem>
-                  {groups.map((g) => (
-                    <SelectItem variantSize="sm" key={g} value={g}>
-                      {g}
-                    </SelectItem>
-                  ))}
+                  {groups
+                    .filter((g) => g && String(g).trim().toLowerCase() !== "all" && String(g).trim().toLowerCase() !== "all groups")
+                    .map((g) => (
+                      <SelectItem variantSize="sm" key={g} value={g}>
+                        {g}
+                      </SelectItem>
+                    ))}
                 </SelectContent>
               </Select>
             </div>
@@ -246,11 +250,13 @@ export function GlobalFilterBar() {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem variantSize="sm" value="all">All Markets</SelectItem>
-                  {umMarkets.map((m: any) => (
-                    <SelectItem variantSize="sm" key={m} value={m}>
-                      {m}
-                    </SelectItem>
-                  ))}
+                  {umMarkets
+                    .filter((m: any) => m && String(m).trim().toLowerCase() !== "all" && String(m).trim().toLowerCase() !== "all markets")
+                    .map((m: any) => (
+                      <SelectItem variantSize="sm" key={m} value={m}>
+                        {m}
+                      </SelectItem>
+                    ))}
                 </SelectContent>
               </Select>
             </div>

@@ -47,9 +47,10 @@ export default function UnitMarketTable({ data, isLoading, title }: UnitMarketTa
 
   const filteredData = useMemo(() => {
     return data.filter(r => {
-      if (marketFilter && r.market !== marketFilter) return false;
-      if (confidenceFilter && r.confidenceLevel !== confidenceFilter) return false;
-      if (recFilter && r.recommendationLabel !== recFilter) return false;
+      // Commented out table filters per user request: keep only global filters
+      // if (marketFilter && r.market !== marketFilter) return false;
+      // if (confidenceFilter && r.confidenceLevel !== confidenceFilter) return false;
+      // if (recFilter && r.recommendationLabel !== recFilter) return false;
       return true;
     });
   }, [data, marketFilter, confidenceFilter, recFilter]);
@@ -232,6 +233,7 @@ export default function UnitMarketTable({ data, isLoading, title }: UnitMarketTa
       </CardHeader>
 
 
+      {/* Table filters commented out per user request: keep only global filters
       <CardContent className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-2 py-2 px-3 md:px-4 border-b border-slate-100">
         <div className="flex flex-col gap-1">
           <label className="text-[11px] font-bold uppercase tracking-wider text-slate-500">Market</label>
@@ -241,7 +243,9 @@ export default function UnitMarketTable({ data, isLoading, title }: UnitMarketTa
             </SelectTrigger>
             <SelectContent>
               <SelectItem variantSize="sm" value="all">All Markets</SelectItem>
-              {markets.map(m => <SelectItem variantSize="sm" key={m} value={m}>{m}</SelectItem>)}
+              {markets
+                .filter(m => m && String(m).trim().toLowerCase() !== "all" && String(m).trim().toLowerCase() !== "all markets")
+                .map(m => <SelectItem variantSize="sm" key={m} value={m}>{m}</SelectItem>)}
             </SelectContent>
           </Select>
         </div>
@@ -287,6 +291,7 @@ export default function UnitMarketTable({ data, isLoading, title }: UnitMarketTa
           </button>
         </div>
       </CardContent>
+      */}
 
       <Table>
         <TableHeader>

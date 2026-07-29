@@ -236,7 +236,9 @@ export default function RecommendationTable({ data, isLoading, title, titleToggl
             </SelectTrigger>
             <SelectContent>
               <SelectItem variantSize="sm" value="all">All Markets</SelectItem>
-              {markets.map(m => <SelectItem variantSize="sm" key={m} value={m}>{m}</SelectItem>)}
+              {markets
+                .filter(m => m && String(m).trim().toLowerCase() !== "all" && String(m).trim().toLowerCase() !== "all markets")
+                .map(m => <SelectItem variantSize="sm" key={m} value={m}>{m}</SelectItem>)}
             </SelectContent>
           </Select>
         </div>
