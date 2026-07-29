@@ -1,5 +1,7 @@
 import logging
 import re
+import os
+import sys
 from typing import List, Optional
 from functools import lru_cache
 import snowflake.connector
@@ -102,11 +104,11 @@ class UnitMarketSnowflakeRepository(SnowflakeRepository):
                 if raw_rows:
                     try:
                         import pandas as pd
-                        import sys
-                        import os
-                        root_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "../../../"))
-                        if root_dir not in sys.path:
-                            sys.path.insert(0, root_dir)
+                        for rel_path in [".", "..", "../..", "../../..", "../../../.."]:
+                            candidate = os.path.abspath(os.path.join(os.path.dirname(__file__), rel_path))
+                            if os.path.exists(os.path.join(candidate, "build_recommendation_report.py")) and candidate not in sys.path:
+                                sys.path.insert(0, candidate)
+                                break
                         from build_recommendation_report import (
                             prepare_schema,
                             calculate_time_aware_features,
