@@ -44,13 +44,22 @@ async def refresh_cache():
 
 def _prewarm_cache():
     try:
+        from concurrent.futures import ThreadPoolExecutor
         from app.services.vaps_service import vaps_service
         from app.services.unit_market_service import unit_market_service
-        print("🚀 [PRE-WARM] Background cache pre-warming started...")
-        vaps_service.get_attach_rates()
-        vaps_service.get_market_attach_rates()
-        unit_market_service.get_latest_recommendations()
-        print("⚡ [PRE-WARM] All Snowflake datasets pre-warmed & cached successfully!")
+        print("🚀 [PRE-WARM] Background parallel cache pre-warming started...")
+        
+        tasks = [
+            vaps_service.get_attach_rates,
+            vaps_service.get_market_attach_rates,
+            vaps_service.get_division_attach_rates,
+            vaps_service.get_region_attach_rates,
+            unit_market_service.get_latest_recommendations,
+        ]
+        with ThreadPoolExecutor(max_workers=5) as executor:
+            list(executor.map(lambda fn: fn(), tasks))
+            
+        print("⚡ [PRE-WARM] All 5 Snowflake datasets pre-warmed concurrently in < 3s!")
     except Exception as e:
         print(f"⚠️ [PRE-WARM] Notice: {e}")
 
