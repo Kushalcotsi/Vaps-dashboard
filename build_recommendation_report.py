@@ -13,9 +13,17 @@ from typing import Any, Callable
 
 import numpy as np
 import pandas as pd
-import plotly.express as px
-import plotly.io as pio
-from jinja2 import Environment
+try:
+    import plotly.express as px
+    import plotly.io as pio
+except ImportError:
+    px = None
+    pio = None
+
+try:
+    from jinja2 import Environment
+except ImportError:
+    Environment = None
 
 
 class DataValidationError(Exception):
