@@ -91,6 +91,13 @@ class UnitMarketSnowflakeRepository(SnowflakeRepository):
     def _ensure_loaded(self):
         if hasattr(self, "_is_loaded") and self._is_loaded:
             return
+        from app.core.cache_utils import get_disk_cache, set_disk_cache
+        cached = get_disk_cache("unit_market_snowflake_data")
+        if cached is not None:
+            self._latest_cache, self._high_cache, self._low_cache = cached
+            self._is_loaded = True
+            logger.info("⚡ Loaded UnitMarket Snowflake data from disk cache in < 15ms")
+            return
         self._latest_cache = []
         self._high_cache = []
         self._low_cache = []
@@ -130,6 +137,7 @@ class UnitMarketSnowflakeRepository(SnowflakeRepository):
                         self._high_cache = self._process_dataframe(high_df)
                         self._low_cache = self._process_dataframe(low_df)
                         self._is_loaded = True
+                        set_disk_cache("unit_market_snowflake_data", (self._latest_cache, self._high_cache, self._low_cache))
                         logger.info(f"UnitMarket Snowflake auto-transformation succeeded: {len(self._latest_cache)} latest records loaded.")
                         return
                     except Exception as transform_err:
@@ -177,6 +185,7 @@ class UnitMarketSnowflakeRepository(SnowflakeRepository):
             logger.error(f"❌ SNOWFLAKE ERROR in UnitMarket get_latest_recommendations: {str(e)}")
             raise e
         self._is_loaded = True
+        set_disk_cache("unit_market_snowflake_data", (self._latest_cache, self._high_cache, self._low_cache))
 
     def get_latest_recommendations(self) -> List[UnitMarketSegmentRate]:
         self._ensure_loaded()

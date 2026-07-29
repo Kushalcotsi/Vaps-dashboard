@@ -49,7 +49,8 @@ export default function DashboardPage() {
       return fetchDashboardData(selectedUnit);
     },
     enabled: !!selectedUnit && !isUM,
-    staleTime: 30000, // Keep data fresh for 30s
+    staleTime: 600000, // Keep data fresh for 10 minutes
+    gcTime: 1800000, // Keep in garbage collector cache for 30 minutes
     placeholderData: keepPreviousData,
   })
 
@@ -59,7 +60,8 @@ export default function DashboardPage() {
       return fetchUnitMarketDashboardData(umSelectedUnit, umSelectedMarket);
     },
     enabled: !!umSelectedUnit && isUM,
-    staleTime: 30000,
+    staleTime: 600000, // Keep data fresh for 10 minutes
+    gcTime: 1800000, // Keep in garbage collector cache for 30 minutes
     placeholderData: keepPreviousData,
   })
 
@@ -419,16 +421,43 @@ export default function DashboardPage() {
   );
 
   const renderUmOverview = () => {
-    const recs = filteredUmRecommendations;
-    const topCore = recs
-      .filter((r: any) => r.recommendationLabel === "Core Recommendation")
-      .sort((a: any, b: any) => b.recommendationScore - a.recommendationScore)
+    const recs = [...(filteredUmRecommendations || [])];
+    const sortedByScore = [...recs].sort((a: any, b: any) => (b.recommendationScore || 0) - (a.recommendationScore || 0));
+    const sortedByMomentum = [...recs].sort((a: any, b: any) => (b.momentumScore || b.recommendationScore || 0) - (a.momentumScore || a.recommendationScore || 0));
+
+    let topCore = sortedByScore
+      .filter((r: any) => {
+        const l = (r.recommendationLabel || "").toLowerCase();
+        return l.includes("core") || (r.recommendationScore || 0) >= 0.25;
+      })
       .slice(0, 5);
-      
-    const topEmerging = recs
-      .filter((r: any) => r.recommendationLabel === "Emerging Opportunity" || r.recommendationLabel === "White Space Opportunity")
-      .sort((a: any, b: any) => b.recommendationScore - a.recommendationScore)
+    if (topCore.length < 5 && sortedByScore.length > 0) {
+      const added = new Set(topCore.map((r: any) => `${r.unit}-${r.market}-${r.productName}`));
+      for (const r of sortedByScore) {
+        const key = `${r.unit}-${r.market}-${r.productName}`;
+        if (!added.has(key) && topCore.length < 5) {
+          topCore.push(r);
+          added.add(key);
+        }
+      }
+    }
+
+    let topEmerging = sortedByMomentum
+      .filter((r: any) => {
+        const l = (r.recommendationLabel || "").toLowerCase();
+        return l.includes("emerg") || l.includes("white") || l.includes("opport") || (r.momentumScore || 0) > 1.0;
+      })
       .slice(0, 5);
+    if (topEmerging.length < 5 && sortedByMomentum.length > 0) {
+      const added = new Set(topEmerging.map((r: any) => `${r.unit}-${r.market}-${r.productName}`));
+      for (const r of sortedByMomentum) {
+        const key = `${r.unit}-${r.market}-${r.productName}`;
+        if (!added.has(key) && topEmerging.length < 5) {
+          topEmerging.push(r);
+          added.add(key);
+        }
+      }
+    }
 
     const umDisplayData = umData ? {
       ...umData,

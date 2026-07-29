@@ -25,9 +25,9 @@ export function GlobalFilterBar() {
     selectedMarket: umSelectedMarket, setSelectedMarket: setUmSelectedMarket
   } = useUnitMarketStore();
 
-  const { data: units } = useQuery({ queryKey: ["units"], queryFn: fetchUnits });
-  const { data: metadata } = useQuery({ queryKey: ["metadata"], queryFn: fetchMetadata });
-  const { data: umMetadata } = useQuery({ queryKey: ["um_metadata"], queryFn: fetchUnitMarketMetadata });
+  const { data: units } = useQuery({ queryKey: ["units"], queryFn: fetchUnits, staleTime: 600000, gcTime: 1800000 });
+  const { data: metadata } = useQuery({ queryKey: ["metadata"], queryFn: fetchMetadata, staleTime: 600000, gcTime: 1800000 });
+  const { data: umMetadata } = useQuery({ queryKey: ["um_metadata"], queryFn: fetchUnitMarketMetadata, staleTime: 600000, gcTime: 1800000 });
 
   const sources = metadata?.sources || [];
   const groups = metadata?.groups || [];
