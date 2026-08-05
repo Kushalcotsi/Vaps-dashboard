@@ -83,13 +83,23 @@ export function getDynamicProductCodes(unitType: string, availableCodes: Set<str
   validCodesForType: string[];
 } {
   if (unitType === "All" || !unitType || unitType === "all") {
-    const allCodes = availableCodes.size > 0 
-      ? Array.from(availableCodes).sort()
-      : Array.from(new Set(Object.values(MOCK_PRODUCT_CODES).flat())).sort();
+    const allHardcoded = Array.from(new Set(Object.values(MOCK_PRODUCT_CODES).flat())).sort();
+    
+    const withData: string[] = [];
+    const withoutData: string[] = [];
+    
+    allHardcoded.forEach((code) => {
+      if (availableCodes.has(code)) {
+        withData.push(code);
+      } else {
+        withoutData.push(code);
+      }
+    });
+
     return {
-      withData: allCodes,
-      withoutData: [],
-      validCodesForType: allCodes,
+      withData,
+      withoutData,
+      validCodesForType: allHardcoded,
     };
   }
 
