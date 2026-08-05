@@ -8,7 +8,7 @@ export const MOCK_PRODUCT_CODES: Record<string, string[]> = {
     "10CR3", "10CR1HC", "20CR1HC", "20CR3", "20CR1HC COMBO", "30CR1HC", "40CR3HC", 
     "40CR3HCR", "28TRD", "28TRH", "28TRE", "36TRMH", "36TRMD", "48TRMH", "53TRMD", 
     "53TRMH", "53TRH", "53TRD", "53TRE", "53TRDSD", "53TRESD", "53TRHSD", "12TRE", 
-    "CSCPXDEN", "20F2", "40F2"
+    "CSCPXDEN", "20F2", "40F2", "20CR1HCCOMBO", "40CR3HCRD", "CSCSPXDEMO", "53TRDRY"
   ],
   Flex: [
     "P1208", "P12016", "P12024", "P12032", "P12040", "P12048", "P12056", "P12064", 
@@ -36,7 +36,7 @@ export const MOCK_PRODUCT_CODES: Record<string, string[]> = {
     "40WS", "20WS", "40ZS", "20ZS", "40ZK", "40S6", "25ZJ", "10S", "20ZK", 
     "10ZS", "25ZK", "20ZI", "15ZS", "15S", "18ZI", "40ZST", "25S", "15ZI", 
     "40ZI", "10ZI", "25ZS", "25ZI", "45VT", "40ZKT", "40ZIT", "20FPH", 
-    "53TRDRY", "SV348", "40F", "40ZF", "10ZK", "20K6", "15ZK", "27VT", 
+    "SV348", "40F", "40ZF", "10ZK", "20K6", "15ZK", "27VT", 
     "12PV", "23PV", "53CT3"
   ],
   Trailer: [
@@ -102,12 +102,12 @@ export function getDynamicProductCodes(unitType: string, availableCodes: Set<str
   });
 
   // Find any extra codes in availableCodes from Snowflake that are NOT in any hardcoded list
-  const extraSnowflakeCodes: string[] = [];
-  availableCodes.forEach((code) => {
-    if (!allHardcodedCodes.has(code)) {
-      extraSnowflakeCodes.push(code);
-    }
-  });
+  // const extraSnowflakeCodes: string[] = [];
+  // availableCodes.forEach((code) => {
+  //   if (!allHardcodedCodes.has(code)) {
+  //     extraSnowflakeCodes.push(code);
+  //   }
+  // });
 
   const withData: string[] = [];
   const withoutData: string[] = [];
@@ -122,9 +122,9 @@ export function getDynamicProductCodes(unitType: string, availableCodes: Set<str
   });
 
   // 2. Add extra codes from Snowflake to withData so they are always visible & clickable
-  extraSnowflakeCodes.forEach((code) => {
-    withData.push(code);
-  });
+  // extraSnowflakeCodes.forEach((code) => {
+  //   withData.push(code);
+  // });
 
   const sortedWithData = Array.from(new Set(withData)).sort();
   const sortedWithoutData = Array.from(new Set(withoutData)).sort();
