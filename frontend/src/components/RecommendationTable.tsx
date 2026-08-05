@@ -8,12 +8,13 @@ import {
   getSortedRowModel,
   SortingState,
   getFilteredRowModel,
+  getPaginationRowModel,
 } from "@tanstack/react-table"
 import { VapsAttachRate } from "@/types"
 import { useState, useMemo } from "react"
 import { cn } from "@/lib/utils"
 import { useLocalStorageState } from "@/hooks/useLocalStorageState"
-import { ArrowUpDown, Search, Download, Filter, Info, RotateCcw } from "lucide-react"
+import { ArrowUpDown, Search, Download, Filter, Info, RotateCcw, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from "lucide-react"
 import { Card, CardHeader, CardContent } from "./ui/Card"
 import { Badge } from "./ui/Badge"
 import { Tooltip, TooltipContent, TooltipTrigger } from "./ui/Tooltip"
@@ -46,6 +47,8 @@ export default function RecommendationTable({ data, isLoading, title, titleToggl
   const [recFilter, setRecFilter] = useLocalStorageState<string>("vaps-dashboard:rec-table:recFilter", "")
   const [tierFilter, setTierFilter] = useLocalStorageState<string>("vaps-dashboard:rec-table:tierFilter", "")
   const [minAttach, setMinAttach] = useLocalStorageState<string>("vaps-dashboard:rec-table:minAttach", "0")
+
+  const [pagination, setPagination] = useLocalStorageState("vaps-dashboard:rec-table:pagination", { pageIndex: 0, pageSize: 50 });
 
   const markets = useMemo(() => Array.from(new Set(data.map(r => r.market).filter(Boolean) as string[])).sort(), [data])
   const tiers = useMemo(() => Array.from(new Set(data.map(r => r.tier).filter(Boolean) as string[])).sort(), [data])
@@ -166,12 +169,14 @@ export default function RecommendationTable({ data, isLoading, title, titleToggl
   const table = useReactTable({
     data: filteredData,
     columns,
-    state: { sorting, globalFilter },
+    state: { sorting, globalFilter, pagination },
     onSortingChange: setSorting,
     onGlobalFilterChange: setGlobalFilter,
+    onPaginationChange: setPagination,
     getCoreRowModel: getCoreRowModel(),
     getSortedRowModel: getSortedRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
+    getPaginationRowModel: getPaginationRowModel(),
   })
 
   const exportData = () => {
@@ -375,6 +380,55 @@ export default function RecommendationTable({ data, isLoading, title, titleToggl
           )}
         </tbody>
       </Table>
+      {/* Pagination Controls */}
+      <div className="flex items-center justify-between px-4 py-3 border-t border-slate-100 bg-slate-50/50 rounded-b-xl">
+        <div className="flex items-center gap-2 text-xs text-slate-500 font-medium">
+          <span>
+            Page <span className="text-slate-900 font-semibold">{table.getState().pagination.pageIndex + 1}</span> of{" "}
+            <span className="text-slate-900 font-semibold">{table.getPageCount() || 1}</span>
+          </span>
+          <span className="text-slate-300">|</span>
+          <span>{table.getFilteredRowModel().rows.length} total rows</span>
+        </div>
+        <div className="flex items-center gap-1.5">
+          <Button
+            variant="outline"
+            size="sm"
+            className="h-8 w-8 p-0"
+            onClick={() => table.setPageIndex(0)}
+            disabled={!table.getCanPreviousPage()}
+          >
+            <ChevronsLeft className="h-4 w-4" />
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            className="h-8 w-8 p-0"
+            onClick={() => table.previousPage()}
+            disabled={!table.getCanPreviousPage()}
+          >
+            <ChevronLeft className="h-4 w-4" />
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            className="h-8 w-8 p-0"
+            onClick={() => table.nextPage()}
+            disabled={!table.getCanNextPage()}
+          >
+            <ChevronRight className="h-4 w-4" />
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            className="h-8 w-8 p-0"
+            onClick={() => table.setPageIndex(table.getPageCount() - 1)}
+            disabled={!table.getCanNextPage()}
+          >
+            <ChevronsRight className="h-4 w-4" />
+          </Button>
+        </div>
+      </div>
     </Card>
   )
 }

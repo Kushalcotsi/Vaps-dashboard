@@ -70,14 +70,20 @@ export default function DashboardPage() {
     if (umSelectedUnit !== "all") return umData.latestRecommendations;
     const availableCodes = new Set<string>(umData.latestRecommendations.map((r: any) => r.unit));
     const { validCodesForType } = getDynamicProductCodes(umUnitType, availableCodes);
-    return umData.latestRecommendations.filter((r: any) => validCodesForType.includes(r.unit));
+    const validSet = new Set(validCodesForType);
+    return umData.latestRecommendations.filter((r: any) => validSet.has(r.unit));
   }, [umData?.latestRecommendations, umUnitType, umSelectedUnit]);
 
-  const matchesFilters = (r: any) => {
+  // ONE-TIME O(N) extraction per render instead of calculating inside the filter loop (O(N^2) freeze)
+  const validCodesSet = useMemo(() => {
     const availableCodes = new Set<string>((data?.unitRows || []).map((row: any) => row.unit));
     const { validCodesForType } = getDynamicProductCodes(unitType, availableCodes);
-    // If 'all' is selected, we MUST filter by the current Unit Type category (including any extra dynamic Snowflake codes!)
-    const matchesType = selectedUnit !== "all" || validCodesForType.includes(r.unit);
+    return new Set(validCodesForType);
+  }, [data?.unitRows, unitType]);
+
+  const matchesFilters = (r: any) => {
+    // If 'all' is selected, we MUST filter by the current Unit Type category
+    const matchesType = selectedUnit !== "all" || validCodesSet.has(r.unit);
     const matchesSource = !selectedSource || r.source === selectedSource;
     const matchesGroup = !selectedGroup || r.mainGroup === selectedGroup;
     return matchesType && matchesSource && matchesGroup;
@@ -86,17 +92,17 @@ export default function DashboardPage() {
   const filteredUnitRows = useMemo(() => {
     if (!data?.unitRows) return [];
     return data.unitRows.filter(matchesFilters);
-  }, [data, selectedSource, selectedGroup, selectedUnit, unitType]);
+  }, [data, selectedSource, selectedGroup, selectedUnit, validCodesSet]);
 
   const filteredRecommendationRows = useMemo(() => {
     if (!data?.recommendationRows) return [];
     return data.recommendationRows.filter(matchesFilters);
-  }, [data, selectedSource, selectedGroup, selectedUnit, unitType]);
+  }, [data, selectedSource, selectedGroup, selectedUnit, validCodesSet]);
 
   const filteredIndustryRecommendationRows = useMemo(() => {
     if (!data?.industryRecommendationRows) return [];
     return data.industryRecommendationRows.filter(matchesFilters);
-  }, [data, selectedSource, selectedGroup, selectedUnit, unitType]);
+  }, [data, selectedSource, selectedGroup, selectedUnit, validCodesSet]);
 
   const filteredSegments = useMemo(() => {
     if (!data?.segments) return {};
@@ -105,7 +111,7 @@ export default function DashboardPage() {
       result[name] = (rows as any[]).filter(matchesFilters);
     });
     return result;
-  }, [data, selectedSource, selectedGroup, selectedUnit, unitType]);
+  }, [data, selectedSource, selectedGroup, selectedUnit, validCodesSet]);
 
   const dynamicSummary = useMemo(() => {
     if (!data?.summary) return null;
