@@ -84,64 +84,19 @@ export function getDynamicProductCodes(unitType: string, availableCodes: Set<str
 } {
   if (unitType === "All" || !unitType || unitType === "all") {
     const allHardcoded = Array.from(new Set(Object.values(MOCK_PRODUCT_CODES).flat())).sort();
-    
-    const withData: string[] = [];
-    const withoutData: string[] = [];
-    
-    allHardcoded.forEach((code) => {
-      if (availableCodes.has(code)) {
-        withData.push(code);
-      } else {
-        withoutData.push(code);
-      }
-    });
-
     return {
-      withData,
-      withoutData,
+      withData: allHardcoded,
+      withoutData: [],
       validCodesForType: allHardcoded,
     };
   }
 
   const hardcodedForType = MOCK_PRODUCT_CODES[unitType] || [];
-  
-  // Find all hardcoded codes across all unit types
-  const allHardcodedCodes = new Set<string>();
-  Object.values(MOCK_PRODUCT_CODES).forEach((list) => {
-    list.forEach((code) => allHardcodedCodes.add(code));
-  });
-
-  // Find any extra codes in availableCodes from Snowflake that are NOT in any hardcoded list
-  // const extraSnowflakeCodes: string[] = [];
-  // availableCodes.forEach((code) => {
-  //   if (!allHardcodedCodes.has(code)) {
-  //     extraSnowflakeCodes.push(code);
-  //   }
-  // });
-
-  const withData: string[] = [];
-  const withoutData: string[] = [];
-
-  // 1. Check hardcoded codes for this unit type
-  hardcodedForType.forEach((code) => {
-    if (availableCodes.has(code)) {
-      withData.push(code);
-    } else {
-      withoutData.push(code);
-    }
-  });
-
-  // 2. Add extra codes from Snowflake to withData so they are always visible & clickable
-  // extraSnowflakeCodes.forEach((code) => {
-  //   withData.push(code);
-  // });
-
-  const sortedWithData = Array.from(new Set(withData)).sort();
-  const sortedWithoutData = Array.from(new Set(withoutData)).sort();
+  const sortedWithData = Array.from(new Set(hardcodedForType)).sort();
 
   return {
     withData: sortedWithData,
-    withoutData: sortedWithoutData,
-    validCodesForType: [...sortedWithData, ...sortedWithoutData],
+    withoutData: [],
+    validCodesForType: sortedWithData,
   };
 }
