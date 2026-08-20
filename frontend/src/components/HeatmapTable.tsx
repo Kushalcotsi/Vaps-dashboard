@@ -190,10 +190,10 @@ export default function HeatmapTable({ title, data, segmentName, cutoff, isLoadi
             {filteredRows.length} VAPS
           </span>
           
-          <Button variant="outline" size="sm" onClick={exportData} className="flex items-center gap-2 whitespace-nowrap">
+          {/* <Button variant="outline" size="sm" onClick={exportData} className="flex items-center gap-2 whitespace-nowrap">
             <Download size={12} />
             CSV
-          </Button>
+          </Button> */}
         </div>
       </CardHeader>
 

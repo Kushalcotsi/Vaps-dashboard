@@ -225,10 +225,10 @@ export default function UnitMarketTable({ data, isLoading, title }: UnitMarketTa
             {table.getRowModel().rows.length} Records
           </span>
 
-          <Button variant="outline" size="sm" onClick={exportData} className="flex items-center gap-2 whitespace-nowrap">
+          {/* <Button variant="outline" size="sm" onClick={exportData} className="flex items-center gap-2 whitespace-nowrap">
             <Download size={12} />
             CSV
-          </Button>
+          </Button> */}
         </div>
       </CardHeader>
 

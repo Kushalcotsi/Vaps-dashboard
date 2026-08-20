@@ -110,7 +110,7 @@ export default function VapsDetailTable({ title, data, columns, downloadId, isLo
             {isLoading ? "..." : `${filteredAndSortedData.length} VAPS`}
           </span>
 
-          <Button 
+          {/* <Button 
             variant="outline" 
             size="sm" 
             onClick={handleDownload}
@@ -118,7 +118,7 @@ export default function VapsDetailTable({ title, data, columns, downloadId, isLo
           >
             <Download size={12} />
             CSV
-          </Button>
+          </Button> */}
         </div>
       </CardHeader>
 
