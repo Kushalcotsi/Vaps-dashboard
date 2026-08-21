@@ -545,9 +545,9 @@ export default function DashboardPage() {
           {activeTab === "division" && renderSegmentAnalysis("division", divisionSubView, setDivisionSubView)}
           {activeTab === "region" && renderSegmentAnalysis("region", regionSubView, setRegionSubView)}
           {activeTab === "raw" && renderRawData()}
-          {activeTab === "um_overview" && renderUmOverview()}
+          {/* {activeTab === "um_overview" && renderUmOverview()}
           {activeTab === "um_recommendations" && renderUmRecommendations()}
-          {activeTab === "um_raw" && renderUmRawData()}
+          {activeTab === "um_raw" && renderUmRawData()} */}
         </div>
       </PageContainer>
     </DashboardLayout>

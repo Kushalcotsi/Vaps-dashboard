@@ -45,14 +45,14 @@ export function Sidebar({ activeTab, onTabChange }: SidebarProps) {
         { id: "raw" as SidebarTab, label: "VAPS Details", icon: Database },
       ]
     },
-    {
-      title: "Unit Market Segment",
-      items: [
-        { id: "um_overview" as SidebarTab, label: "Segment Overview", icon: LayoutDashboard },
-        { id: "um_recommendations" as SidebarTab, label: "Recommendations", icon: BarChart3 },
-        { id: "um_raw" as SidebarTab, label: "Market Segment Details", icon: Database },
-      ]
-    }
+    // {
+    //   title: "Unit Market Segment",
+    //   items: [
+    //     { id: "um_overview" as SidebarTab, label: "Segment Overview", icon: LayoutDashboard },
+    //     { id: "um_recommendations" as SidebarTab, label: "Recommendations", icon: BarChart3 },
+    //     { id: "um_raw" as SidebarTab, label: "Market Segment Details", icon: Database },
+    //   ]
+    // }
   ];
 
   return (
